@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+         {% load static %}
+
+         <meta charset="utf-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+         <meta name="description" content="A spending tracker for finances.">
+         <meta name="author" content="Brendan Dagys">
+
+         <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+         <!-- Latest compiled and minified CSS -->
+         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+         <!-- Latest compiled and minified JavaScript -->
+         <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script> -->
+
+         <title>Brendan's Spending Tracker</title>
+    </head>
+
+    <body>
+
+        <form id="purchase_form" action="" method="post">
+            {% csrf_token %}
+            <table>
+                {{ purchase_form }}
+                <!-- {{ purchase_form.errors}} -->
+            </table> </br>
+            <input class="btn btn-primary" type="submit" value="Submit" name="purchase_form_submit">
+        </form>
+
+    </body>
+
+</html>

@@ -1,0 +1,11 @@
+# Mac
+.DS_Store
+
+__pycache__
+db.sqlite3
+*.pyc
+*.pyo
+*.mo
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
