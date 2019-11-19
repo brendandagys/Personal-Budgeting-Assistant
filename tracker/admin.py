@@ -1,0 +1,16 @@
+from django.contrib import admin
+
+from .models import Purchase
+
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
+
+class PurchaseResource(resources.ModelResource):
+    class Meta:
+        model = Purchase
+
+@admin.register(Purchase)
+class PurchaseAdmin(ImportExportModelAdmin):
+    resource_class = PurchaseResource
+    list_display = ('date', 'time', 'category', 'item', 'amount')
+    list_filter = ['date', 'category', 'item']

@@ -1,0 +1,33 @@
+.center {
+    margin: auto;
+    /* justify-content: center; */
+}
+
+input[type="submit"] {
+    display: block;
+    margin: auto;
+}
+
+label[for^="id_"] {
+    color: #FF1493;
+    display: block;
+    margin: 5px 15px;
+    text-align: center;
+}
+
+input[id^="id_"] {
+    color: #3498DB;
+}
+
+textarea[id^="id_"] {
+    color: #3498DB;
+}
+
+select[id^="id_"] {
+    color: #3498DB;
+}
+
+.red_text {
+    color: blue;
+    font-size: 1.5rem;
+}

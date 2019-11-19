@@ -13,6 +13,7 @@ class PurchaseForm(forms.Form):
             ('Groceries', 'Groceries'),
             ('Fast Food', 'Fast Food'),
             ('Samantha', 'Samantha'),
+            ('Dates', 'Dates'),
             ('Coffee', 'Coffee'),
             ('Gas', 'Gas'),
             ('Household Supplies', 'Household Supplies'),
@@ -36,14 +37,13 @@ class PurchaseForm(forms.Form):
 
         amount = forms.DecimalField(label='Amount', max_digits=7, decimal_places=2, localize=False, widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm',
                                                                                                                                      'placeholder': 'Amount...'}))
-
         category = forms.ChoiceField(label='Category', choices=CATEGORY_CHOICES)
 
         item = forms.CharField(label='Item(s)', widget=forms.TextInput(attrs={'class': 'form-control form-control-sm',
                                                                               'placeholder': 'Item...'}))
 
-        description = forms.CharField(required=False, label='Description', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3', 'placeholder': 'Specifics...'}))
-
+        description = forms.CharField(required=False, label='Description', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3',
+                                                                                                        'placeholder': 'Specifics...'}))
 
         def clean_date(self):
             return self.cleaned_data['date']

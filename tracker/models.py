@@ -1,4 +1,5 @@
 from django.db import models
+import django_filters
 
 import datetime
 from django.utils import timezone
@@ -20,8 +21,15 @@ class Purchase(models.Model):
     description = models.TextField(blank=True, verbose_name='Description')
 
     class Meta:
-        verbose_name_plural = 'Purchase'
+        verbose_name_plural = 'Purchases'
         verbose_name = 'Purchase'
 
     def __str__(self):
-        return ', '.join([str(date), time, category, item, amount])
+        return ', '.join([str(self.date), self.time, self.category, self.item, str(self.amount)])
+
+class PurchaseFilter(django_filters.FilterSet):
+    category = django_filters.CharFilter(field_name='category', lookup_expr='iexact')
+
+    # class Meta:
+    #     model = Purchase
+    #     fields = ['category']
