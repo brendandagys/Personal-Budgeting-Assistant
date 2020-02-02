@@ -27,9 +27,22 @@ class Purchase(models.Model):
     def __str__(self):
         return ', '.join([str(self.date), self.time, self.category, self.item, str(self.amount)])
 
-class PurchaseFilter(django_filters.FilterSet):
-    category = django_filters.CharFilter(field_name='category', lookup_expr='iexact')
+# class PurchaseFilter(django_filters.FilterSet):
+#     category = django_filters.CharFilter(field_name='category', lookup_expr='iexact')
 
     # class Meta:
     #     model = Purchase
     #     fields = ['category']
+
+class Filters(models.Model):
+    last_update_date = models.DateField(verbose_name='Last Update Date', default=current_date)
+    last_update_time = models.CharField(max_length=20, verbose_name = 'Time (24 hr.)', default=current_time)
+    date_filter = models.CharField(max_length=20, verbose_name = 'Date Filter')
+    time_filter = models.CharField(max_length=20, verbose_name = 'Time Filter')
+
+    class Meta:
+        verbose_name_plural = 'Filters'
+        verbose_name = 'Filter'
+
+    def __str__(self):
+        return ', '.join([str(self.last_update_date), self.last_update_time])
