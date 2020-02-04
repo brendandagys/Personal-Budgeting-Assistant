@@ -45,20 +45,20 @@
                 <div class="col-sm-2">
                     <a id="No Filter" href="http://localhost:8000/transactions/">NO FILTER</a></br></br>
 
-                    <a id="Groceries" href="http://localhost:8000/transactions/">Groceries</a></br>
-                    <a id="Fast Food" href="http://localhost:8000/transactions/">Fast Food</a></br>
-                    <a id="Dates" href="http://localhost:8000/transactions/">Dates</a></br>
-                    <a id="Coffee" href="http://localhost:8000/transactions/">Coffee</a></br>
-                    <a id="Gas" href="http://localhost:8000/transactions/">Gas</a></br>
-                    <a id="Household Supplies" href="http://localhost:8000/transactions/">Household Supplies</a></br>
-                    <a id="Clothes" href="http://localhost:8000/transactions/">Clothes</a></br>
-                    <a id="Medicine" href="http://localhost:8000/transactions/">Medicine</a></br></br>
+                    <a id="cGroceries" href="http://localhost:8000/transactions/">Groceries</a></br>
+                    <a id="cFast Food" href="http://localhost:8000/transactions/">Fast Food</a></br>
+                    <a id="cDates" href="http://localhost:8000/transactions/">Dates</a></br>
+                    <a id="cCoffee" href="http://localhost:8000/transactions/">Coffee</a></br>
+                    <a id="cGas" href="http://localhost:8000/transactions/">Gas</a></br>
+                    <a id="cHousehold Supplies" href="http://localhost:8000/transactions/">Household Supplies</a></br>
+                    <a id="cClothes" href="http://localhost:8000/transactions/">Clothes</a></br>
+                    <a id="cMedicine" href="http://localhost:8000/transactions/">Medicine</a></br></br>
 
-                    <a id="Last Week" href="http://localhost:8000/transactions/">Last Week</a></br>
-                    <a id="Last Month" href="http://localhost:8000/transactions/">Last Month</a></br>
-                    <a id="Last Three Months" href="http://localhost:8000/transactions/">Last Three Months</a></br>
-                    <a id="Last Six Months" href="http://localhost:8000/transactions/">Last Six Months</a></br>
-                    <a id="Last Year" href="http://localhost:8000/transactions/">Last Year</a></br>
+                    <a id="tLast Week" href="http://localhost:8000/transactions/">Last Week</a></br>
+                    <a id="tLast Month" href="http://localhost:8000/transactions/">Last Month</a></br>
+                    <a id="tLast Three Months" href="http://localhost:8000/transactions/">Last Three Months</a></br>
+                    <a id="tLast Six Months" href="http://localhost:8000/transactions/">Last Six Months</a></br>
+                    <a id="tLast Year" href="http://localhost:8000/transactions/">Last Year</a></br>
 
                 </div>
             </div>
@@ -73,22 +73,20 @@
 $(document).ready(function(){
 
         $('a').on('click', function(e) {
-            console.log('Anchor link clicked!')
-            console.log(event.target.id)
             e.preventDefault()
 
-            // $.ajax({
-            //     type: 'POST',
-            //     url: ''
-            //     data: {
-            //         csrfmiddlewaretoken: '{{ csrf_token }}',
-            //         console.log(event.target.id)
-            //
-            //     },
-            //     success: function () {
-            //         console.log('Filter POST successful!')
-            //     }
-            // });
+            $.ajax({
+                type: 'POST',
+                url: 'updatefilter/',
+                data: {
+                       csrfmiddlewaretoken: '{{ csrf_token }}',
+                       'filter': event.target.id
+                      },
+                success: function () {
+                    console.log('Filter POST successful!')
+                    location.reload()
+                }
+            });
             return false;
         });
       });

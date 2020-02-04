@@ -37,7 +37,7 @@ class Purchase(models.Model):
 class Filters(models.Model):
     last_update_date = models.DateField(verbose_name='Last Update Date', default=current_date)
     last_update_time = models.CharField(max_length=20, verbose_name = 'Time (24 hr.)', default=current_time)
-    date_filter = models.CharField(max_length=20, verbose_name = 'Date Filter')
+    category_filter = models.CharField(max_length=20, verbose_name = 'Category Filter')
     time_filter = models.CharField(max_length=20, verbose_name = 'Time Filter')
 
     class Meta:

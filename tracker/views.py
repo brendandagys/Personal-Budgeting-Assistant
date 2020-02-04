@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse
+# from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views import generic
 from .forms import PurchaseForm
-from .models import Purchase
+from .models import Purchase, Filters
 
 import datetime
 import re
@@ -43,132 +44,74 @@ class PurchaseListView(generic.ListView):
     # queryset = Purchase.objects.order_by('-date')
     template_name = 'tracker/transaction_list.html' # Specify your own template
 
-    def get_date_filter(self, parameter):
+    def get_time_filter(self, parameter):
 
-        if parameter == 'LastWeek':
+        if parameter == 'Last Week':
             return datetime.date.today() - datetime.timedelta(days=7)
-        elif parameter == 'LastMonth':
+        elif parameter == 'Last Month':
             return datetime.date.today() - datetime.timedelta(days=30)
-        elif parameter == 'LastThreeMonths':
+        elif parameter == 'Last Three Months':
             return datetime.date.today() - datetime.timedelta(days=91)
-        elif parameter == 'LastSixMonths:':
+        elif parameter == 'Last Six Months:':
             return datetime.date.today() - datetime.timedelta(days=183)
-        elif parameter == 'LastYear':
+        elif parameter == 'Last Year':
             return datetime.date.today() - datetime.timedelta(days=365)
         else:
             return datetime.date.today() - datetime.timedelta(days=1000)
 
     def get_queryset(self):
 
-        # URL that user was on when filter was clicked
-        from_url = self.request.META.get('HTTP_REFERER')
-        print(from_url)
-        # print(self.request.META['HTTP_REFERER'])
-        if from_url is not None and 'NO FILTER' not in self.request.path:
-
-        # Find the filter settings from the old page
-            try:
-                match_date = re.search('.*transactions/(\w+)/.*', from_url).group(1)
-            except Exception:
-                match_date = None
-
-            try:
-                match_category = re.search('.*transactions/.*/(\w+)', from_url).group(1)
-            except Exception:
-                match_category = None
-
-            # If there is one and no new one was specified...
-            if match_date is not None and self.args[0] == '':
-                date_filter = self.get_date_filter(match_date)
-            # Otherwise process the URL parameter as normal
-            else:
-                 date_filter = self.get_date_filter(self.args[0])
-
-            # To add on to the filter
-            if match_category is not None and self.args[1] == '':
-                category_filter = match_category
-            else:
-                category_filter = self.args[1]
+        filters_instance = Filters.objects.last()
+        # If no filters OR filters were set on different days OR 'NO FILTER' is clicked...
+        if filters_instance is None or datetime.date.today() - filters_instance.last_update_date > datetime.timedelta(days=1):
+            category_filter = ''
+            time_filter = ''
 
         else:
-            date_filter = datetime.date.today() - datetime.timedelta(days=1000)#self.get_date_filter(self.args[0])
-            category_filter = ''#self.args[1]
+            category_filter = filters_instance.category_filter
+            time_filter = self.get_time_filter(filters_instance.time_filter)
 
-        if category_filter == 'Medicine':
-            category_filter = 'Drugs'
+        if category_filter == '' and time_filter != '':
+            return Purchase.objects.filter(date__gte=time_filter).order_by('-date', '-time')
 
-        print(date_filter)
-        print(category_filter)
+        elif category_filter != '' and time_filter == '':
+            return Purchase.objects.filter(category=category_filter).order_by('-date', '-time')
 
-        if category_filter == '':
+        elif category_filter != '' and time_filter != '':
+            return Purchase.objects.filter(date__gte=time_filter, category=category_filter).order_by('-date', '-time')
 
-            return Purchase.objects.filter(date__gte=date_filter).order_by('-date', '-time')
-
-        return Purchase.objects.filter(date__gte=date_filter, category=category_filter).order_by('-date', '-time')
-        # return Purchase.objects.all()
+        else:
+            return Purchase.objects.all()
 
 
 def filter_manager(request):
 
-    if request.method == 'GET':
-
-        filters_instance = Filters.objects.last()
-
-        if filters_instance is None or datetime.date.today() - filters_instance.last_update_date > 1:
-
-            last_update_date = datetime.date.today()
-            last_update_time = datetime.datetime.now()
-            date_filter = ''
-            time_filter = ''
-
-            Filters.objects.create(last_update_date = datetime.date.today(),
-                                   last_update_time = datetime.datetime.now(),
-                                   date_filter = '',
-                                   time_filter = ''
-                                   )
-
-        else:
-            last_update_date = filters_instance.last_update_date
-            last_last_update_time = filters_instance.last_update_time
-            date_filter = filters_instance.date_filter
-            time_filter = filters_instance.time_filter
-
-            filters_instance.save()
-
-        return JsonResponse({'last_update_date': last_update_date,
-                             'last_update_time': last_update_time,
-                             'date_filter': date_filter,
-                             'time_filter': time_filter})
-
-
-    elif request.method == 'POST': # Shouldn't need to TRY/EXCEPT or to save. Should be done on GET
+    if request.method == 'POST':
         try:
             filters_instance = Filters.objects.all()[0]
 
-            filters_instance.last_update_date = datetime.date.today()
-            filters_instance.last_update_time = datetime.date.now()
-            filters_instance.date_filter = request.POST.get('date_filter', '')
-            filters_instance.time_filter = request.POST.get('time_filter', '')
-
-
-            code_red_status_instance = CodeStatuses.objects.all()[0]
-
-            code_red_status_instance.code_red_status = request.POST['code_red_status']
-            code_red_status_instance.status_setter = request.POST['status_setter']
-
-            try:
-                code_red_status_instance.from_location = request.POST['from_location']
-            except:
-                code_red_status_instance.from_location = ''
-
-            try:
-                code_red_status_instance.to_location = request.POST['to_location']
-            except:
-                code_red_status_instance.to_location = ''
-
         except:
-            code_red_status_instance = CodeStatuses()
 
-        code_red_status_instance.save()
+            Filters.objects.create(last_update_date = datetime.date.today(),
+                                                      last_update_time = datetime.datetime.now(),
+                                                      category_filter = '',
+                                                      time_filter = ''
+                                  )
+
+        filters_instance = Filters.objects.all()[0]
+
+        filters_instance.last_update_date = datetime.date.today()
+        filters_instance.last_update_time = datetime.datetime.now()
+
+        if request.POST['filter'][0] == 'c':
+            filters_instance.category_filter = request.POST['filter'][1:]
+        elif request.POST['filter'][0] == 't':
+            filters_instance.time_filter = request.POST['filter'][1:]
+
+        else: # 'NO FILTER' was selected
+            filters_instance.category_filter = ''
+            filters_instance.time_filter = ''
+
+        filters_instance.save()
 
         return HttpResponse()
