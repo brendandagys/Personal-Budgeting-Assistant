@@ -10,6 +10,7 @@ def current_date():
 def current_time():
     return str(timezone.now().time())[0:5]
 
+
 class Purchase(models.Model):
     # null and blank arguments are False by default
     # null doesn't allow null in the database, blank is not database-related; it prevents '' in forms
@@ -34,7 +35,8 @@ class Purchase(models.Model):
     #     model = Purchase
     #     fields = ['category']
 
-class Filters(models.Model):
+
+class Filter(models.Model):
     last_update_date = models.DateField(verbose_name='Last Update Date', default=current_date)
     last_update_time = models.CharField(max_length=20, verbose_name = 'Time (24 hr.)', default=current_time)
     category_filter = models.CharField(max_length=20, verbose_name = 'Category Filter')
@@ -46,3 +48,15 @@ class Filters(models.Model):
 
     def __str__(self):
         return ', '.join([str(self.last_update_date), self.last_update_time])
+
+
+class Bill(models.Model):
+    bill = models.CharField(max_length=30, verbose_name = 'Bill')
+    last_update_date = models.DateField(verbose_name='Last Update Date', default=current_date)
+
+    class Meta:
+        verbose_name_plural = 'Bills'
+        verbose_name = 'Bill'
+
+    def __str__(self):
+        return ', '.join([str(self.bill), self.last_update_date])

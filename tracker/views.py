@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 # from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views import generic
 from .forms import PurchaseForm
-from .models import Purchase, Filters
+from .models import Purchase, Filter, Bill
 
 import datetime
 import re
@@ -12,6 +12,22 @@ import re
 def homepage(request):
 
     if request.method == 'GET':
+
+        date = datetime.date.today()
+        year = date.year
+        month = date.month
+        day = date.day
+
+        apple_music_instance = Bill.objects.filter(bill='apple_music')[-1:]
+        if len(apple_music_instance) == 0 or apple_music_instance.last_update_date.month != month:
+            Bill.objects.create(bill = 'Apple Music', last_update_date = date)
+
+        try:
+            bills_instance = Bill.objects.all[0]
+        except:
+            bills_instance = Bill.objects.create(bill = '', last_update_date = '')
+
+
 
         purchase_form = PurchaseForm()
 
@@ -61,7 +77,7 @@ class PurchaseListView(generic.ListView):
 
     def get_queryset(self):
 
-        filters_instance = Filters.objects.last()
+        filters_instance = Filter.objects.last()
         # If no filters OR filters were set on different days OR 'NO FILTER' is clicked...
         if filters_instance is None or datetime.date.today() - filters_instance.last_update_date > datetime.timedelta(days=1):
             category_filter = ''
@@ -87,18 +103,8 @@ class PurchaseListView(generic.ListView):
 def filter_manager(request):
 
     if request.method == 'POST':
-        try:
-            filters_instance = Filters.objects.all()[0]
 
-        except:
-
-            Filters.objects.create(last_update_date = datetime.date.today(),
-                                                      last_update_time = datetime.datetime.now(),
-                                                      category_filter = '',
-                                                      time_filter = ''
-                                  )
-
-        filters_instance = Filters.objects.all()[0]
+        filters_instance = Filter.objects.all()[0]
 
         filters_instance.last_update_date = datetime.date.today()
         filters_instance.last_update_time = datetime.datetime.now()
@@ -115,3 +121,18 @@ def filter_manager(request):
         filters_instance.save()
 
         return HttpResponse()
+
+    elif request.method == 'GET':
+
+        try:
+            filters_instance = Filter.objects.all()[0]
+
+        except:
+
+            Filter.objects.create(last_update_date = datetime.date.today(),
+                                  last_update_time = datetime.datetime.now(),
+                                  category_filter = '',
+                                  time_filter = '' )
+
+        return JsonResponse({ 'category_filter': filters_instance.category_filter,
+                              'time_filter': filters_instance.time_filter })

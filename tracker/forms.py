@@ -9,24 +9,24 @@ from .models import Purchase
 class PurchaseForm(forms.Form):
 
         CATEGORY_CHOICES = (
-            ('Unspecified', 'Category...'),
-            ('Groceries', 'Groceries'),
-            ('Fast Food', 'Fast Food'),
-            ('Samantha', 'Samantha'),
-            ('Dates', 'Dates'),
+            ('Unspecified', 'Unspecified'),
             ('Coffee', 'Coffee'),
+            ('Groceries', 'Groceries'),
+            ('Food/Drinks', 'Food/Drinks'),
+            ('Restaurants', 'Restaurants'),
             ('Gas', 'Gas'),
+            ('Bills', 'Bills'),
             ('Household Supplies', 'Household Supplies'),
+            ('Services', 'Services'),
+            ('Dates', 'Dates'),
+            ('Gifts', 'Gifts'),
+            ('Tickets', 'Tickets'),
+            ('Electronics', 'Electronics'),
+            ('Appliances', 'Appliances'),
             ('Clothes', 'Clothes'),
-            ('Sex', 'Sex'),
-            ('Drugs', 'Drugs'),
-            #('', ''),
+            ('Medicine', 'Medicine'),
+            ('Fees', 'Fees')
         )
-        # To program:
-        #   Cell phone bill
-        #   Car insurance
-        #   Apple Music
-        #   Rent
 
         # required argument is True by default
         date = forms.DateField(label='Date:', initial=lambda: datetime.date.today(), widget=forms.TextInput(attrs={'class': 'form-control form-control-sm',

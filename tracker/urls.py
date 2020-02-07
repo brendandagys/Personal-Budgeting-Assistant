@@ -5,5 +5,5 @@ from . import views
 urlpatterns = [
     path('', views.homepage, name='homepage'),
     path('transactions/', views.PurchaseListView.as_view(), name='transactions'),
-    path('transactions/updatefilter/', views.filter_manager),
+    path('transactions/filter/', views.filter_manager),
 ]
