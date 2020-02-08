@@ -31,3 +31,10 @@ select[id^="id_"] {
     color: blue;
     font-size: 1.5rem;
 }
+
+.login_button {
+    margin: auto;
+    position: relative;
+    top: 3rem;
+    transform: scale(2,2);
+}

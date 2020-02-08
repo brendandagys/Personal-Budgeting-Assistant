@@ -59,4 +59,4 @@ class Bill(models.Model):
         verbose_name = 'Bill'
 
     def __str__(self):
-        return ', '.join([str(self.bill), self.last_update_date])
+        return ', '.join([str(self.bill), str(self.last_update_date)])
