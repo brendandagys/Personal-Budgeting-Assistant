@@ -42,7 +42,7 @@ class PurchaseForm(forms.Form):
         item = forms.CharField(label='Item(s)', widget=forms.TextInput(attrs={'class': 'form-control form-control-sm',
                                                                               'placeholder': 'Item...'}))
 
-        description = forms.CharField(required=False, label='Description', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3',
+        description = forms.CharField(required=False, label='Information', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3',
                                                                                                         'placeholder': 'Specifics...'}))
 
         def clean_date(self):

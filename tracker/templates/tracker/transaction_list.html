@@ -20,18 +20,18 @@
 
     </head>
 
-    <body>
+    <body class="lighter_background">
 
         <div class="container-fluid">
             <div class="row">
 
-                <div class="col-sm-12">
-                    <a id="homepage_link" href="{% url 'homepage' %}">Home Page</a>
+                <div class="navigation_link col-sm-12">
+                    <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">New Entry/Statistics</a>
                 </div>
 
-                <div class="col-sm-2">
+                <div class="filter_list col-sm-2">
                     </br>
-                    <a id="No Filter" href="http://localhost:8000/transactions/">NO FILTER</a></br></br>
+                    <a id="No Filter" class="no_filter" href="http://localhost:8000/transactions/">NO FILTER</a></br></br>
 
                     <a id="cCoffee" href="http://localhost:8000/transactions/">Coffee</a></br>
                     <a id="cGroceries" href="http://localhost:8000/transactions/">Groceries</a></br>
@@ -75,7 +75,7 @@
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <h4>There are no purchases recorded.</h1>
+                        <h4 class="no_purchases">There are no purchases recorded.</h1>
                     {% endif %}
 
                 </div>

@@ -1,6 +1,6 @@
 .center {
     margin: auto;
-    /* justify-content: center; */
+    justify-content: center;
 }
 
 input[type="submit"] {
@@ -9,22 +9,36 @@ input[type="submit"] {
 }
 
 label[for^="id_"] {
-    color: #FF1493;
+    color: #35b234;
     display: block;
     margin: 5px 15px;
     text-align: center;
+    /* font-family: Arial; */
+}
+
+.lighter_background {
+    background-color: #FAFAFA;
 }
 
 input[id^="id_"] {
-    color: #3498DB;
+    /* color: #35b234; */
+    margin: 0.2rem 0;
+    width: 20rem;
 }
 
 textarea[id^="id_"] {
-    color: #3498DB;
+    /* color: #35b234; */
+    margin: 0.2rem 0;
+    width: 20rem;
 }
 
 select[id^="id_"] {
-    color: #3498DB;
+    /* color: #35b234; */
+    margin: 0.2rem 0;
+}
+
+#submit_button {
+    margin-bottom: 1.2rem;
 }
 
 .red_text {
@@ -36,5 +50,57 @@ select[id^="id_"] {
     margin: auto;
     position: relative;
     top: 3rem;
-    transform: scale(2,2);
+    transform: scale(1.5,1.5);
+}
+
+#password {
+    margin-bottom: 1rem;
+    margin-top: 0.6rem;
+}
+
+#username, #password {
+    color: #35b234;
+    max-width: 15rem;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login_div {
+    text-align: center;
+    position: relative;
+    margin: auto;
+    margin-top: 1rem;
+}
+
+.homepage_link {
+    color: grey;
+    font-size: 2rem;
+}
+
+.navigation_link {
+    top: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.filter_list {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.no_filter {
+    font-size: 1.75rem;
+}
+
+.no_purchases {
+    padding-top: 1.7rem;
+}
+
+#purchase_form {
+    margin-top: 2.5rem;
+}
+
+.bottom_div {
+    background-color: white;
 }
