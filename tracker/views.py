@@ -9,12 +9,43 @@ from django.contrib.auth.decorators import login_required
 
 from django.views import generic
 from .forms import PurchaseForm
-from .models import Purchase, Filter, Bill
+from .models import Purchase, Filter, Bill, Alert
 
 from django.db.models import Sum
 
+from math import floor
 import datetime
 import re
+import pandas as pd
+
+# Get information about today's date
+date = datetime.date.today()
+year = date.year
+month = date.month
+day = date.day
+
+
+def get_chart_data(request):
+
+    if request.method == 'GET':
+
+        all_purchases_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100))
+        food_drinks_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Food/Drinks')
+        groceries_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Groceries')
+        coffee_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Coffee')
+        gas_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Gas')
+        services_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Services')
+
+        chart_data = list(Purchase.objects.values('date', 'amount').order_by('date'))
+
+        labels = []
+        values = []
+
+        [labels.append(str(x['date'])) for x in chart_data]
+        [values.append(pd.to_numeric(x['amount'])) for x in chart_data]
+
+        json = {'labels': labels, 'values': values}
+        return JsonResponse(json)
 
 @login_required
 def homepage(request):
@@ -26,17 +57,11 @@ def homepage(request):
     'Rent': [1, 'Rent', 750.00, 'Monthly rent for apartment.'],
     }
 
-    # Get information about today's date
-    date = datetime.date.today()
-    year = date.year
-    month = date.month
-    day = date.day
-
     if request.method == 'GET':
 
         # Get all bill instances
         apple_music_queryset = Bill.objects.filter(bill='Apple Music').order_by('-last_update_date') # Querysets can return zero items
-        cell_phone_queryset = Bill.objects.filter(bill='Cell phone').order_by('-last_update_date')
+        cell_phone_plan_queryset = Bill.objects.filter(bill='Cell phone plan').order_by('-last_update_date')
         car_insurance_queryset = Bill.objects.filter(bill='Car insurance').order_by('-last_update_date')
         rent_queryset = Bill.objects.filter(bill='Rent').order_by('-last_update_date')
 
@@ -50,8 +75,9 @@ def homepage(request):
             else:
                 instance = queryset[0] # instance is either a Queryset or a real instance. This ensures it always becomes the latter
             # Check if bills for the current month have been recorded
-            if (instance.last_update_date.month != month and day > instance.last_update_date.day) or instance_created_flag is True:
+            if instance.last_update_date.month != month and day > instance.last_update_date.day:# or instance_created_flag is True:
                 instance.last_update_date = datetime.datetime(year, month, bill_information[bill][0]) # Update the date. Won't matter if instance was just created
+                instance.save()
 
                 Purchase.objects.create(date = datetime.datetime(year, month, bill_information[bill][0]),
                                         time = '00:00',
@@ -61,7 +87,7 @@ def homepage(request):
                                         description = bill_information[bill][3] )
 
         check_bill_payments('Apple Music', apple_music_queryset)
-        check_bill_payments('Cell phone plan', cell_phone_queryset)
+        check_bill_payments('Cell phone plan', cell_phone_plan_queryset)
         check_bill_payments('Car insurance', car_insurance_queryset)
         check_bill_payments('Rent', rent_queryset)
 
@@ -114,38 +140,80 @@ def homepage(request):
             purchase_instance.save()
 
 
-    def check_spending(item, maximum):
-        total_spent_to_date = Purchase.objects.filter(item=item, date__gte=datetime.datetime(year, month, 1)).aggregate(Sum('amount'))
-        print(total_spent_to_date)
-        if total_spent_to_date >= maximum:
-            notification = '100%'
-        elif total_spent_to_date >= floor(maximum * 0.75):
-            notification = '75%'
-        elif total_spent_to_date >= floor(maximum * 0.5):
-            notification = '50%'
-        elif total_spent_to_date >= floor(maximum * 0.25):
-            notification = '25%'
+        def check_spending(category, maximum):
+            # Get all purchases of the specific type for the current month
+            alert_queryset = Alert.objects.filter(type=category, date_sent__gte=datetime.datetime(year, month, 1))
+            # If no alerts have been created, make one
+            if len(alert_queryset) == 0:
+                instance = Alert.objects.create(type = category,
+                                     percent = 0,
+                                     date_sent = datetime.datetime(year, month, 1) )
+            # Otherwise take the first alert received (there will only be one...four in total)
+            else:
+                instance = alert_queryset[0]
+                # Check if a new month has begun, and reset if so
+                if month != instance.date_sent.month:
+                    instance.date_sent.month = month
+                    instance.percent = 0
 
-        email_body = """\
-<html>
-  <head></head>
-  <body style="border-radius: 20px; padding: 1rem; color: black; font-size: 1.1rem; background-color: #d5e9fb">
-    <h3>You have reached {0} of your monthly spending on {1}.</h3> </br>
-    <p>Spent this month: ${2}/${3}</p> </br>
-  </body>
-</html>
-""".format(notification, item, total_spent_to_date, maximum)
+            highest_threshold_reached = instance.percent
 
-        email_message = EmailMessage('Spending Alert for {0}'.format(item), email_body, from_email='Spending Helper <spendinghelper@gmail.com', to=['brendandagys@gmail.com'])
-        email_message.content_subtype = 'html'
-        email_message.send()
+            # Get total spent this month on the specific type
+            total_spent_to_date = Purchase.objects.filter(category=category, date__gte=datetime.datetime(year, month, 1)).aggregate(Sum('amount'))
+            total_spent_to_date = total_spent_to_date['amount__sum']
 
-        send_email()
-    # Run the function
-    check_spending('Coffee', 20)
-    check_spending('Groceries', 100)
-    check_spending('Food/Drinks', 50)
-    check_spending('Dates', 100)
+            send_email = True
+
+            if total_spent_to_date is None:
+                total_spent_to_date = 0
+
+            if total_spent_to_date >= maximum:
+                instance.percent = 100
+                if highest_threshold_reached >= 100:
+                    send_email = False
+
+            elif total_spent_to_date >= floor(maximum * 0.75):
+                instance.percent = 75
+                if highest_threshold_reached >= 75:
+                    send_email = False
+
+            elif total_spent_to_date >= floor(maximum * 0.5):
+                instance.percent = 50
+                if highest_threshold_reached >= 50:
+                    send_email = False
+
+            elif total_spent_to_date >= floor(maximum * 0.25) and (instance.percent < 25 or instance.percent in (50, 75, 100)):
+                instance.percent = 25
+                if highest_threshold_reached >= 25:
+                    send_email = False
+
+            else:
+                instance.percent = 0
+                instance.save()
+                return
+
+            instance.save()
+
+            if send_email is True:
+                email_body = """\
+    <html>
+      <head></head>
+      <body style="border-radius: 20px; padding: 1rem; color: black; font-size: 1.1rem; background-color: #d5e9fb">
+        <h3>You have reached {0}% of your monthly spending on {1}.</h3> </br>
+        <p>Spent this month: ${2}/${3}</p> </br>
+      </body>
+    </html>
+    """.format(instance.percent, category, round(total_spent_to_date, 2), maximum)
+
+                email_message = EmailMessage('Spending Alert for {0}'.format(category), email_body, from_email='Spending Helper <spendinghelper@gmail.com', to=['brendandagys@gmail.com'])
+                email_message.content_subtype = 'html'
+                email_message.send()
+
+        # Run the function
+        check_spending('Coffee', 20)
+        check_spending('Groceries', 100)
+        check_spending('Food/Drinks', 50)
+        check_spending('Dates', 100)
 
     # This returns a blank form, (to clear for the next submission if request.method == 'POST')
     purchase_form = PurchaseForm()

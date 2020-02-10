@@ -59,4 +59,16 @@ class Bill(models.Model):
         verbose_name = 'Bill'
 
     def __str__(self):
-        return ', '.join([str(self.bill), str(self.last_update_date)])
+        return ', '.join([self.bill, str(self.last_update_date)])
+
+class Alert(models.Model):
+    type = models.CharField(max_length=20, verbose_name = 'Type')
+    percent = models.IntegerField(verbose_name = 'Percent')
+    date_sent = models.DateField(verbose_name='Date Sent')
+
+    class Meta:
+        verbose_name_plural = 'Alerts'
+        verbose_name = 'Alert'
+
+    def __str__(self):
+        return ', '.join([self.type, str(self.percent), str(self.date_sent)])
