@@ -28,23 +28,38 @@ day = date.day
 def get_chart_data(request):
 
     if request.method == 'GET':
+        category = request.GET['category']
+        json = dict()
 
-        all_purchases_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100))
-        food_drinks_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Food/Drinks')
-        groceries_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Groceries')
-        coffee_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Coffee')
-        gas_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Gas')
-        services_chart_queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = 'Services')
+        if category == 'All': # Don't add category filter to the query
+            queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100)).values('date', 'amount').order_by('date')
+        else:
+            queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = category).values('date', 'amount').order_by('date')
 
-        chart_data = list(Purchase.objects.values('date', 'amount').order_by('date'))
-
+        # List comprehension wouldn't work unless these were created first
         labels = []
         values = []
+        # Range from 100 to 0
+        for x in range(50, -1, -1):
+            labels.append(str(date-datetime.timedelta(days=x)))
 
-        [labels.append(str(x['date'])) for x in chart_data]
-        [values.append(pd.to_numeric(x['amount'])) for x in chart_data]
+        for x in labels:
+            if category == 'All':
+                queryset = Purchase.objects.filter(date = x).exclude(category='Bills').values('amount').aggregate(Sum('amount'))
+            else:
+                queryset = Purchase.objects.filter(date = x, category = category).values('amount').aggregate(Sum('amount')) # Get all purchase amounts on that date
 
-        json = {'labels': labels, 'values': values}
+            if queryset['amount__sum'] is None:
+                values.append(0)
+            else:
+                values.append(queryset['amount__sum'])
+
+            print(values)
+
+        json[category] = {'labels': labels, 'values': values}
+
+        print(json)
+
         return JsonResponse(json)
 
 @login_required

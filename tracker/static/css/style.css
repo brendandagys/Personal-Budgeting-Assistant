@@ -38,7 +38,7 @@ select[id^="id_"] {
 }
 
 #submit_button {
-    margin-bottom: 1.2rem;
+    margin-bottom: 4rem;
 }
 
 .red_text {
@@ -103,4 +103,14 @@ select[id^="id_"] {
 
 .bottom_div {
     background-color: white;
+}
+
+.chart {
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.button {
+    margin: 8px 5px 35px 5px;
+    position: relative;
 }

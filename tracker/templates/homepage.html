@@ -51,29 +51,53 @@
         <div class="bottom_div">
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
-                    <canvas id="myChart" width="400" height="400"></canvas>
+                <div class="chart col-sm-12 col-md-6">
+                    <h3>All Purchases (Excluding Bills)</h3>
+                    <canvas id="myChart1" width="400" height="400"></canvas>
+                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
+                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
-                <div class="col-sm-12 col-md-6">
-                    <h1>Block 2</h1>
+                <div class="chart col-sm-12 col-md-6">
+                    <h3>Food/Drinks</h3>
+                    <canvas id="myChart2" width="400" height="400"></canvas>
+                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
+                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
-                    <h1>Block 3</h1>
+                <div class="chart col-sm-12 col-md-6">
+                    <h3>Groceries</h3>
+                    <canvas id="myChart3" width="400" height="400"></canvas>
+                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
+                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
-                <div class="col-sm-12 col-md-6">
-                    <h1>Block 4</h1>
+                <div class="chart col-sm-12 col-md-6">
+                    <h3>Coffee</h3>
+                    <canvas id="myChart4" width="400" height="400"></canvas>
+                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
+                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
-                    <h1>Block 5</h1>
+                <div class="chart col-sm-12 col-md-6">
+                    <h3>Gas</h3>
+                    <canvas id="myChart5" width="400" height="400"></canvas>
+                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
+                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
-                <div class="col-sm-12 col-md-6">
-                    <h1>Block 6</h1>
+                <div class="chart col-sm-12 col-md-6">
+                    <h3>Services</h3>
+                    <canvas id="myChart6" width="400" height="400"></canvas>
+                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
+                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
             </div>
 
@@ -83,34 +107,291 @@
 
             $(document).ready(function() {
 
+                $('button').hide();
+
                 $.ajax({
                     type: 'GET',
                     url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'All' },
                     success: function(response) {
-
-                        var ctx = document.getElementById('myChart').getContext('2d');
+                            console.log(response);
+                        var ctx = document.getElementById('myChart1').getContext('2d');
                         var myChart = new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: response['labels'],
+                                labels: response['All']['labels'],
                                 datasets: [{
                                     label: 'Date',
-                                    data: response['values'],
+                                    data: response['All']['values'],
+                                    backgroundColor: [
+                                        // 'rgba(255, 99, 132, 0.2)',
+                                        'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(255, 206, 86, 0.2)',
+                                        // 'rgba(75, 192, 192, 0.2)',
+                                        // 'rgba(153, 102, 255, 0.2)',
+                                        // 'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        // 'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        // 'rgba(255, 206, 86, 1)',
+                                        // 'rgba(75, 192, 192, 1)',
+                                        // 'rgba(153, 102, 255, 1)',
+                                        // 'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'charts/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Food/Drinks' },
+                    success: function(response) {
+                            console.log(response);
+                        var ctx = document.getElementById('myChart2').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: response['Food/Drinks']['labels'],
+                                datasets: [{
+                                    label: 'Date',
+                                    data: response['Food/Drinks']['values'],
                                     backgroundColor: [
                                         'rgba(255, 99, 132, 0.2)',
-                                        'rgba(54, 162, 235, 0.2)',
-                                        'rgba(255, 206, 86, 0.2)',
-                                        'rgba(75, 192, 192, 0.2)',
-                                        'rgba(153, 102, 255, 0.2)',
-                                        'rgba(255, 159, 64, 0.2)'
+                                        // 'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(255, 206, 86, 0.2)',
+                                        // 'rgba(75, 192, 192, 0.2)',
+                                        // 'rgba(153, 102, 255, 0.2)',
+                                        // 'rgba(255, 159, 64, 0.2)'
                                     ],
                                     borderColor: [
                                         'rgba(255, 99, 132, 1)',
-                                        'rgba(54, 162, 235, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
+                                        // 'rgba(255, 206, 86, 1)',
+                                        // 'rgba(75, 192, 192, 1)',
+                                        // 'rgba(153, 102, 255, 1)',
+                                        // 'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'charts/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Groceries' },
+                    success: function(response) {
+                            console.log(response);
+                        var ctx = document.getElementById('myChart3').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: response['Groceries']['labels'],
+                                datasets: [{
+                                    label: 'Date',
+                                    data: response['Groceries']['values'],
+                                    backgroundColor: [
+                                        // 'rgba(255, 99, 132, 0.2)',
+                                        // 'rgba(54, 162, 235, 0.2)',
+                                        'rgba(255, 206, 86, 0.2)',
+                                        // 'rgba(75, 192, 192, 0.2)',
+                                        // 'rgba(153, 102, 255, 0.2)',
+                                        // 'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        // 'rgba(255, 99, 132, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
                                         'rgba(255, 206, 86, 1)',
-                                        'rgba(75, 192, 192, 1)',
+                                        // 'rgba(75, 192, 192, 1)',
+                                        // 'rgba(153, 102, 255, 1)',
+                                        // 'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'charts/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Coffee' },
+                    success: function(response) {
+                            console.log(response);
+                        var ctx = document.getElementById('myChart4').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: response['Coffee']['labels'],
+                                datasets: [{
+                                    label: 'Date',
+                                    data: response['Coffee']['values'],
+                                    backgroundColor: [
+                                        // 'rgba(255, 99, 132, 0.2)',
+                                        // 'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(255, 206, 86, 0.2)',
+                                        // 'rgba(75, 192, 192, 0.2)',
+                                        'rgba(153, 102, 255, 0.2)',
+                                        // 'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        // 'rgba(255, 99, 132, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
+                                        // 'rgba(255, 206, 86, 1)',
+                                        // 'rgba(75, 192, 192, 1)',
                                         'rgba(153, 102, 255, 1)',
+                                        // 'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'charts/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Gas' },
+                    success: function(response) {
+                            console.log(response);
+                        var ctx = document.getElementById('myChart5').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: response['Gas']['labels'],
+                                datasets: [{
+                                    label: 'Date',
+                                    data: response['Gas']['values'],
+                                    backgroundColor: [
+                                        // 'rgba(255, 99, 132, 0.2)',
+                                        // 'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(255, 206, 86, 0.2)',
+                                        'rgba(75, 192, 192, 0.2)',
+                                        // 'rgba(153, 102, 255, 0.2)',
+                                        // 'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        // 'rgba(255, 99, 132, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
+                                        // 'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        // 'rgba(153, 102, 255, 1)',
+                                        // 'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'charts/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Services' },
+                    success: function(response) {
+                            console.log(response);
+                        var ctx = document.getElementById('myChart6').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: response['Services']['labels'],
+                                datasets: [{
+                                    label: 'Date',
+                                    data: response['Services']['values'],
+                                    backgroundColor: [
+                                        // 'rgba(255, 99, 132, 0.2)',
+                                        // 'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(255, 206, 86, 0.2)',
+                                        // 'rgba(75, 192, 192, 0.2)',
+                                        // 'rgba(153, 102, 255, 0.2)',
+                                        'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        // 'rgba(255, 99, 132, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
+                                        // 'rgba(255, 206, 86, 1)',
+                                        // 'rgba(75, 192, 192, 1)',
+                                        // 'rgba(153, 102, 255, 1)',
                                         'rgba(255, 159, 64, 1)'
                                     ],
                                     borderWidth: 1
@@ -122,12 +403,20 @@
                                         ticks: {
                                             beginAtZero: true
                                         }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
                                     }]
                                 }
                             }
                         });
                     }
                 });
+
+                $('button').fadeIn(3000);
+
             });
 
         </script>
