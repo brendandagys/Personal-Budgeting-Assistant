@@ -56,8 +56,8 @@
                     <a id="tLast Six Months" href="http://localhost:8000/transactions/">Last Six Months</a></br>
                     <a id="tLast Year" href="http://localhost:8000/transactions/">Last Year</a></br></br>
 
-                    <i><h5 id="category_filter_indicator">No Filter</h5></i>
-                    <i><h5 id="time_filter_indicator">No Filter</h5></i>
+                    <i><h5 id="category_filter_indicator"></h5></i>
+                    <i><h5 id="time_filter_indicator"></h5></i>
 
                 </div>
 
@@ -70,7 +70,7 @@
                             {% for purchase in purchase_list %}
                             <li>
                                 <h5><b>{{ purchase.date }}, {{ purchase.time }}</b>: <span class="red_text">${{ purchase.amount }}</span></h5>
-                                <h5><u>{{ purchase.category }}</u>: {{ purchase.item }} | <i>{{ purchase.description }}</i></h5>
+                                <h5><u>{{ purchase.category }}</u>: {{ purchase.item }} {% if purchase.description %} | <i>{{ purchase.description }}</i> {% endif %}</h5>
                             </li>
                             {% endfor %}
                         </ul>
@@ -99,7 +99,7 @@
             url: 'filter/',
             data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
             success: function(response) {
-                console.log('Filter GET succesful!')
+                console.log('Filter GET successful!')
                 $('#category_filter_indicator').text(response['category_filter']);
                 $('#time_filter_indicator').text(response['time_filter']);
             }

@@ -29,18 +29,20 @@ def get_chart_data(request):
 
     if request.method == 'GET':
         category = request.GET['category']
+        days_filter = int(request.GET['filter']) - 1 # Comes through as '025' or '050' or '100' | gives one extra, so subtract
+        # To send to the front-end
         json = dict()
 
         if category == 'All': # Don't add category filter to the query
-            queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100)).values('date', 'amount').order_by('date')
+            queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=days_filter)).values('date', 'amount').order_by('date')
         else:
-            queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=100), category = category).values('date', 'amount').order_by('date')
+            queryset = Purchase.objects.filter(date__gte = date - datetime.timedelta(days=days_filter), category = category).values('date', 'amount').order_by('date')
 
         # List comprehension wouldn't work unless these were created first
         labels = []
         values = []
         # Range from 100 to 0
-        for x in range(50, -1, -1):
+        for x in range(days_filter, -1, -1):
             labels.append(str(date-datetime.timedelta(days=x)))
 
         for x in labels:

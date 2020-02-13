@@ -55,15 +55,15 @@
                     <h3>All Purchases (Excluding Bills)</h3>
                     <canvas id="myChart1" width="400" height="400"></canvas>
                     <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
-                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
-                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
+                    <button id="1_050" type="button" class="button btn btn-success">Last 50 Days</button>
+                    <button id="1_025" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
                 <div class="chart col-sm-12 col-md-6">
                     <h3>Food/Drinks</h3>
                     <canvas id="myChart2" width="400" height="400"></canvas>
-                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
-                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
-                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
+                    <button id="2_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="2_050" type="button" class="button btn btn-success">Last 50 Days</button>
+                    <button id="2_025" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
             </div>
 
@@ -71,16 +71,16 @@
                 <div class="chart col-sm-12 col-md-6">
                     <h3>Groceries</h3>
                     <canvas id="myChart3" width="400" height="400"></canvas>
-                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
-                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
-                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
+                    <button id="3_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="3_050" type="button" class="button btn btn-success">Last 50 Days</button>
+                    <button id="3_025" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
                 <div class="chart col-sm-12 col-md-6">
                     <h3>Coffee</h3>
                     <canvas id="myChart4" width="400" height="400"></canvas>
-                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
-                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
-                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
+                    <button id="4_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="4_050" type="button" class="button btn btn-success">Last 50 Days</button>
+                    <button id="4_025" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
             </div>
 
@@ -88,16 +88,16 @@
                 <div class="chart col-sm-12 col-md-6">
                     <h3>Gas</h3>
                     <canvas id="myChart5" width="400" height="400"></canvas>
-                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
-                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
-                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
+                    <button id="5_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="5_050" type="button" class="button btn btn-success">Last 50 Days</button>
+                    <button id="5_025" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
                 <div class="chart col-sm-12 col-md-6">
                     <h3>Services</h3>
                     <canvas id="myChart6" width="400" height="400"></canvas>
-                    <button id="1_100" type="button" class="button btn btn-primary">Last 100 Days</button>
-                    <button id="1_50" type="button" class="button btn btn-primary">Last 50 Days</button>
-                    <button id="1_25" type="button" class="button btn btn-primary">Last 25 Days</button>
+                    <button id="6_100" type="button" class="button btn btn-primary">Last 100 Days</button>
+                    <button id="6_050" type="button" class="button btn btn-success">Last 50 Days</button>
+                    <button id="6_025" type="button" class="button btn btn-primary">Last 25 Days</button>
                 </div>
             </div>
 
@@ -105,317 +105,380 @@
 
         <script>
 
+            $('button').hide();
+
             $(document).ready(function() {
 
-                $('button').hide();
+                function chart_1(filter='50') {
 
-                $.ajax({
-                    type: 'GET',
-                    url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'All' },
-                    success: function(response) {
-                            console.log(response);
-                        var ctx = document.getElementById('myChart1').getContext('2d');
-                        var myChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: response['All']['labels'],
-                                datasets: [{
-                                    label: 'Date',
-                                    data: response['All']['values'],
-                                    backgroundColor: [
-                                        // 'rgba(255, 99, 132, 0.2)',
-                                        'rgba(54, 162, 235, 0.2)',
-                                        // 'rgba(255, 206, 86, 0.2)',
-                                        // 'rgba(75, 192, 192, 0.2)',
-                                        // 'rgba(153, 102, 255, 0.2)',
-                                        // 'rgba(255, 159, 64, 0.2)'
-                                    ],
-                                    borderColor: [
-                                        // 'rgba(255, 99, 132, 1)',
-                                        'rgba(54, 162, 235, 1)',
-                                        // 'rgba(255, 206, 86, 1)',
-                                        // 'rgba(75, 192, 192, 1)',
-                                        // 'rgba(153, 102, 255, 1)',
-                                        // 'rgba(255, 159, 64, 1)'
-                                    ],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    yAxes: [{
-                                        ticks: {
-                                            beginAtZero: true
-                                        }
-                                    }],
-                                    xAxes: [{
-                                        ticks: {
-                                            fontSize: 8
-                                        }
+                    $.ajax({
+                        type: 'GET',
+                        url: 'charts/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'All', 'filter': filter },
+                        success: function(response) {
+                                console.log(response);
+                            var ctx = document.getElementById('myChart1').getContext('2d');
+                            var myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: response['All']['labels'],
+                                    datasets: [{
+                                        label: 'Amount Spent',
+                                        data: response['All']['values'],
+                                        backgroundColor: [
+                                            // 'rgba(255, 99, 132, 0.2)',
+                                            'rgba(54, 162, 235, 0.2)',
+                                            // 'rgba(255, 206, 86, 0.2)',
+                                            // 'rgba(75, 192, 192, 0.2)',
+                                            // 'rgba(153, 102, 255, 0.2)',
+                                            // 'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            // 'rgba(255, 99, 132, 1)',
+                                            'rgba(54, 162, 235, 1)',
+                                            // 'rgba(255, 206, 86, 1)',
+                                            // 'rgba(75, 192, 192, 1)',
+                                            // 'rgba(153, 102, 255, 1)',
+                                            // 'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
                                     }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            ticks: {
+                                                fontSize: 8
+                                            }
+                                        }]
+                                    }
                                 }
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
 
-                $.ajax({
-                    type: 'GET',
-                    url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Food/Drinks' },
-                    success: function(response) {
-                            console.log(response);
-                        var ctx = document.getElementById('myChart2').getContext('2d');
-                        var myChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: response['Food/Drinks']['labels'],
-                                datasets: [{
-                                    label: 'Date',
-                                    data: response['Food/Drinks']['values'],
-                                    backgroundColor: [
-                                        'rgba(255, 99, 132, 0.2)',
-                                        // 'rgba(54, 162, 235, 0.2)',
-                                        // 'rgba(255, 206, 86, 0.2)',
-                                        // 'rgba(75, 192, 192, 0.2)',
-                                        // 'rgba(153, 102, 255, 0.2)',
-                                        // 'rgba(255, 159, 64, 0.2)'
-                                    ],
-                                    borderColor: [
-                                        'rgba(255, 99, 132, 1)',
-                                        // 'rgba(54, 162, 235, 1)',
-                                        // 'rgba(255, 206, 86, 1)',
-                                        // 'rgba(75, 192, 192, 1)',
-                                        // 'rgba(153, 102, 255, 1)',
-                                        // 'rgba(255, 159, 64, 1)'
-                                    ],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    yAxes: [{
-                                        ticks: {
-                                            beginAtZero: true
-                                        }
-                                    }],
-                                    xAxes: [{
-                                        ticks: {
-                                            fontSize: 8
-                                        }
-                                    }]
-                                }
-                            }
-                        });
-                    }
-                });
+                function chart_2(filter='50') {
 
-                $.ajax({
-                    type: 'GET',
-                    url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Groceries' },
-                    success: function(response) {
-                            console.log(response);
-                        var ctx = document.getElementById('myChart3').getContext('2d');
-                        var myChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: response['Groceries']['labels'],
-                                datasets: [{
-                                    label: 'Date',
-                                    data: response['Groceries']['values'],
-                                    backgroundColor: [
-                                        // 'rgba(255, 99, 132, 0.2)',
-                                        // 'rgba(54, 162, 235, 0.2)',
-                                        'rgba(255, 206, 86, 0.2)',
-                                        // 'rgba(75, 192, 192, 0.2)',
-                                        // 'rgba(153, 102, 255, 0.2)',
-                                        // 'rgba(255, 159, 64, 0.2)'
-                                    ],
-                                    borderColor: [
-                                        // 'rgba(255, 99, 132, 1)',
-                                        // 'rgba(54, 162, 235, 1)',
-                                        'rgba(255, 206, 86, 1)',
-                                        // 'rgba(75, 192, 192, 1)',
-                                        // 'rgba(153, 102, 255, 1)',
-                                        // 'rgba(255, 159, 64, 1)'
-                                    ],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    yAxes: [{
-                                        ticks: {
-                                            beginAtZero: true
-                                        }
-                                    }],
-                                    xAxes: [{
-                                        ticks: {
-                                            fontSize: 8
-                                        }
+                    $.ajax({
+                        type: 'GET',
+                        url: 'charts/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Food/Drinks', 'filter': filter },
+                        success: function(response) {
+                                console.log(response);
+                            var ctx = document.getElementById('myChart2').getContext('2d');
+                            var myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: response['Food/Drinks']['labels'],
+                                    datasets: [{
+                                        label: 'Amount Spent',
+                                        data: response['Food/Drinks']['values'],
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.2)',
+                                            // 'rgba(54, 162, 235, 0.2)',
+                                            // 'rgba(255, 206, 86, 0.2)',
+                                            // 'rgba(75, 192, 192, 0.2)',
+                                            // 'rgba(153, 102, 255, 0.2)',
+                                            // 'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            'rgba(255, 99, 132, 1)',
+                                            // 'rgba(54, 162, 235, 1)',
+                                            // 'rgba(255, 206, 86, 1)',
+                                            // 'rgba(75, 192, 192, 1)',
+                                            // 'rgba(153, 102, 255, 1)',
+                                            // 'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
                                     }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            ticks: {
+                                                fontSize: 8
+                                            }
+                                        }]
+                                    }
                                 }
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
 
-                $.ajax({
-                    type: 'GET',
-                    url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Coffee' },
-                    success: function(response) {
-                            console.log(response);
-                        var ctx = document.getElementById('myChart4').getContext('2d');
-                        var myChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: response['Coffee']['labels'],
-                                datasets: [{
-                                    label: 'Date',
-                                    data: response['Coffee']['values'],
-                                    backgroundColor: [
-                                        // 'rgba(255, 99, 132, 0.2)',
-                                        // 'rgba(54, 162, 235, 0.2)',
-                                        // 'rgba(255, 206, 86, 0.2)',
-                                        // 'rgba(75, 192, 192, 0.2)',
-                                        'rgba(153, 102, 255, 0.2)',
-                                        // 'rgba(255, 159, 64, 0.2)'
-                                    ],
-                                    borderColor: [
-                                        // 'rgba(255, 99, 132, 1)',
-                                        // 'rgba(54, 162, 235, 1)',
-                                        // 'rgba(255, 206, 86, 1)',
-                                        // 'rgba(75, 192, 192, 1)',
-                                        'rgba(153, 102, 255, 1)',
-                                        // 'rgba(255, 159, 64, 1)'
-                                    ],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    yAxes: [{
-                                        ticks: {
-                                            beginAtZero: true
-                                        }
-                                    }],
-                                    xAxes: [{
-                                        ticks: {
-                                            fontSize: 8
-                                        }
-                                    }]
-                                }
-                            }
-                        });
-                    }
-                });
+                function chart_3(filter='50') {
 
-                $.ajax({
-                    type: 'GET',
-                    url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Gas' },
-                    success: function(response) {
-                            console.log(response);
-                        var ctx = document.getElementById('myChart5').getContext('2d');
-                        var myChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: response['Gas']['labels'],
-                                datasets: [{
-                                    label: 'Date',
-                                    data: response['Gas']['values'],
-                                    backgroundColor: [
-                                        // 'rgba(255, 99, 132, 0.2)',
-                                        // 'rgba(54, 162, 235, 0.2)',
-                                        // 'rgba(255, 206, 86, 0.2)',
-                                        'rgba(75, 192, 192, 0.2)',
-                                        // 'rgba(153, 102, 255, 0.2)',
-                                        // 'rgba(255, 159, 64, 0.2)'
-                                    ],
-                                    borderColor: [
-                                        // 'rgba(255, 99, 132, 1)',
-                                        // 'rgba(54, 162, 235, 1)',
-                                        // 'rgba(255, 206, 86, 1)',
-                                        'rgba(75, 192, 192, 1)',
-                                        // 'rgba(153, 102, 255, 1)',
-                                        // 'rgba(255, 159, 64, 1)'
-                                    ],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    yAxes: [{
-                                        ticks: {
-                                            beginAtZero: true
-                                        }
-                                    }],
-                                    xAxes: [{
-                                        ticks: {
-                                            fontSize: 8
-                                        }
+                    $.ajax({
+                        type: 'GET',
+                        url: 'charts/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Groceries', 'filter': filter },
+                        success: function(response) {
+                                console.log(response);
+                            var ctx = document.getElementById('myChart3').getContext('2d');
+                            var myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: response['Groceries']['labels'],
+                                    datasets: [{
+                                        label: 'Amount Spent',
+                                        data: response['Groceries']['values'],
+                                        backgroundColor: [
+                                            // 'rgba(255, 99, 132, 0.2)',
+                                            // 'rgba(54, 162, 235, 0.2)',
+                                            'rgba(255, 206, 86, 0.2)',
+                                            // 'rgba(75, 192, 192, 0.2)',
+                                            // 'rgba(153, 102, 255, 0.2)',
+                                            // 'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            // 'rgba(255, 99, 132, 1)',
+                                            // 'rgba(54, 162, 235, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                            // 'rgba(75, 192, 192, 1)',
+                                            // 'rgba(153, 102, 255, 1)',
+                                            // 'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
                                     }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            ticks: {
+                                                fontSize: 8
+                                            }
+                                        }]
+                                    }
                                 }
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
 
-                $.ajax({
-                    type: 'GET',
-                    url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Services' },
-                    success: function(response) {
-                            console.log(response);
-                        var ctx = document.getElementById('myChart6').getContext('2d');
-                        var myChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: response['Services']['labels'],
-                                datasets: [{
-                                    label: 'Date',
-                                    data: response['Services']['values'],
-                                    backgroundColor: [
-                                        // 'rgba(255, 99, 132, 0.2)',
-                                        // 'rgba(54, 162, 235, 0.2)',
-                                        // 'rgba(255, 206, 86, 0.2)',
-                                        // 'rgba(75, 192, 192, 0.2)',
-                                        // 'rgba(153, 102, 255, 0.2)',
-                                        'rgba(255, 159, 64, 0.2)'
-                                    ],
-                                    borderColor: [
-                                        // 'rgba(255, 99, 132, 1)',
-                                        // 'rgba(54, 162, 235, 1)',
-                                        // 'rgba(255, 206, 86, 1)',
-                                        // 'rgba(75, 192, 192, 1)',
-                                        // 'rgba(153, 102, 255, 1)',
-                                        'rgba(255, 159, 64, 1)'
-                                    ],
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    yAxes: [{
-                                        ticks: {
-                                            beginAtZero: true
-                                        }
-                                    }],
-                                    xAxes: [{
-                                        ticks: {
-                                            fontSize: 8
-                                        }
+                function chart_4(filter='50') {
+
+                    $.ajax({
+                        type: 'GET',
+                        url: 'charts/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Coffee', 'filter': filter },
+                        success: function(response) {
+                                console.log(response);
+                            var ctx = document.getElementById('myChart4').getContext('2d');
+                            var myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: response['Coffee']['labels'],
+                                    datasets: [{
+                                        label: 'Amount Spent',
+                                        data: response['Coffee']['values'],
+                                        backgroundColor: [
+                                            // 'rgba(255, 99, 132, 0.2)',
+                                            // 'rgba(54, 162, 235, 0.2)',
+                                            // 'rgba(255, 206, 86, 0.2)',
+                                            // 'rgba(75, 192, 192, 0.2)',
+                                            'rgba(153, 102, 255, 0.2)',
+                                            // 'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            // 'rgba(255, 99, 132, 1)',
+                                            // 'rgba(54, 162, 235, 1)',
+                                            // 'rgba(255, 206, 86, 1)',
+                                            // 'rgba(75, 192, 192, 1)',
+                                            'rgba(153, 102, 255, 1)',
+                                            // 'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
                                     }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            ticks: {
+                                                fontSize: 8
+                                            }
+                                        }]
+                                    }
                                 }
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
+
+                function chart_5(filter='50') {
+
+                    $.ajax({
+                        type: 'GET',
+                        url: 'charts/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Gas', 'filter': filter },
+                        success: function(response) {
+                                console.log(response);
+                            var ctx = document.getElementById('myChart5').getContext('2d');
+                            var myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: response['Gas']['labels'],
+                                    datasets: [{
+                                        label: 'Amount Spent',
+                                        data: response['Gas']['values'],
+                                        backgroundColor: [
+                                            // 'rgba(255, 99, 132, 0.2)',
+                                            // 'rgba(54, 162, 235, 0.2)',
+                                            // 'rgba(255, 206, 86, 0.2)',
+                                            'rgba(75, 192, 192, 0.2)',
+                                            // 'rgba(153, 102, 255, 0.2)',
+                                            // 'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            // 'rgba(255, 99, 132, 1)',
+                                            // 'rgba(54, 162, 235, 1)',
+                                            // 'rgba(255, 206, 86, 1)',
+                                            'rgba(75, 192, 192, 1)',
+                                            // 'rgba(153, 102, 255, 1)',
+                                            // 'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            ticks: {
+                                                fontSize: 8
+                                            }
+                                        }]
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                function chart_6(filter='50') {
+
+                    $.ajax({
+                        type: 'GET',
+                        url: 'charts/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Services', 'filter': filter },
+                        success: function(response) {
+                                console.log(response);
+                            var ctx = document.getElementById('myChart6').getContext('2d');
+                            var myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: response['Services']['labels'],
+                                    datasets: [{
+                                        label: 'Amount Spent',
+                                        data: response['Services']['values'],
+                                        backgroundColor: [
+                                            // 'rgba(255, 99, 132, 0.2)',
+                                            // 'rgba(54, 162, 235, 0.2)',
+                                            // 'rgba(255, 206, 86, 0.2)',
+                                            // 'rgba(75, 192, 192, 0.2)',
+                                            // 'rgba(153, 102, 255, 0.2)',
+                                            'rgba(255, 159, 64, 0.2)'
+                                        ],
+                                        borderColor: [
+                                            // 'rgba(255, 99, 132, 1)',
+                                            // 'rgba(54, 162, 235, 1)',
+                                            // 'rgba(255, 206, 86, 1)',
+                                            // 'rgba(75, 192, 192, 1)',
+                                            // 'rgba(153, 102, 255, 1)',
+                                            'rgba(255, 159, 64, 1)'
+                                        ],
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            ticks: {
+                                                fontSize: 8
+                                            }
+                                        }]
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                chart_1();
+                chart_2();
+                chart_3();
+                chart_4();
+                chart_5();
+                chart_6();
 
                 $('button').fadeIn(3000);
+                // Pass the desired filter, taken from the last 3 characters of the button's id
+                $('button[id^="1"]').on('click', function(e) { chart_1(this.id.slice(2, 5)) } );
+                $('button[id^="2"]').on('click', function(e) { chart_2(this.id.slice(2, 5)) } );
+                $('button[id^="3"]').on('click', function(e) { chart_3(this.id.slice(2, 5)) } );
+                $('button[id^="4"]').on('click', function(e) { chart_4(this.id.slice(2, 5)) } );
+                $('button[id^="5"]').on('click', function(e) { chart_5(this.id.slice(2, 5)) } );
+                $('button[id^="6"]').on('click', function(e) { chart_6(this.id.slice(2, 5)) } );
+
+                $('button[id^="1"]').on('click', function(e) {
+                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
+                    $(this).addClass('btn-success');
+                });
+
+                $('button[id^="2"]').on('click', function(e) {
+                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
+                    $(this).addClass('btn-success');
+                });
+
+                $('button[id^="3"]').on('click', function(e) {
+                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
+                    $(this).addClass('btn-success');
+                });
+
+                $('button[id^="4"]').on('click', function(e) {
+                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
+                    $(this).addClass('btn-success');
+                });
+
+                $('button[id^="5"]').on('click', function(e) {
+                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
+                    $(this).addClass('btn-success');
+                });
+
+                $('button[id^="6"]').on('click', function(e) {
+                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
+                    $(this).addClass('btn-success');
+
+                });
 
             });
 
