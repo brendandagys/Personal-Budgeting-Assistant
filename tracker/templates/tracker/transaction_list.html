@@ -48,6 +48,7 @@
                     <a id="cAppliances" href="http://localhost:8000/transactions/">Appliances</a></br>
                     <a id="cClothes" href="http://localhost:8000/transactions/">Clothes</a></br>
                     <a id="cMedicine" href="http://localhost:8000/transactions/">Medicine</a></br>
+                    <a id="cVacations" href="http://localhost:8000/transactions/">Vacations</a></br>
                     <a id="cFees" href="http://localhost:8000/transactions/">Fees</a></br></br>
 
                     <a id="tLast Week" href="http://localhost:8000/transactions/">Last Week</a></br>
@@ -70,7 +71,7 @@
                             {% for purchase in purchase_list %}
                             <li>
                                 <h5><b>{{ purchase.date }}, {{ purchase.time }}</b>: <span class="red_text">${{ purchase.amount }}</span></h5>
-                                <h5><u>{{ purchase.category }}</u>: {{ purchase.item }} {% if purchase.description %} | <i>{{ purchase.description }}</i> {% endif %}</h5>
+                                <h5><u>{{ purchase.category }}</u>  {% if purchase.category_2 %} | <u>{{ purchase.category_2 }}</u> {% endif %}| {{ purchase.item }} {% if purchase.description %} | <i>{{ purchase.description }}</i> {% endif %}</h5>
                             </li>
                             {% endfor %}
                         </ul>

@@ -4,6 +4,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 
+from django.db.models import Q
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
@@ -47,20 +49,20 @@ def get_chart_data(request):
 
         for x in labels:
             if category == 'All':
-                queryset = Purchase.objects.filter(date = x).exclude(category='Bills').values('amount').aggregate(Sum('amount'))
+                queryset = Purchase.objects.filter(date=x).exclude(category='Bills').values('amount').aggregate(Sum('amount'))
             else:
-                queryset = Purchase.objects.filter(date = x, category = category).values('amount').aggregate(Sum('amount')) # Get all purchase amounts on that date
+                queryset = Purchase.objects.filter(Q(date=x) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount')) # Get all purchase amounts on that date
 
             if queryset['amount__sum'] is None:
                 values.append(0)
             else:
                 values.append(queryset['amount__sum'])
 
-            print(values)
+            # print(values)
 
         json[category] = {'labels': labels, 'values': values}
 
-        print(json)
+        # print(json)
 
         return JsonResponse(json)
 
@@ -120,6 +122,7 @@ def homepage(request):
             purchase_instance.time = purchase_form.cleaned_data['time'].strip()
             purchase_instance.amount = purchase_form.cleaned_data['amount']
             purchase_instance.category = purchase_form.cleaned_data['category'].strip()
+            purchase_instance.category_2 = purchase_form.cleaned_data['category_2'].strip()
             purchase_instance.item = purchase_form.cleaned_data['item'].strip()
             purchase_instance.description = purchase_form.cleaned_data['description'].strip()
 
@@ -262,7 +265,7 @@ class PurchaseListView(generic.ListView):
 
     def get_queryset(self):
 
-        filters_instance = Filter.objects.last()
+        filters_instance = Filter.objects.last() # Gives object or None
         # If no filters OR filters were set on different days OR 'NO FILTER' is clicked...
         if filters_instance is None or datetime.date.today() - filters_instance.last_update_date > datetime.timedelta(days=1):
             category_filter = ''
@@ -276,10 +279,10 @@ class PurchaseListView(generic.ListView):
             return Purchase.objects.filter(date__gte=time_filter).order_by('-date', '-time')
 
         elif category_filter != '' and time_filter == '':
-            return Purchase.objects.filter(category=category_filter).order_by('-date', '-time')
+            return Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
 
         elif category_filter != '' and time_filter != '':
-            return Purchase.objects.filter(date__gte=time_filter, category=category_filter).order_by('-date', '-time')
+            return Purchase.objects.filter(Q(date__gte=time_filter) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
 
         else:
             return Purchase.objects.all()
@@ -289,7 +292,7 @@ def filter_manager(request):
 
     if request.method == 'POST':
 
-        filters_instance = Filter.objects.all()[0]
+        filters_instance = Filter.objects.all()[0] # Gives object or raises an exception
 
         filters_instance.last_update_date = datetime.date.today()
         filters_instance.last_update_time = datetime.datetime.now()

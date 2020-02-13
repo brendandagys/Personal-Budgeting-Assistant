@@ -25,6 +25,7 @@ class PurchaseForm(forms.Form):
             ('Appliances', 'Appliances'),
             ('Clothes', 'Clothes'),
             ('Medicine', 'Medicine'),
+            ('Vacation', 'Vacation'),
             ('Fees', 'Fees')
         )
 
@@ -38,6 +39,8 @@ class PurchaseForm(forms.Form):
         amount = forms.DecimalField(label='Amount', max_digits=7, decimal_places=2, localize=False, widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm',
                                                                                                                                      'placeholder': 'Amount...'}))
         category = forms.ChoiceField(label='Category', choices=CATEGORY_CHOICES)
+
+        category_2 = forms.ChoiceField(required=False, label='Category 2', choices=CATEGORY_CHOICES)
 
         item = forms.CharField(label='Item(s)', widget=forms.TextInput(attrs={'class': 'form-control form-control-sm',
                                                                               'placeholder': 'Item...'}))
@@ -56,6 +59,9 @@ class PurchaseForm(forms.Form):
 
         def clean_category(self):
             return self.cleaned_data['category']
+
+        def clean_category_2(self):
+            return self.cleaned_data['category_2']
 
         def clean_item(self):
             return self.cleaned_data['item']

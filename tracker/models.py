@@ -18,6 +18,7 @@ class Purchase(models.Model):
     time = models.CharField(max_length=20, verbose_name='Time (24 hr.)', default=current_time)
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
     category = models.CharField(max_length=50, verbose_name='Category')
+    category_2 = models.CharField(blank=True, max_length=50, verbose_name='Category 2') # null=True unnecessary because CharField and TextFields always stores blank values as '' in the database
     item = models.CharField(max_length=100, verbose_name='Item(s)')
     description = models.TextField(blank=True, verbose_name='Description')
 
