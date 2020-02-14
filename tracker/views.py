@@ -290,7 +290,7 @@ class PurchaseListView(generic.ListView):
 @login_required
 def filter_manager(request):
 
-    def get_time_filter(self, parameter):
+    def get_time_filter(parameter):
 
         if parameter == 'Last Week':
             return datetime.date.today() - datetime.timedelta(days=7)
