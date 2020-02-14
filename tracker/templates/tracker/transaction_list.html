@@ -59,6 +59,8 @@
 
                     <i><h5 id="category_filter_indicator"></h5></i>
                     <i><h5 id="time_filter_indicator"></h5></i>
+                    </br>
+                    <b><h2 id="total_spent"></h2></b>
 
                 </div>
 
@@ -103,6 +105,8 @@
                 console.log('Filter GET successful!')
                 $('#category_filter_indicator').text(response['category_filter']);
                 $('#time_filter_indicator').text(response['time_filter']);
+                $('#total_spent').text(response['total_spent']);
+
             }
         });
         //$('a':not('#homepage_link')).on('click', function(e) {

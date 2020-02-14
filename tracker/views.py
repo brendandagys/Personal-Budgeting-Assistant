@@ -290,6 +290,21 @@ class PurchaseListView(generic.ListView):
 @login_required
 def filter_manager(request):
 
+    def get_time_filter(self, parameter):
+
+        if parameter == 'Last Week':
+            return datetime.date.today() - datetime.timedelta(days=7)
+        elif parameter == 'Last Month':
+            return datetime.date.today() - datetime.timedelta(days=30)
+        elif parameter == 'Last Three Months':
+            return datetime.date.today() - datetime.timedelta(days=91)
+        elif parameter == 'Last Six Months:':
+            return datetime.date.today() - datetime.timedelta(days=183)
+        elif parameter == 'Last Year':
+            return datetime.date.today() - datetime.timedelta(days=365)
+        else:
+            return datetime.date.today() - datetime.timedelta(days=1000)
+
     if request.method == 'POST':
 
         filters_instance = Filter.objects.all()[0] # Gives object or raises an exception
@@ -317,10 +332,29 @@ def filter_manager(request):
 
         except:
 
-            Filter.objects.create(last_update_date = datetime.date.today(),
+            filters_instance = Filter.objects.create(last_update_date = datetime.date.today(),
                                   last_update_time = datetime.datetime.now(),
                                   category_filter = '',
                                   time_filter = '' )
 
+        # Return the sum of money spent for the given filters
+        category_filter = filters_instance.category_filter
+        time_filter = get_time_filter(filters_instance.time_filter)
+
+        if category_filter == '' and time_filter != '':
+            purchase_instance = Purchase.objects.filter(date__gte=time_filter)
+
+        elif category_filter != '' and time_filter == '':
+            purchase_instance = Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter))
+
+        elif category_filter != '' and time_filter != '':
+            purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter) & (Q(category=category_filter) | Q(category_2=category_filter)))
+
+        else:
+            purchase_instance = Purchase.objects.all()
+        # More DRY method than was used above?
+        total_spent = purchase_instance.aggregate(Sum('amount'))['amount__sum']
+
         return JsonResponse({'category_filter': filters_instance.category_filter,
-                             'time_filter': filters_instance.time_filter})
+                             'time_filter': filters_instance.time_filter,
+                             'total_spent': total_spent, })
