@@ -179,7 +179,7 @@ def homepage(request):
             highest_threshold_reached = instance.percent
 
             # Get total spent this month on the specific type
-            total_spent_to_date = Purchase.objects.filter(category=category, date__gte=datetime.datetime(year, month, 1)).aggregate(Sum('amount'))
+            total_spent_to_date = Purchase.objects.filter((Q(category=category) | Q(category_2=category)) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
             total_spent_to_date = total_spent_to_date['amount__sum']
 
             send_email = True
@@ -189,7 +189,7 @@ def homepage(request):
 
             if total_spent_to_date >= maximum:
                 instance.percent = 100
-                if highest_threshold_reached >= 100:
+                if highest_threshold_reached == 100:
                     send_email = False
 
             elif total_spent_to_date >= floor(maximum * 0.75):
@@ -202,7 +202,7 @@ def homepage(request):
                 if highest_threshold_reached >= 50:
                     send_email = False
 
-            elif total_spent_to_date >= floor(maximum * 0.25) and (instance.percent < 25 or instance.percent in (50, 75, 100)):
+            elif total_spent_to_date >= floor(maximum * 0.25): # and (instance.percent < 25 or instance.percent in (50, 75, 100)):
                 instance.percent = 25
                 if highest_threshold_reached >= 25:
                     send_email = False
