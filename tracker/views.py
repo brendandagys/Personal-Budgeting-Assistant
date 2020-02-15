@@ -17,6 +17,7 @@ from django.db.models import Sum
 
 from math import floor
 import datetime
+from dateutil.relativedelta import *
 import re
 import pandas as pd
 
@@ -25,6 +26,7 @@ date = datetime.date.today()
 year = date.year
 month = date.month
 day = date.day
+weekday = date.weekday()
 
 
 def get_chart_data(request):
@@ -250,18 +252,41 @@ class PurchaseListView(generic.ListView):
 
     def get_time_filter(self, parameter):
 
-        if parameter == 'Last Week':
-            return datetime.date.today() - datetime.timedelta(days=7)
-        elif parameter == 'Last Month':
-            return datetime.date.today() - datetime.timedelta(days=30)
+        if parameter == 'Last Seven Days':
+            return [date - datetime.timedelta(days=6), date]
+        elif parameter == 'Last 30 Days':
+            return [date - datetime.timedelta(days=29), date]
         elif parameter == 'Last Three Months':
-            return datetime.date.today() - datetime.timedelta(days=91)
+            return [date + relativedelta(months=-3), date]
         elif parameter == 'Last Six Months:':
-            return datetime.date.today() - datetime.timedelta(days=183)
+            return [date + relativedelta(months=-6), date]
         elif parameter == 'Last Year':
-            return datetime.date.today() - datetime.timedelta(days=365)
+            return [date + relativedelta(years=-1), date]
+        elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
+            return [date - datetime.timedelta(days=1 + weekday), date]
+        elif parameter == 'One Week Ago':
+            return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
+        elif parameter == 'Two Weeks Ago':
+            return [date + relativedelta(weeks=-2, weekday=SU(-1)), date + relativedelta(weeks=-2, weekday=SA(1))]
+        elif parameter == 'Three Weeks Ago':
+            return [date + relativedelta(weeks=-3, weekday=SU(-1)), date + relativedelta(weeks=-3, weekday=SA(1))]
+        elif parameter == 'Four Weeks Ago':
+            return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
+        elif parameter == 'This Month':
+            return [datetime.datetime(year, month, 1), date]
+        elif parameter == 'One Month Ago':
+            return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
+        elif parameter == 'Two Months Ago':
+            return [date + relativedelta(day=1, months=-2), date + relativedelta(day=31, months=-2)]
+        elif parameter == 'Three Months Ago':
+            return [date + relativedelta(day=1, months=-3), date + relativedelta(day=31, months=-3)]
+        elif parameter == 'Four Months Ago':
+            return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
+        elif parameter == 'This Year':
+            return [datetime.datetime(year, 1, 1), date]
+
         else:
-            return datetime.date.today() - datetime.timedelta(days=1000)
+            return [date - datetime.timedelta(days=5000), date]
 
     def get_queryset(self):
 
@@ -269,20 +294,22 @@ class PurchaseListView(generic.ListView):
         # If no filters OR filters were set on different days OR 'NO FILTER' is clicked...
         if filters_instance is None or datetime.date.today() - filters_instance.last_update_date > datetime.timedelta(days=1):
             category_filter = ''
-            time_filter = ''
+            time_filter_start = ''
+            time_filter_end = ''
 
         else:
             category_filter = filters_instance.category_filter
-            time_filter = self.get_time_filter(filters_instance.time_filter)
+            time_filter_start = self.get_time_filter(filters_instance.time_filter)[0]
+            time_filter_end = self.get_time_filter(filters_instance.time_filter)[1]
 
-        if category_filter == '' and time_filter != '':
-            return Purchase.objects.filter(date__gte=time_filter).order_by('-date', '-time')
+        if category_filter == '' and time_filter_start != '':
+            return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
 
-        elif category_filter != '' and time_filter == '':
+        elif category_filter != '' and time_filter_start == '':
             return Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
 
-        elif category_filter != '' and time_filter != '':
-            return Purchase.objects.filter(Q(date__gte=time_filter) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
+        elif category_filter != '' and time_filter_start != '':
+            return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
 
         else:
             return Purchase.objects.all()
@@ -292,18 +319,41 @@ def filter_manager(request):
 
     def get_time_filter(parameter):
 
-        if parameter == 'Last Week':
-            return datetime.date.today() - datetime.timedelta(days=7)
-        elif parameter == 'Last Month':
-            return datetime.date.today() - datetime.timedelta(days=30)
+        if parameter == 'Last Seven Days':
+            return [date - datetime.timedelta(days=6), date]
+        elif parameter == 'Last 30 Days':
+            return [date - datetime.timedelta(days=29), date]
         elif parameter == 'Last Three Months':
-            return datetime.date.today() - datetime.timedelta(days=91)
+            return [date + relativedelta(months=-3), date]
         elif parameter == 'Last Six Months:':
-            return datetime.date.today() - datetime.timedelta(days=183)
+            return [date + relativedelta(months=-6), date]
         elif parameter == 'Last Year':
-            return datetime.date.today() - datetime.timedelta(days=365)
+            return [date + relativedelta(years=-1), date]
+        elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
+            return [date - datetime.timedelta(days=1 + weekday), date]
+        elif parameter == 'One Week Ago':
+            return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
+        elif parameter == 'Two Weeks Ago':
+            return [date + relativedelta(weeks=-2, weekday=SU(-1)), date + relativedelta(weeks=-2, weekday=SA(1))]
+        elif parameter == 'Three Weeks Ago':
+            return [date + relativedelta(weeks=-3, weekday=SU(-1)), date + relativedelta(weeks=-3, weekday=SA(1))]
+        elif parameter == 'Four Weeks Ago':
+            return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
+        elif parameter == 'This Month':
+            return [datetime.datetime(year, month, 1), date]
+        elif parameter == 'One Month Ago':
+            return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
+        elif parameter == 'Two Months Ago':
+            return [date + relativedelta(day=1, months=-2), date + relativedelta(day=31, months=-2)]
+        elif parameter == 'Three Months Ago':
+            return [date + relativedelta(day=1, months=-3), date + relativedelta(day=31, months=-3)]
+        elif parameter == 'Four Months Ago':
+            return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
+        elif parameter == 'This Year':
+            return [datetime.datetime(year, 1, 1), date]
+
         else:
-            return datetime.date.today() - datetime.timedelta(days=1000)
+            return [date - datetime.timedelta(days=5000), date]
 
     if request.method == 'POST':
 
@@ -339,22 +389,29 @@ def filter_manager(request):
 
         # Return the sum of money spent for the given filters
         category_filter = filters_instance.category_filter
-        time_filter = get_time_filter(filters_instance.time_filter)
+        time_filter_start = get_time_filter(filters_instance.time_filter)[0]
+        time_filter_end = get_time_filter(filters_instance.time_filter)[1]
 
-        if category_filter == '' and time_filter != '':
-            purchase_instance = Purchase.objects.filter(date__gte=time_filter)
+        if category_filter == '' and time_filter_start != '':
+            purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
 
-        elif category_filter != '' and time_filter == '':
-            purchase_instance = Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter))
+        elif category_filter != '' and time_filter_start == '':
+            purchase_instance = Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
 
-        elif category_filter != '' and time_filter != '':
-            purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter) & (Q(category=category_filter) | Q(category_2=category_filter)))
+        elif category_filter != '' and time_filter_start != '':
+            purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
 
         else:
             purchase_instance = Purchase.objects.all()
-        # More DRY method than was used above?
-        total_spent = purchase_instance.aggregate(Sum('amount'))['amount__sum']
+
+        # If there are no objects, the sum will be None
+        try:
+            total_spent = '$' + str(round(purchase_instance.aggregate(Sum('amount'))['amount__sum'], 2))
+        except:
+            total_spent = ''
 
         return JsonResponse({'category_filter': filters_instance.category_filter,
                              'time_filter': filters_instance.time_filter,
+                             'time_filter_start': time_filter_start,
+                             'time_filter_end': time_filter_end,
                              'total_spent': total_spent, })

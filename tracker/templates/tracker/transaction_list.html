@@ -33,6 +33,7 @@
                     </br>
                     <a id="No Filter" class="no_filter" href="https://brendanspending.herokuapp.com/transactions/">NO FILTER</a></br></br>
 
+                    <p class="filter_headers">Categories</p>
                     <a id="cCoffee" href="https://brendanspending.herokuapp.com/transactions/">Coffee</a></br>
                     <a id="cGroceries" href="https://brendanspending.herokuapp.com/transactions/">Groceries</a></br>
                     <a id="cFood/Drinks" href="https://brendanspending.herokuapp.com/transactions/">Food/Drinks</a></br>
@@ -51,29 +52,52 @@
                     <a id="cVacations" href="https://brendanspending.herokuapp.com/transactions/">Vacations</a></br>
                     <a id="cFees" href="https://brendanspending.herokuapp.com/transactions/">Fees</a></br></br>
 
-                    <a id="tLast Week" href="https://brendanspending.herokuapp.com/transactions/">Last Week</a></br>
-                    <a id="tLast Month" href="https://brendanspending.herokuapp.com/transactions/">Last Month</a></br>
+                    <p class="filter_headers">Dates Up To Today</p>
+                    <a id="tLast Seven Days" href="https://brendanspending.herokuapp.com/transactions/">Last Seven Days</a></br>
+                    <a id="tLast 30 Days" href="https://brendanspending.herokuapp.com/transactions/">Last 30 Days</a></br>
                     <a id="tLast Three Months" href="https://brendanspending.herokuapp.com/transactions/">Last Three Months</a></br>
                     <a id="tLast Six Months" href="https://brendanspending.herokuapp.com/transactions/">Last Six Months</a></br>
                     <a id="tLast Year" href="https://brendanspending.herokuapp.com/transactions/">Last Year</a></br></br>
 
-                    <i><h5 id="category_filter_indicator"></h5></i>
-                    <i><h5 id="time_filter_indicator"></h5></i>
-                    </br>
-                    <b><h2 id="total_spent"></h2></b>
+                    <p class="filter_headers">Past Week Periods</p>
+                    <a id="tThis Week" href="https://brendanspending.herokuapp.com/transactions/">This Week</a></br>
+                    <a id="tOne Week Ago" href="https://brendanspending.herokuapp.com/transactions/">One Week Ago</a></br>
+                    <a id="tTwo Weeks Ago" href="https://brendanspending.herokuapp.com/transactions/">Two Weeks Ago</a></br>
+                    <a id="tThree Weeks Ago" href="https://brendanspending.herokuapp.com/transactions/">Three Weeks Ago</a></br>
+                    <a id="tFour Weeks Ago" href="https://brendanspending.herokuapp.com/transactions/">Four Weeks Ago</a></br></br>
+                    <p class="filter_headers">Past Month Periods</p>
+                    <a id="tThis Month" href="https://brendanspending.herokuapp.com/transactions/">This Month</a></br>
+                    <a id="tOne Month Ago" href="https://brendanspending.herokuapp.com/transactions/">One Month Ago</a></br>
+                    <a id="tTwo Months Ago" href="https://brendanspending.herokuapp.com/transactions/">Two Months Ago</a></br>
+                    <a id="tThree Months Ago" href="https://brendanspending.herokuapp.com/transactions/">Three Months Ago</a></br>
+                    <a id="tFour Months Ago" href="https://brendanspending.herokuapp.com/transactions/">Four Months Ago</a></br></br>
+                    <p class="filter_headers">Calendar Year To-Date</p>
+                    <a id="tThis Year" href="https://brendanspending.herokuapp.com/transactions/">This Year</a></br></br>
+
+                    <div class="filters_box">
+
+                        <b><h5>Filters Applied:</h5></b>
+                        <i><h5 id="category_filter_indicator"></h5></i>
+                        <i><h5 id="time_filter_indicator"></h5></i>
+
+                    </div>
+
+                    </br></br>
+                    <b><h4>SUM OF PURCHASES</h4></b>
+                    <b><h2 class="total_spent"></h2></b>
 
                 </div>
 
                 <div class="col-sm-10">
 
                     {% if purchase_list %}
-                        <h1>&nbsp&nbsp&nbspPurchase List</h1>
+                        <h1 class="purchase_header">Purchase List </h1><span class="date_span"></span>
 
-                        <ul>
+                        <ul class="list_container">
                             {% for purchase in purchase_list %}
-                            <li>
-                                <h5><b>{{ purchase.date }}, {{ purchase.time }}</b>: <span class="red_text">${{ purchase.amount }}</span></h5>
-                                <h5><u>{{ purchase.category }}</u>  {% if purchase.category_2 %} | <u>{{ purchase.category_2 }}</u> {% endif %}| {{ purchase.item }} {% if purchase.description %} | <i>{{ purchase.description }}</i> {% endif %}</h5>
+                            <li class="purchase_list_items">
+                                <h5><b>{{ purchase.date }}, {{ purchase.time }}</b>: <span class="blue_text">${{ purchase.amount }}</span></h5>
+                                <h5><u>{{ purchase.category }}</u>  {% if purchase.category_2 %} | <u>{{ purchase.category_2 }}</u> {% endif %}| {{ purchase.item }} {% if purchase.description %} | <span class="purchase_description"><i>{{ purchase.description }}</i></span> {% endif %}</h5>
                             </li>
                             {% endfor %}
                         </ul>
@@ -102,11 +126,11 @@
             url: 'filter/',
             data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
             success: function(response) {
-                console.log('Filter GET successful!')
+                // console.log('Filter GET successful!')
                 $('#category_filter_indicator').text(response['category_filter']);
                 $('#time_filter_indicator').text(response['time_filter']);
-                $('#total_spent').text(response['total_spent']);
-
+                $('.total_spent').text(response['total_spent']);
+                $('.date_span').text(response['time_filter_start'].concat(' - ', response['time_filter_end']))
             }
         });
         //$('a':not('#homepage_link')).on('click', function(e) {
@@ -122,7 +146,7 @@
                        'filter': event.target.id
                 },
                 success: function () {
-                    console.log('Filter POST successful!');
+                    // console.log('Filter POST successful!');
                     location.reload()
                 }
             });

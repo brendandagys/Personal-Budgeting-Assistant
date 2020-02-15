@@ -41,7 +41,7 @@ select[id^="id_"] {
     margin-bottom: 4rem;
 }
 
-.red_text {
+.blue_text {
     color: blue;
     font-size: 1.5rem;
 }
@@ -80,7 +80,7 @@ select[id^="id_"] {
 
 .navigation_link {
     top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 3rem;
     text-align: center;
 }
 
@@ -113,4 +113,57 @@ select[id^="id_"] {
 .button {
     margin: 8px 5px 35px 5px;
     position: relative;
+}
+
+.total_spent {
+    color: dimgrey;
+    font-size: 2rem;
+    border-style: dotted;
+    padding: 5px;
+}
+
+.purchase_description {
+    font-size: 1.2rem;
+}
+
+.list_container {
+    padding-left: 0;
+}
+
+.purchase_list_items {
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: slategrey;
+    margin-bottom: 3px;
+    padding: 0 5px;
+    list-style-type: none;
+    background-color: rgba(240,248,255,0.4);
+    /* background-color: rgba(60,279,113,0.1); */
+}
+
+.filter_headers {
+    font-size: 1.05rem;
+    margin-bottom: 3px;
+    text-decoration: underline;
+}
+
+.filters_box {
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
+}
+
+.purchase_header {
+    display: inline;
+}
+
+.date_span {
+    position: relative;
+    bottom: 0.75rem;
+    left: 1rem;
+    border-style: outset;
+    border-radius: 5px;
+    border-color: slategrey;
+    padding: 5px;
 }
