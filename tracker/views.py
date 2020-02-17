@@ -85,32 +85,51 @@ def homepage(request):
         cell_phone_plan_queryset = Bill.objects.filter(bill='Cell phone plan').order_by('-last_update_date')
         car_insurance_queryset = Bill.objects.filter(bill='Car insurance').order_by('-last_update_date')
         rent_queryset = Bill.objects.filter(bill='Rent').order_by('-last_update_date')
+        gym_membership_queryset = Bill.objects.filter(bill='Gym membership').order_by('-last_update_date')
 
         def check_bill_payments(bill, queryset):
             # Will create a Purchase object if True, since the month will match in the second if-statement
             instance_created_flag = False
             # If an instance doesn't exist, create it
             if len(queryset) == 0:
-                instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(year, month, bill_information[bill][0]))
-                instance_created_flag = True
+                if bill != 'Gym membership':
+                    instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(year, month, bill_information[bill][0]))
+                    instance_created_flag = True
+                else: # Create gym membership Bill
+                    instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(2020, 2, 14))
             else:
                 instance = queryset[0] # instance is either a Queryset or a real instance. This ensures it always becomes the latter
             # Check if bills for the current month have been recorded
-            if instance.last_update_date.month != month and day > instance.last_update_date.day:# or instance_created_flag is True:
-                instance.last_update_date = datetime.datetime(year, month, bill_information[bill][0]) # Update the date. Won't matter if instance was just created
-                instance.save()
+            if bill != 'Gym membership':
+                if instance.last_update_date.month != month and day > instance.last_update_date.day:# or instance_created_flag is True:
+                    instance.last_update_date = datetime.datetime(year, month, bill_information[bill][0]) # Update the date. Won't matter if instance was just created
+                    instance.save()
 
-                Purchase.objects.create(date = datetime.datetime(year, month, bill_information[bill][0]),
-                                        time = '00:00',
-                                        amount = bill_information[bill][2],
-                                        category = 'Bills',
-                                        item = bill,
-                                        description = bill_information[bill][3] )
+                    Purchase.objects.create(date = datetime.datetime(year, month, bill_information[bill][0]),
+                                            time = '00:00',
+                                            amount = bill_information[bill][2],
+                                            category = 'Bills',
+                                            category_2 = '', # Worked without this line, but being safe
+                                            item = bill,
+                                            description = bill_information[bill][3] )
+            else:
+                if (((date + relativedelta(weekday=FR(-1))) - instance.last_update_date).days)%14 == 0 and (date - instance.last_update_date).days >=14:
+                    instance.last_update_date = date + relativedelta(weekday=FR(-1))
+                    instance.save()
+
+                    Purchase.objects.create(date = date + relativedelta(weekday=FR(-1)),
+                                            time = '00:00',
+                                            amount = 10.16,
+                                            category = 'Bills',
+                                            category_2 = '', # Worked without this line, but being safe
+                                            item = 'Gym membership',
+                                            description = 'Bi-weekly fee.' )
 
         check_bill_payments('Apple Music', apple_music_queryset)
         check_bill_payments('Cell phone plan', cell_phone_plan_queryset)
         check_bill_payments('Car insurance', car_insurance_queryset)
         check_bill_payments('Rent', rent_queryset)
+        check_bill_payments('Gym membership', gym_membership_queryset)
 
     elif request.method == 'POST':
 
@@ -263,7 +282,7 @@ class PurchaseListView(generic.ListView):
         elif parameter == 'Last Year':
             return [date + relativedelta(years=-1), date]
         elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
-            return [date - datetime.timedelta(days=1 + weekday), date]
+            return [date - datetime.timedelta(days=1+weekday), date]
         elif parameter == 'One Week Ago':
             return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
         elif parameter == 'Two Weeks Ago':
@@ -273,7 +292,7 @@ class PurchaseListView(generic.ListView):
         elif parameter == 'Four Weeks Ago':
             return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
         elif parameter == 'This Month':
-            return [datetime.datetime(year, month, 1), date]
+            return [datetime.datetime(year, month, 1).date(), date]
         elif parameter == 'One Month Ago':
             return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
         elif parameter == 'Two Months Ago':
@@ -330,7 +349,7 @@ def filter_manager(request):
         elif parameter == 'Last Year':
             return [date + relativedelta(years=-1), date]
         elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
-            return [date - datetime.timedelta(days=1 + weekday), date]
+            return [date - datetime.timedelta(days=1+weekday), date]
         elif parameter == 'One Week Ago':
             return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
         elif parameter == 'Two Weeks Ago':
@@ -340,7 +359,7 @@ def filter_manager(request):
         elif parameter == 'Four Weeks Ago':
             return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
         elif parameter == 'This Month':
-            return [datetime.datetime(year, month, 1), date]
+            return [datetime.datetime(year, month, 1).date(), date]
         elif parameter == 'One Month Ago':
             return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
         elif parameter == 'Two Months Ago':

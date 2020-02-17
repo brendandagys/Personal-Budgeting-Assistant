@@ -9,7 +9,7 @@ from .models import Purchase
 class PurchaseForm(forms.Form):
 
         CATEGORY_CHOICES = (
-            ('Unspecified', 'Unspecified'),
+            ('', ''),
             ('Coffee', 'Coffee'),
             ('Groceries', 'Groceries'),
             ('Food/Drinks', 'Food/Drinks'),
@@ -24,7 +24,7 @@ class PurchaseForm(forms.Form):
             ('Electronics', 'Electronics'),
             ('Appliances', 'Appliances'),
             ('Clothes', 'Clothes'),
-            ('Medicine', 'Medicine'),
+            ('Alcohol', 'Alcohol'),
             ('Vacation', 'Vacation'),
             ('Fees', 'Fees')
         )

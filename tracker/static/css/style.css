@@ -160,8 +160,11 @@ select[id^="id_"] {
 
 .date_span {
     position: relative;
-    bottom: 0.75rem;
-    left: 1rem;
+    /* left: 1.7rem; */
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    width: 19rem;
+    text-align: center;
     border-style: outset;
     border-radius: 5px;
     border-color: slategrey;
