@@ -113,7 +113,7 @@ def homepage(request):
                                             item = bill,
                                             description = bill_information[bill][3] )
             else:
-                if (((date + relativedelta(weekday=FR(-1))) - instance.last_update_date).days)%14 == 0 and (date - instance.last_update_date.date()).days >=14:
+                if (((date + relativedelta(weekday=FR(-1))) - instance.last_update_date).days)%14 == 0 and (date - instance.last_update_date).days >=14:
                     instance.last_update_date = date + relativedelta(weekday=FR(-1))
                     instance.save()
 
@@ -427,7 +427,7 @@ def filter_manager(request):
         try:
             total_spent = '$' + str(round(purchase_instance.aggregate(Sum('amount'))['amount__sum'], 2))
         except:
-            total_spent = ''
+            total_spent = '$0'
 
         return JsonResponse({'category_filter': filters_instance.category_filter,
                              'time_filter': filters_instance.time_filter,
