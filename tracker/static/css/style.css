@@ -140,6 +140,10 @@ select[id^="id_"] {
     padding-left: 0;
 }
 
+.main_container {
+    padding: 0 !important;
+}
+
 .purchase_list_items {
     border-style: solid;
     border-width: 2px;
@@ -197,10 +201,14 @@ a {
     font-size: 1.25rem;
 }
 
-.filter_div_1 {
+.purchase_list_div {
+    padding: 7px !important;
+}
+
+/* .filter_div_1 {
     width: 200px;
 }
 
 .filter_div_2 {
-    width: 200px;
+    width: 200px; */
 }
