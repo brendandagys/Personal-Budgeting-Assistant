@@ -62,6 +62,7 @@ class Bill(models.Model):
     def __str__(self):
         return ', '.join([self.bill, str(self.last_update_date)])
 
+
 class Alert(models.Model):
     type = models.CharField(max_length=20, verbose_name = 'Type')
     percent = models.IntegerField(verbose_name = 'Percent')
@@ -73,3 +74,14 @@ class Alert(models.Model):
 
     def __str__(self):
         return ', '.join([self.type, str(self.percent), str(self.date_sent)])
+
+
+class Mode(models.Model):
+    mode = models.CharField(max_length=10, verbose_name = 'Mode')
+
+    class Meta:
+        verbose_name_plural = 'Modes'
+        verbose_name = 'Mode'
+
+    def __str__(self):
+        return self.mode

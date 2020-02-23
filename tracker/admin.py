@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Purchase, Filter, Bill, Alert
+from .models import Purchase, Filter, Bill, Alert, Mode
 
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -26,3 +26,7 @@ class BillAdmin(ImportExportModelAdmin):
 @admin.register(Alert)
 class AlertAdmin(ImportExportModelAdmin):
     resource_class = Alert
+
+@admin.register(Mode)
+class ModeAdmin(ImportExportModelAdmin):
+    resource_class = Mode

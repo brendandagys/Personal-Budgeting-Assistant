@@ -210,5 +210,10 @@ a {
 }
 
 .filter_div_2 {
-    width: 200px; */
+    width: 200px;
+} */
+
+.modes {
+  text-align: center;
+  padding-bottom: 10px;
 }

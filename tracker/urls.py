@@ -8,4 +8,5 @@ urlpatterns = [
     path('transactions/', login_required(views.PurchaseListView.as_view()), name='transactions'),
     path('transactions/filter/', views.filter_manager),
     path('charts/', views.get_chart_data),
+    path('mode/', views.manage_mode),
 ]

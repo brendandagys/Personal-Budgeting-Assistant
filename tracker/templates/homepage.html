@@ -109,6 +109,24 @@
 
             $(document).ready(function() {
 
+                var mode
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'mode/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+                    success: function(response) {
+                      mode = response['mode'];
+                      if (mode === 'All') {
+                        $('button[id="all_mode"]').addClass('btn-success');
+                      }
+                      else if (mode === 'Threshold') {
+                        $('button[id="threshold_mode"]').addClass('btn-success');
+                      }
+                      console.log('Retrieved mode: '.concat(mode));
+                    }
+                });
+
                 function chart_1(filter='50') {
 
                     $.ajax({
@@ -477,12 +495,46 @@
                 $('button[id^="6"]').on('click', function(e) {
                     $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
                     $(this).addClass('btn-success');
+                });
 
+                $('button[id="all_mode"]').on('click', function(e) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'mode/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'All'},
+                        success: function(response) {
+                          $(this).addClass('btn-success');
+                          $('button[id="all_mode"]').addClass('btn-success');
+                          $('button[id="threshold_mode"]').removeClass('btn-success');
+                          console.log('Updated mode to All!');
+                        }
+                    });
+                });
+
+                $('button[id="threshold_mode"]').on('click', function(e) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'mode/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'Threshold'},
+                        success: function(response) {
+                          $(this).addClass('btn-success');
+                          $('button[id="threshold_mode"]').addClass('btn-success');
+                          $('button[id="all_mode"]').removeClass('btn-success');
+                          console.log('Updated mode to Threshold!');
+                        }
+                    });
                 });
 
             });
 
         </script>
+
+        <hr />
+
+        <div class="modes col-sm-12">
+          <button id="all_mode" type="button" class="mode button btn btn-secondary">Send Alerts After Every Purchase</button>
+          <button id="threshold_mode" type="button" class="mode button btn btn-secondary">Send Alerts When Threshold Reached</button>
+        </div>
 
     </body>
 
