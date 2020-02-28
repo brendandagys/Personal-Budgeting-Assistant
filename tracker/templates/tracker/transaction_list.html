@@ -46,7 +46,7 @@
                         <p class="filter_headers">Categories</p>
                         <a id="cCoffee" href="https://brendanspending.herokuapp.com/transactions/">Coffee</a></br>
                         <a id="cGroceries" href="https://brendanspending.herokuapp.com/transactions/">Groceries</a></br>
-                        <a id="cFood/Drinks" href="https://brendanspending.herokuapp.com/transactions/">Food/Drinks</a></br>
+                        <a id="cFood/Drinks" class="food" href="https://brendanspending.herokuapp.com/transactions/">Food/Drinks</a></br>
                         <a id="cRestaurants" href="https://brendanspending.herokuapp.com/transactions/">Restaurants</a></br>
                         <a id="cGas" href="https://brendanspending.herokuapp.com/transactions/">Gas</a></br>
                         <a id="cBills" href="https://brendanspending.herokuapp.com/transactions/">Bills</a></br>
@@ -100,13 +100,13 @@
 
                     </div>
 
-                    <div class="filters_box col-sm-2">
+                    <!-- <div class="filters_box col-sm-2">
 
                         <b><h5>Filters Applied:</h5></b>
                         <i><h5 id="category_filter_indicator"></h5></i>
                         <i><h5 id="time_filter_indicator"></h5></i>
 
-                    </div>
+                    </div> -->
 
                     <div class="col-sm-5">
 
@@ -161,11 +161,24 @@
             url: 'filter/',
             data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
             success: function(response) {
-                // console.log('Filter GET successful!')
+                console.log(response['time_filter'])
                 $('#category_filter_indicator').text(response['category_filter']);
                 $('#time_filter_indicator').text(response['time_filter']);
                 $('.total_spent').text(response['total_spent']);
-                $('.date_span').text(response['time_filter_start'].concat(' - ', response['time_filter_end']))
+                $('.date_span').text(response['time_filter_start'].concat(' - ', response['time_filter_end']));
+
+                $('#t'.concat(response['time_filter'])).wrap('<b></b>');
+
+                // Something about the '/' in the id of Food/Drinks causes a big JavaScript error
+                if (response['category_filter'] !== 'Food/Drinks') {
+                    $('#c' + response['category_filter']).wrap('<b></b>');
+                }
+                else {
+                    $('.food').wrap('<b></b>')
+                }
+
+                console.log('#t' + response['time_filter'])
+
             }
         });
         //$('a':not('#homepage_link')).on('click', function(e) {
