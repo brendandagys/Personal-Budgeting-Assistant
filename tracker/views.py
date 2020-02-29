@@ -371,7 +371,7 @@ class PurchaseListView(generic.ListView):
         elif parameter == 'Four Months Ago':
             return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
         elif parameter == 'This Year':
-            return [datetime.datetime(year, 1, 1), date]
+            return [datetime.datetime(year, 1, 1).date(), date]
 
         else:
             return [date - datetime.timedelta(days=5000), date]
@@ -438,7 +438,7 @@ def filter_manager(request):
         elif parameter == 'Four Months Ago':
             return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
         elif parameter == 'This Year':
-            return [datetime.datetime(year, 1, 1), date]
+            return [datetime.datetime(year, 1, 1).date(), date]
 
         else:
             return [datetime.datetime(2019, 12, 1).date(), date]
@@ -498,8 +498,8 @@ def filter_manager(request):
         except:
             total_spent = '$0'
 
-        return JsonResponse({'category_filter': filters_instance.category_filter,
-                             'time_filter': filters_instance.time_filter,
+        return JsonResponse({'category_filter': filters_instance.category_filter.replace(' ', '').replace('/', '').lower(),
+                             'time_filter': filters_instance.time_filter.replace(' ','').replace('/', '').lower(),
                              'time_filter_start': time_filter_start,
                              'time_filter_end': time_filter_end,
                              'total_spent': total_spent, })
