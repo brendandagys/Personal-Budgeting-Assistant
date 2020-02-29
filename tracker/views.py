@@ -379,16 +379,25 @@ class PurchaseListView(generic.ListView):
     def get_queryset(self):
 
         filters_instance = Filter.objects.last() # Gives object or None
-        # If no filters OR filters were set on different days OR 'NO FILTER' is clicked...
-        if filters_instance is None or datetime.date.today() - filters_instance.last_update_date > datetime.timedelta(days=1):
+        # If no filter instance exists or five or more minutes have passed
+        if filters_instance is None or (datetime.datetime.now() - datetime.datetime.strptime(filters_instance.last_update_time.split('.')[0], "%Y-%m-%d %H:%M:%S")).total_seconds()/60 >= 5:
             category_filter = ''
             time_filter_start = ''
             time_filter_end = ''
+            deactivate_category = 'No'
+            deactivate_time = 'No'
 
         else:
             category_filter = filters_instance.category_filter
             time_filter_start = self.get_time_filter(filters_instance.time_filter)[0]
             time_filter_end = self.get_time_filter(filters_instance.time_filter)[1]
+            deactivate_category = filters_instance.deactivate_category
+            deactivate_time = filters_instance.deactivate_time
+
+        if deactivate_category == 'Yes':
+            category_filter = ''
+        if deactivate_time == 'Yes':
+            time_filter_start = ''
 
         if category_filter == '' and time_filter_start != '':
             return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
@@ -451,9 +460,18 @@ def filter_manager(request):
         filters_instance.last_update_time = datetime.datetime.now()
 
         if request.POST['filter'][0] == 'c':
-            filters_instance.category_filter = request.POST['filter'][1:]
+            if request.POST['filter'][1:] == filters_instance.category_filter:
+                filters_instance.deactivate = 'Yes'
+                filters_instance.category_filter = ''
+            else:
+                filters_instance.category_filter = request.POST['filter'][1:]
+
         elif request.POST['filter'][0] == 't':
-            filters_instance.time_filter = request.POST['filter'][1:]
+            if request.POST['filter'][1:] == filters_instance.time_filter:
+                filters_instance.deactivate = 'Yes'
+                filters_instance.time_filter = ''
+            else:
+                filters_instance.time_filter = request.POST['filter'][1:]
 
         else: # 'NO FILTER' was selected
             filters_instance.category_filter = ''
@@ -470,15 +488,27 @@ def filter_manager(request):
 
         except:
             filters_instance = Filter.objects.create(last_update_date = datetime.date.today(),
-                                                    last_update_time = datetime.datetime.now(),
-                                                    category_filter = '',
-                                                    time_filter = '' )
+                                                     last_update_time = datetime.datetime.now(),
+                                                     category_filter = '',
+                                                     time_filter = '',
+                                                     deactivate_category = 'No',
+                                                     deactivate_time = 'No' )
 
         # Return the sum of money spent for the given filters
-        category_filter = filters_instance.category_filter
-        # Probably could put this into one line of code
-        time_filter_start = get_time_filter(filters_instance.time_filter)[0]
-        time_filter_end = get_time_filter(filters_instance.time_filter)[1]
+
+        if filters_instance.deactivate_category == 'Yes':
+            category_filter = ''
+        else:
+            category_filter = filters_instance.category_filter
+
+        if filters_instance.deactivate_time == 'Yes':
+            time_filter = ''
+            time_filter_start = ''
+            time_filter_end = ''
+        else:
+            time_filter = filters_instance.time_filter
+            time_filter_start = get_time_filter(filters_instance.time_filter)[0]
+            time_filter_end = get_time_filter(filters_instance.time_filter)[1]
 
         if category_filter == '' and time_filter_start != '':
             purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
@@ -498,8 +528,8 @@ def filter_manager(request):
         except:
             total_spent = '$0'
 
-        return JsonResponse({'category_filter': filters_instance.category_filter.replace(' ', '').replace('/', '').lower(),
-                             'time_filter': filters_instance.time_filter.replace(' ','').replace('/', '').lower(),
+        return JsonResponse({'category_filter': category_filter.replace(' ', '').replace('/', '').lower(),
+                             'time_filter': time_filter.replace(' ', '').replace('/', '').lower(),
                              'time_filter_start': time_filter_start,
                              'time_filter_end': time_filter_end,
                              'total_spent': total_spent, })

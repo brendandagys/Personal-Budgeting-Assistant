@@ -42,6 +42,8 @@ class Filter(models.Model):
     last_update_time = models.CharField(max_length=30, verbose_name = 'Time (24 hr.)', default=current_time)
     category_filter = models.CharField(max_length=20, verbose_name = 'Category Filter')
     time_filter = models.CharField(max_length=20, verbose_name = 'Time Filter')
+    deactivate_category = models.CharField(max_length=5, verbose_name = 'Deactivate Category', default='No')
+    deactivate_time = models.CharField(max_length=5, verbose_name = 'Deactivate Time', default='No')
 
     class Meta:
         verbose_name_plural = 'Filters'
