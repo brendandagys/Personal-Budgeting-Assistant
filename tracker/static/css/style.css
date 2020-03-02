@@ -128,8 +128,10 @@ select[id^="id_"] {
     font-size: 2rem;
     border-style: dotted;
     padding: 5px;
-    width: 200px;
+    width: 150px;
     margin: auto;
+    /* margin-left: 35%;
+    margin-right: 35%; */
 }
 
 .purchase_description {
@@ -216,4 +218,8 @@ a {
 .modes {
   text-align: center;
   padding-bottom: 10px;
+}
+
+.center_text {
+    text-align: center;
 }
