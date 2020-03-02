@@ -128,7 +128,7 @@ select[id^="id_"] {
     font-size: 2rem;
     border-style: dotted;
     padding: 5px;
-    width: 150px;
+    width: 130px;
     margin: auto;
     /* margin-left: 35%;
     margin-right: 35%; */
@@ -222,4 +222,8 @@ a {
 
 .center_text {
     text-align: center;
+}
+
+.green_filters {
+    color: #35b234;
 }

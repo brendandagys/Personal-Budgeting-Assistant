@@ -40,7 +40,7 @@ class PurchaseForm(forms.Form):
                                                                                                                                      'placeholder': 'Amount...'}))
         category = forms.ChoiceField(label='Category', choices=CATEGORY_CHOICES)
 
-        category_2 = forms.ChoiceField(required=False, label='Category 2', choices=CATEGORY_CHOICES)
+        category_2 = forms.ChoiceField(required=False, label='Category', choices=CATEGORY_CHOICES)
 
         item = forms.CharField(label='Item(s)', widget=forms.TextInput(attrs={'class': 'form-control form-control-sm',
                                                                               'placeholder': 'Item...'}))
