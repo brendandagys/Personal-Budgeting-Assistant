@@ -18,7 +18,7 @@
 
                     <div id="login" class="login_div">
 
-                        <p>Please log in using your credentials below:</p>
+                        <p>Please log in to the Spending Tracker using your credentials below:</p>
                         </br>
 
                         <form class="form-horizontal" name="LoginForm" action="{% url 'login' %}" method="post">
@@ -32,10 +32,11 @@
                             </div>
                         <div>
                             <!-- <label class="control-label" for="password">Password</label> -->
-                            <div>
+                            <div class="spacing">
                                 <input type="password" name="password" id="password" class="form-control" placeholder="Password...">
                             </div>
                         </div>
+
                             <div>
                                 <button type="submit" class="login_button btn-success btn">Login</button>
                             </div>

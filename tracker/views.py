@@ -181,7 +181,7 @@ def homepage(request):
                 instance = queryset[0] # instance is either a Queryset or a real instance. This ensures it always becomes the latter
             # Check if bills for the current month have been recorded
             if bill != 'Gym membership':
-                if instance.last_update_date.month != month and day > instance.last_update_date.day:# or instance_created_flag is True:
+                if instance.last_update_date.month != month and day >= instance.last_update_date.day:# or instance_created_flag is True:
                     instance.last_update_date = datetime.datetime(year, month, bill_information[bill][0]) # Update the date. Won't matter if instance was just created
                     instance.save()
 
@@ -489,7 +489,7 @@ class PurchaseListView(generic.ListView):
             return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
 
         else:
-            return Purchase.objects.all()
+            return Purchase.objects.all().order_by('-date', '-time')
 
 @login_required
 def filter_manager(request):

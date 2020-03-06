@@ -20,16 +20,25 @@
 
     </head>
 
-    <body class="lighter_background">
+    <body class="lightfer_background">
 
-        <div class="main_container container-fluid">
-            <div class="row">
+        <div class="floating_bar row">
 
-                <div class="navigation_link col-sm-12">
+            <div class="navigation_link col-sm-12">
+                <div>
                     <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">New Entry/Statistics</a>
                 </div>
-
             </div>
+
+            <div class="col-sm-12">
+                <b><h2 class="total_spent"></h2></b>
+            </div>
+
+        </hr/>
+
+        </div>
+
+        <div class="main_container container-fluid">
 
             <table style="width:100%;">
 
@@ -41,7 +50,7 @@
 
                 <tr>
                     <td colspan="2" style="width:100%; text-align:center;">
-                        <p class="filter_headers">Dates Up To Today</p>
+                        <p class="filter_headers">Categories</p>
                     </td>
                 </tr>
 
@@ -242,23 +251,7 @@
 
             </table>
 
-            <div class="row">
-
-                <!-- <div class="col-sm-5">
-
-                </div>
-
-                <div class="filters_box col-sm-2">
-
-                    <b><h5>Filters Applied:</h5></b>
-                    <i><h5 id="category_filter_indicator"></h5></i>
-                    <i><h5 id="time_filter_indicator"></h5></i>
-
-                </div>
-
-                <div class="col-sm-5">
-
-                </div> -->
+            <!-- <div class="row">
 
                 <div class="sum_box col-sm-12">
 
@@ -266,7 +259,7 @@
                     <b><h4>SUM OF PURCHASES</h4></b>
                     <b><h2 class="total_spent"></h2></b>
                 </div>
-            </div>
+            </div> -->
 
             <div class="purchase_list_div col-sm-12">
 
