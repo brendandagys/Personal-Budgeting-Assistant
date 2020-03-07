@@ -147,7 +147,7 @@ select[id^="id_"] {
 
 .total_spent {
     color: dimgrey;
-    font-size: 2rem;
+    font-size: 1.75rem;
     /* border-style: dotted; */
     padding: 5px;
     /* width: 130px; */
@@ -261,7 +261,12 @@ a {
 
 .floating_bar {
     position: fixed;
-    left: 35.5rem;
+    margin: auto !important;
+    width: 100%;
+    height: 7.5rem;
+    right: 0.01%;
+    text-align: center;
+    /* left: 35.5rem; */
     z-index: 1000;
     border-radius: 10px;
     border-style: double;
