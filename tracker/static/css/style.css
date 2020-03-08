@@ -17,7 +17,7 @@ label[for^="id_"] {
 }
 
 .lighter_background {
-    background-color: #F4F4F4;
+    background-color: #FAFAFA;
 }
 
 .body_background {
@@ -68,6 +68,7 @@ select[id^="id_"] {
 
 #submit_button {
     margin-bottom: 4rem;
+    transform: scale(1.5,1.5)
 }
 
 .blue_text {
@@ -141,7 +142,7 @@ select[id^="id_"] {
 }
 
 .button {
-    margin: 8px 5px 35px 5px;
+    margin: 8px 2px 35px 2px;
     position: relative;
     width: 90px;
 }
