@@ -390,7 +390,7 @@ def homepage(request):
     <p>Spent this month: ${2}/${3}</p> </br>
   </body>
 </html>
-""".format(round(total_spent_to_date/maximum, 1), category, round(total_spent_to_date, 2), maximum)
+""".format(round((total_spent_to_date/maximum)*100, 1), category, round(total_spent_to_date, 2), maximum)
 
                     email_message = EmailMessage('Spending Alert for {0}'.format(category), email_body, from_email='Spending Helper <spendinghelper@gmail.com', to=['brendandagys@gmail.com'])
                     email_message.content_subtype = 'html'

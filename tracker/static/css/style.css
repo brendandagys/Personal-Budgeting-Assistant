@@ -17,7 +17,7 @@ label[for^="id_"] {
 }
 
 .lighter_background {
-    background-color: #FAFAFA;
+    background-color: #F4F4F4;
 }
 
 .body_background {
@@ -143,6 +143,7 @@ select[id^="id_"] {
 .button {
     margin: 8px 5px 35px 5px;
     position: relative;
+    width: 90px;
 }
 
 .total_spent {
@@ -203,6 +204,7 @@ select[id^="id_"] {
 .sum_box {
     text-align: center;
     margin-top: -2rem;
+    color: #35B234
     /* width: 50%; */
 }
 
@@ -269,11 +271,12 @@ a {
     text-align: center;
     /* left: 35.5rem; */
     z-index: 1000;
-    border-radius: 10px;
-    border-style: double;
-    background: rgba(250,250,250,1);
+    /* border-radius: 10px; */
+    /* border-style: double; */
+    /* background: rgba(250,250,250,1); */
+    background-color: #FAFAFA;
 }
 
 .white_background {
-    background: white;
+    background-color: #F4F4F4;
 }
