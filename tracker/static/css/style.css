@@ -144,7 +144,7 @@ select[id^="id_"] {
 .button {
     margin: 8px 1px 35px 1px;
     position: relative;
-    left: 0.5px;
+    left: 0.4px;
     width: 85px;
 }
 
@@ -251,7 +251,7 @@ a {
 
 .modes {
   text-align: center;
-  padding-bottom: 10px;
+  padding-bottom: 14px;
 }
 
 .center_text {
