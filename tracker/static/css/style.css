@@ -68,7 +68,7 @@ select[id^="id_"] {
 
 #submit_button {
     margin-bottom: 4rem;
-    transform: scale(1.5,1.5)
+    /* transform: scale(1.5,1.5) */
 }
 
 .blue_text {
@@ -142,9 +142,9 @@ select[id^="id_"] {
 }
 
 .button {
-    margin: 8px 2px 35px 2px;
+    margin: 8px 1px 35px 1px;
     position: relative;
-    width: 90px;
+    width: 85px;
 }
 
 .total_spent {
@@ -183,7 +183,7 @@ select[id^="id_"] {
     margin-bottom: 3px;
     padding: 0 5px;
     list-style-type: none;
-    background-color: white !important;
+    background-color: #FAFAFA !important;
     /* background-color: rgba(240,248,255,0.4); */
     /* background-color: rgba(60,279,113,0.1); */
 }
@@ -236,6 +236,8 @@ a {
 
 .purchase_list_div {
     padding: 7px !important;
+    margin-top: -3rem;
+    /* background-color: #FAFAFA; */
 }
 
 /* .filter_div_1 {
@@ -274,10 +276,11 @@ a {
     z-index: 1000;
     /* border-radius: 10px; */
     /* border-style: double; */
+    border-bottom: 2px solid slategrey;
     /* background: rgba(250,250,250,1); */
     background-color: #FAFAFA;
 }
 
 .white_background {
-    background-color: #F4F4F4;
+    background-color: white !important;
 }

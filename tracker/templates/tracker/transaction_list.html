@@ -267,6 +267,8 @@
                 </div>
             </div> -->
 
+        <hr>
+
             <div class="purchase_list_div col-sm-12">
 
                 {% if purchase_list %}
@@ -275,10 +277,10 @@
 
                     <ul class="list_container">
                         {% for purchase in purchase_list %}
-                        <li class="purchase_list_items">
-                            <h5><b>{{ purchase.date }}, {{ purchase.time }}</b>: <span class="blue_text">${{ purchase.amount }}</span></h5>
-                            <h5><u>{{ purchase.category }}</u>  {% if purchase.category_2 %} | <u>{{ purchase.category_2 }}</u> {% endif %}| {{ purchase.item }} {% if purchase.description %} | <span class="purchase_description"><i>{{ purchase.description }}</i></span> {% endif %}</h5>
-                        </li>
+                            <li class="purchase_list_items">
+                                <h5><b>{{ purchase.date }}, {{ purchase.time }}</b>: <span class="blue_text">${{ purchase.amount }}</span></h5>
+                                <h5><u>{{ purchase.category }}</u>  {% if purchase.category_2 %} | <u>{{ purchase.category_2 }}</u> {% endif %}| {{ purchase.item }} {% if purchase.description %} | <span class="purchase_description"><i>{{ purchase.description }}</i></span> {% endif %}</h5>
+                            </li>
                         {% endfor %}
                     </ul>
                 {% else %}
