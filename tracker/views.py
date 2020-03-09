@@ -17,6 +17,7 @@ from django.db.models import Sum
 
 from math import floor
 import datetime
+import calendar
 from dateutil.relativedelta import *
 import re
 import pandas as pd
@@ -25,6 +26,7 @@ import pandas as pd
 date = datetime.date.today()
 year = date.year
 month = date.month
+month_name = calendar.month_name[date.month]
 day = date.day
 weekday = date.weekday()
 
@@ -303,7 +305,7 @@ def homepage(request):
 <html>
 <head></head>
 <body style="border-radius: 20px; padding: 1rem; color: black; font-size: 0.80rem; background-color: #d5e9fb">
-<u><h3>Monthly Spending:</h3></u>
+<u><h3>Monthly Spending in {}:</h3></u>
 <p style="margin-bottom: 0px; font-family: monospace; color: black"><b>Coffee</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
 <p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Groceries</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
 <p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Food/Drinks</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
@@ -313,7 +315,8 @@ def homepage(request):
 <p style="margin-top: 0px; font-family: monospace; color: black"><b>Household Supplies</b>: <span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
 </body>
 </html>
-""".format(a, coffee_maximum, round((a/coffee_maximum)*100, 1),
+""".format(month_name,
+           a, coffee_maximum, round((a/coffee_maximum)*100, 1),
            b, groceries_maximum, round((b/groceries_maximum)*100, 1),
            c, food_drinks_maximum, round((c/food_drinks_maximum)*100, 1),
            d, restaurants_maximum, round((d/restaurants_maximum)*100, 1),
@@ -387,10 +390,10 @@ def homepage(request):
   <head></head>
   <body style="border-radius: 20px; padding: 1rem; color: black; font-size: 1.1rem; background-color: #d5e9fb">
     <h3>You have reached {0}% of your monthly spending on {1}.</h3> </br>
-    <p>Spent this month: ${2}/${3}</p> </br>
+    <p>Spent in {2}: ${3}/${4}</p> </br>
   </body>
 </html>
-""".format(round((total_spent_to_date/maximum)*100, 1), category, round(total_spent_to_date, 2), maximum)
+""".format(round((total_spent_to_date/maximum)*100, 1), category, month_name, round(total_spent_to_date, 2), maximum)
 
                     email_message = EmailMessage('Spending Alert for {0}'.format(category), email_body, from_email='Spending Helper <spendinghelper@gmail.com', to=['brendandagys@gmail.com'])
                     email_message.content_subtype = 'html'
