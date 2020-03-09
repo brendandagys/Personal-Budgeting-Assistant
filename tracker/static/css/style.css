@@ -68,7 +68,7 @@ select[id^="id_"] {
 
 #submit_button {
     margin-bottom: 4rem;
-    /* transform: scale(1.5,1.5) */
+    transform: scale(1.2,1.2)
 }
 
 .blue_text {
@@ -144,6 +144,7 @@ select[id^="id_"] {
 .button {
     margin: 8px 1px 35px 1px;
     position: relative;
+    left: 1px;
     width: 85px;
 }
 
