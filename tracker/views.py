@@ -324,7 +324,7 @@ def homepage(request):
            f, dates_maximum, round((f/dates_maximum)*100, 1),
            g, household_supplies_maximum, round((g/household_supplies_maximum)*100, 1) )
 
-            email_message = EmailMessage('Spending Alert', email_body, from_email='Spending Helper <spendinghelper@gmail.com', to=['brendandagys@gmail.com'])
+            email_message = EmailMessage('Spending Alert', email_body, from_email='Spending Helper <spendinghelper@gmail.com>', to=['brendandagys@gmail.com'])
             email_message.content_subtype = 'html'
             email_message.send()
 
@@ -395,7 +395,7 @@ def homepage(request):
 </html>
 """.format(round((total_spent_to_date/maximum)*100, 1), category, month_name, round(total_spent_to_date, 2), maximum)
 
-                    email_message = EmailMessage('Spending Alert for {0}'.format(category), email_body, from_email='Spending Helper <spendinghelper@gmail.com', to=['brendandagys@gmail.com'])
+                    email_message = EmailMessage('Spending Alert for {0}'.format(category), email_body, from_email='Spending Helper <spendinghelper@gmail.com>', to=['brendandagys@gmail.com'])
                     email_message.content_subtype = 'html'
                     email_message.send()
 
