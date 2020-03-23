@@ -6,7 +6,7 @@ from django.core.mail import EmailMessage
 
 from django.db.models import Q
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+# from django.contrib.auth.mixins import LoginRequiredMixin # Done in urls.py
 from django.contrib.auth.decorators import login_required
 
 from django.views import generic
