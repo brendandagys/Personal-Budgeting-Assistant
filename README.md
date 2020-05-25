@@ -1,2 +1,4 @@
 # SpendingTracker
 Tracks spending habits and displays visualizations and summaries of the data.
+
+This Web application was built for my own personal interest. It has three main features. The first is the input of purchases made, with a form that allows for specification of purchase category, date/time of purchase, amount spent, and a brief + detailed description of the purchase. These entries are stored in the database and recalled on the Purchases page, where all purchases can be viewed. The Purchases page also has dynamic filters for the category and time range of purchases, to allow for customization of what is displayed. Last, another page displays multiple charts based on the purchases made. These charts can be updated using AJAX calls based on the category, or how far you wish to look back. I have used this Website and information to learn about my purchase habits and further improve my financial responsibility!
