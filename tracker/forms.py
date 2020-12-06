@@ -36,14 +36,19 @@ class PurchaseForm(forms.Form):
         time = forms.CharField(label='Time (24 hr.)', initial=lambda: str(timezone.now().time())[0:5], widget=forms.TimeInput(attrs={'class': 'form-control form-control-sm',
                                                                                                                                      'placeholder': 'Time...'}))
 
-        amount = forms.DecimalField(label='Amount', max_digits=7, decimal_places=2, localize=False, widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm',
-                                                                                                                                     'placeholder': 'Amount...'}))
-        category = forms.ChoiceField(label='Category', choices=CATEGORY_CHOICES)
-
-        category_2 = forms.ChoiceField(required=False, label='Category', choices=CATEGORY_CHOICES)
 
         item = forms.CharField(label='Item(s)', widget=forms.TextInput(attrs={'class': 'form-control form-control-sm',
                                                                               'placeholder': 'Item...'}))
+
+        category = forms.ChoiceField(label='Category', choices=CATEGORY_CHOICES)
+
+        amount = forms.DecimalField(label='Amount', max_digits=7, decimal_places=2, localize=False, widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm',
+                                                                                                                                     'placeholder': 'Amount...'}))
+
+        category_2 = forms.ChoiceField(required=False, label='Category 2', choices=CATEGORY_CHOICES)
+
+        amount_2 = forms.DecimalField(required=False, label='Amount 2', max_digits=7, decimal_places=2, localize=False, widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm',
+                                                                                                                                     'placeholder': 'Amount 2...'}))
 
         description = forms.CharField(required=False, label='Information', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '3',
                                                                                                         'placeholder': 'Specifics...'}))
@@ -54,17 +59,20 @@ class PurchaseForm(forms.Form):
         def clean_time(self):
             return self.cleaned_data['time']
 
-        def clean_amount(self):
-            return self.cleaned_data['amount']
+        def clean_item(self):
+            return self.cleaned_data['item']
 
         def clean_category(self):
             return self.cleaned_data['category']
 
+        def clean_amount(self):
+            return self.cleaned_data['amount']
+
         def clean_category_2(self):
             return self.cleaned_data['category_2']
 
-        def clean_item(self):
-            return self.cleaned_data['item']
+        def clean_amount_2(self):
+            return self.cleaned_data['amount_2']
 
         def clean_description(self):
             return self.cleaned_data['description']

@@ -10,17 +10,40 @@ def current_date():
 def current_time():
     return str(timezone.now().time())[0:5]
 
+def current_datetime():
+    return timezone.now()
+
+
+class PurchaseCategory(models.Model):
+    category = models.CharField(primary_key=True, max_length=30, verbose_name='Category')
+    category_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Category Created DateTime') # Any field with the auto_now attribute set will also inherit editable=False and won't show in admin panel
+
+    class Meta:
+        verbose_name_plural = 'Purchase Categories'
+        verbose_name = 'Purchase Category'
+
+    def __str__(self):
+        return ', '.join([str(self.category)])
+
+
+# Ensure that these exist, otherwise we'll get an IntegrityError for the existing Purchases
+for category in ['Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
+    temp = PurchaseCategory.objects.get_or_create(category=category)
+
 
 class Purchase(models.Model):
     # null and blank arguments are False by default
     # null doesn't allow null in the database, blank is not database-related; it prevents '' in forms
     date = models.DateField(verbose_name='Date', default=current_date)
     time = models.CharField(max_length=20, verbose_name='Time (24 hr.)', default=current_time)
-    amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    category = models.CharField(max_length=50, verbose_name='Category')
-    category_2 = models.CharField(blank=True, max_length=50, verbose_name='Category 2') # null=True unnecessary because CharField and TextFields always stores blank values as '' in the database
     item = models.CharField(max_length=100, verbose_name='Item(s)')
-    description = models.TextField(blank=True, verbose_name='Description')
+    category = models.CharField(blank=True, null=True, max_length=50, verbose_name='Category')
+    # category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category')
+
+    amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
+    category_2 = models.CharField(blank=True, max_length=50, verbose_name='Category 2') # null=True unnecessary because CharField and TextFields always store blank values as '' in the database
+    amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
+    description = models.TextField(blank=True, verbose_name='Details')
 
     class Meta:
         verbose_name_plural = 'Purchases'
@@ -28,13 +51,6 @@ class Purchase(models.Model):
 
     def __str__(self):
         return ', '.join([str(self.date), self.time, self.category, self.item, str(self.amount)])
-
-# class PurchaseFilter(django_filters.FilterSet):
-#     category = django_filters.CharFilter(field_name='category', lookup_expr='iexact')
-
-    # class Meta:
-    #     model = Purchase
-    #     fields = ['category']
 
 
 class Filter(models.Model):

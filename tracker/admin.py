@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Purchase, Filter, Bill, Alert, Mode
+from .models import Purchase, PurchaseCategory, Filter, Bill, Alert, Mode
 
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -14,6 +14,11 @@ class PurchaseAdmin(ImportExportModelAdmin):
     resource_class = PurchaseResource
     list_display = ('date', 'time', 'category', 'category_2', 'item', 'amount')
     list_filter = ['date', 'category', 'category_2', 'item']
+
+@admin.register(PurchaseCategory)
+class PurchaseCategoryAdmin(ImportExportModelAdmin):
+    resource_class = PurchaseCategory
+    readonly_fields = ('category_created_datetime',)
 
 @admin.register(Filter)
 class FiltersAdmin(ImportExportModelAdmin):
