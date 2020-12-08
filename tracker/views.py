@@ -153,65 +153,65 @@ def get_chart_data(request):
 @login_required
 def homepage(request):
 
-    bill_information = {
-    'Apple Music': [7, 'Apple Music', 5.64, 'Monthly fee for Apple Music subscription.'],
-    'Cell phone plan': [13, 'Cell phone plan', 41.81, 'Monthly fee for cell phone plan with Public Mobile.'],
-    'Car insurance': [15, 'Car insurance', 137.91, 'Monthly fee for car insurance with TD Meloche.'],
-    'Rent': [1, 'Rent', 750.00, 'Monthly rent for apartment.'],
-    }
+    # bill_information = {
+    # 'Apple Music': [7, 'Apple Music', 5.64, 'Monthly fee for Apple Music subscription.'],
+    # 'Cell phone plan': [13, 'Cell phone plan', 41.81, 'Monthly fee for cell phone plan with Public Mobile.'],
+    # 'Car insurance': [15, 'Car insurance', 137.91, 'Monthly fee for car insurance with TD Meloche.'],
+    # 'Rent': [1, 'Rent', 750.00, 'Monthly rent for apartment.'],
+    # }
 
     if request.method == 'GET':
-
+        pass
         # Get all bill instances
-        apple_music_queryset = Bill.objects.filter(bill='Apple Music').order_by('-last_update_date') # Querysets can return zero items
-        cell_phone_plan_queryset = Bill.objects.filter(bill='Cell phone plan').order_by('-last_update_date')
-        car_insurance_queryset = Bill.objects.filter(bill='Car insurance').order_by('-last_update_date')
-        rent_queryset = Bill.objects.filter(bill='Rent').order_by('-last_update_date')
-        gym_membership_queryset = Bill.objects.filter(bill='Gym membership').order_by('-last_update_date')
+        # apple_music_queryset = Bill.objects.filter(bill='Apple Music').order_by('-last_update_date') # Querysets can return zero items
+        # cell_phone_plan_queryset = Bill.objects.filter(bill='Cell phone plan').order_by('-last_update_date')
+        # car_insurance_queryset = Bill.objects.filter(bill='Car insurance').order_by('-last_update_date')
+        # rent_queryset = Bill.objects.filter(bill='Rent').order_by('-last_update_date')
+        # gym_membership_queryset = Bill.objects.filter(bill='Gym membership').order_by('-last_update_date')
 
-        def check_bill_payments(bill, queryset):
-            # Will create a Purchase object if True, since the month will match in the second if-statement
-            instance_created_flag = False
-            # If an instance doesn't exist, create it
-            if len(queryset) == 0:
-                if bill != 'Gym membership':
-                    instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(year, month, bill_information[bill][0]))
-                    instance_created_flag = True
-                else: # Create gym membership Bill
-                    instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(2020, 2, 14))
-            else:
-                instance = queryset[0] # instance is either a Queryset or a real instance. This ensures it always becomes the latter
-            # Check if bills for the current month have been recorded
-            if bill != 'Gym membership':
-                if instance.last_update_date.month != month and day >= instance.last_update_date.day:# or instance_created_flag is True:
-                    instance.last_update_date = datetime.datetime(year, month, bill_information[bill][0]) # Update the date. Won't matter if instance was just created
-                    instance.save()
+        # def check_bill_payments(bill, queryset):
+        #     # Will create a Purchase object if True, since the month will match in the second if-statement
+        #     instance_created_flag = False
+        #     # If an instance doesn't exist, create it
+        #     if len(queryset) == 0:
+        #         if bill != 'Gym membership':
+        #             instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(year, month, bill_information[bill][0]))
+        #             instance_created_flag = True
+        #         else: # Create gym membership Bill
+        #             instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(2020, 2, 14))
+        #     else:
+        #         instance = queryset[0] # instance is either a Queryset or a real instance. This ensures it always becomes the latter
+        #     # Check if bills for the current month have been recorded
+        #     if bill != 'Gym membership':
+        #         if instance.last_update_date.month != month and day >= instance.last_update_date.day:# or instance_created_flag is True:
+        #             instance.last_update_date = datetime.datetime(year, month, bill_information[bill][0]) # Update the date. Won't matter if instance was just created
+        #             instance.save()
+        #
+        #             Purchase.objects.create(date = datetime.datetime(year, month, bill_information[bill][0]),
+        #                                     time = '00:00',
+        #                                     amount = bill_information[bill][2],
+        #                                     category = 'Bills',
+        #                                     category_2 = '', # Worked without this line, but being safe
+        #                                     item = bill,
+        #                                     description = bill_information[bill][3] )
+        #     else:
+        #         if (((date + relativedelta(weekday=FR(-1))) - instance.last_update_date).days)%14 == 0 and (date - instance.last_update_date).days >=14:
+        #             instance.last_update_date = date + relativedelta(weekday=FR(-1))
+        #             instance.save()
+        #
+        #             Purchase.objects.create(date = date + relativedelta(weekday=FR(-1)),
+        #                                     time = '00:00',
+        #                                     amount = 10.16,
+        #                                     category = 'Bills',
+        #                                     category_2 = '', # Worked without this line, but being safe
+        #                                     item = 'Gym membership',
+        #                                     description = 'Bi-weekly fee.' )
 
-                    Purchase.objects.create(date = datetime.datetime(year, month, bill_information[bill][0]),
-                                            time = '00:00',
-                                            amount = bill_information[bill][2],
-                                            category = 'Bills',
-                                            category_2 = '', # Worked without this line, but being safe
-                                            item = bill,
-                                            description = bill_information[bill][3] )
-            else:
-                if (((date + relativedelta(weekday=FR(-1))) - instance.last_update_date).days)%14 == 0 and (date - instance.last_update_date).days >=14:
-                    instance.last_update_date = date + relativedelta(weekday=FR(-1))
-                    instance.save()
-
-                    Purchase.objects.create(date = date + relativedelta(weekday=FR(-1)),
-                                            time = '00:00',
-                                            amount = 10.16,
-                                            category = 'Bills',
-                                            category_2 = '', # Worked without this line, but being safe
-                                            item = 'Gym membership',
-                                            description = 'Bi-weekly fee.' )
-
-        check_bill_payments('Apple Music', apple_music_queryset)
-        check_bill_payments('Cell phone plan', cell_phone_plan_queryset)
-        check_bill_payments('Car insurance', car_insurance_queryset)
-        check_bill_payments('Rent', rent_queryset)
-        check_bill_payments('Gym membership', gym_membership_queryset)
+        # check_bill_payments('Apple Music', apple_music_queryset)
+        # check_bill_payments('Cell phone plan', cell_phone_plan_queryset)
+        # check_bill_payments('Car insurance', car_insurance_queryset)
+        # check_bill_payments('Rent', rent_queryset)
+        # check_bill_payments('Gym membership', gym_membership_queryset)
 
     elif request.method == 'POST':
 

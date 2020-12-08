@@ -23,7 +23,7 @@ class PurchaseCategory(models.Model):
         verbose_name = 'Purchase Category'
 
     def __str__(self):
-        return ', '.join([str(self.category)])
+        return ', '.join([self.category, str(self.category_created_datetime)])
 
 
 # Ensure that these exist, otherwise we'll get an IntegrityError for the existing Purchases
@@ -49,7 +49,7 @@ class Purchase(models.Model):
         verbose_name = 'Purchase'
 
     def __str__(self):
-        return ', '.join([str(self.date), self.time, self.category.category, self.category_2.category, self.item, str(self.amount)])
+        return ', '.join([str(self.date), self.time, str(self.category.category), str(self.category_2.category), self.item, str(self.amount)])
 
 
 class Filter(models.Model):
@@ -75,9 +75,10 @@ class Account(models.Model):
 
     class Meta:
         verbose_name_plural = 'Accounts'
+        verbose_name = 'Account'
 
     def __str__(self):
-        return ', '.join([str(self.account), str(self.active)])
+        return ', '.join([self.account, str(self.active), str(self.account_created_datetime)])
 
 
 class AccountUpdate(models.Model):
@@ -87,21 +88,23 @@ class AccountUpdate(models.Model):
 
     class Meta:
         verbose_name_plural = 'Account Updates'
+        verbose_name = 'Account Update'
 
     def __str__(self):
         return ', '.join([str(self.account), str(self.value), str(self.timestamp)])
 
 
 class Bill(models.Model):
-    bill = models.CharField(max_length=30, verbose_name = 'Bill')
-    last_update_date = models.DateField(verbose_name='Last Update Date', default=current_date)
+    bill = models.CharField(primary_key=True, max_length=40, verbose_name = 'Bill')
+    active = models.BooleanField(default=True, verbose_name='Active')
+    frequency = models.CharField(max_length=100, verbose_name='Frequency')
 
     class Meta:
         verbose_name_plural = 'Bills'
         verbose_name = 'Bill'
 
     def __str__(self):
-        return ', '.join([self.bill, str(self.last_update_date)])
+        return ', '.join([self.bill, str(self.active), self.frequency])
 
 
 class Alert(models.Model):

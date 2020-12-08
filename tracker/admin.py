@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Purchase, PurchaseCategory, Filter, Account, Bill, Alert, Mode
+from .models import Purchase, PurchaseCategory, Filter, Account, AccountUpdate, Bill, Alert, Mode
 
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -28,6 +28,10 @@ class FiltersAdmin(ImportExportModelAdmin):
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):
     resource_class = Account
+
+@admin.register(AccountUpdate)
+class AccountUpdateAdmin(ImportExportModelAdmin):
+    resource_class = AccountUpdate
 
 @admin.register(Bill)
 class BillAdmin(ImportExportModelAdmin):
