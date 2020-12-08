@@ -27,8 +27,8 @@ class PurchaseCategory(models.Model):
 
 
 # Ensure that these exist, otherwise we'll get an IntegrityError for the existing Purchases
-# for category in ['', 'Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
-#     temp = PurchaseCategory.objects.get_or_create(category=category)
+for category in ['', 'Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
+    temp = PurchaseCategory.objects.get_or_create(category=category)
 
 
 class Purchase(models.Model):
@@ -37,10 +37,9 @@ class Purchase(models.Model):
     date = models.DateField(verbose_name='Date', default=current_date)
     time = models.CharField(max_length=20, verbose_name='Time (24 hr.)', default=current_time)
     item = models.CharField(max_length=120, verbose_name='Item(s)')
-    # category = models.CharField(blank=True, null=True, max_length=50, verbose_name='Category')
     category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='category_1') # blank=False by default...
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    # category_2 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2')
+    category_2 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2')
     amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
     description = models.TextField(blank=True, verbose_name='Details')
 
@@ -49,7 +48,7 @@ class Purchase(models.Model):
         verbose_name = 'Purchase'
 
     def __str__(self):
-        return ', '.join([str(self.date), self.time, str(self.category.category), self.item, str(self.amount)])
+        return ', '.join([str(self.date), self.time, str(self.category.category), str(self.category.category_2), self.item, str(self.amount)])
 
 
 class Filter(models.Model):
