@@ -52,19 +52,26 @@ class Purchase(models.Model):
 
 
 class Filter(models.Model):
-    last_update_date = models.DateField(verbose_name='Last Update Date', default=current_date)
-    last_update_time = models.CharField(max_length=30, verbose_name = 'Time (24 hr.)', default=current_time)
-    category_filter = models.CharField(max_length=20, verbose_name = 'Category Filter')
-    time_filter = models.CharField(max_length=20, verbose_name = 'Time Filter')
-    deactivate_category = models.CharField(max_length=5, verbose_name = 'Deactivate Category', default='No')
-    deactivate_time = models.CharField(max_length=5, verbose_name = 'Deactivate Time', default='No')
+    category_filter_1 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 1', related_name='category_filter_1')
+    category_filter_2 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 2', related_name='category_filter_2')
+    category_filter_3 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 3', related_name='category_filter_3')
+    category_filter_4 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 4', related_name='category_filter_4')
+    category_filter_5 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 5', related_name='category_filter_5')
+    category_filter_6 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 6', related_name='category_filter_6')
+    category_filter_7 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 7', related_name='category_filter_7')
+    category_filter_8 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 8', related_name='category_filter_8')
+    category_filter_9 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 9', related_name='category_filter_9')
+    category_filter_10 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 10', related_name='category_filter_10')
+    start_date_filter = models.DateField(blank=True, null=True, verbose_name = 'Start Date')
+    end_date_filter = models.DateField(blank=True, null=True, verbose_name = 'End Date')
+    last_updated = models.DateTimeField(auto_now=True, verbose_name='Filter Last Updated')
 
     class Meta:
         verbose_name_plural = 'Filters'
         verbose_name = 'Filter'
 
     def __str__(self):
-        return ', '.join([str(self.last_update_date), self.last_update_time])
+        return ', '.join([str(self.category_filter_1.category), str(self.start_date_filter), str(self.end_date_filter)])
 
 
 class Account(models.Model):
