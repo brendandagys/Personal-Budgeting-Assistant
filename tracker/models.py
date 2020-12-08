@@ -49,7 +49,7 @@ class Purchase(models.Model):
         verbose_name = 'Purchase'
 
     def __str__(self):
-        return ', '.join([str(self.date), self.time, str(self.category.category), str(self.category_2.category), self.item, str(self.amount)])
+        return ', '.join([str(self.date), self.time, str(self.category.category), self.item, str(self.amount)])
 
 
 class Filter(models.Model):
