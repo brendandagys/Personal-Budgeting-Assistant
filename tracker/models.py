@@ -70,8 +70,8 @@ class Filter(models.Model):
         verbose_name_plural = 'Filters'
         verbose_name = 'Filter'
 
-    # def __str__(self):
-    #     return ', '.join([str(self.category_filter_1.category), str(self.start_date_filter), str(self.end_date_filter)])
+    def __str__(self):
+        return ', '.join([str(self.category_filter_1), str(self.start_date_filter), str(self.end_date_filter)])
 
 
 class Account(models.Model):
@@ -103,7 +103,7 @@ class AccountUpdate(models.Model):
 class Bill(models.Model):
     bill = models.CharField(primary_key=True, max_length=40, verbose_name = 'Bill')
     active = models.BooleanField(default=True, verbose_name='Active')
-    amount = models.DecimalField(default=0, max_digits=7, decimal_places=2, verbose_name='Amount')
+    amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
     frequency = models.CharField(max_length=100, verbose_name='Frequency')
 
     class Meta:

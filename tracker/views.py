@@ -572,58 +572,60 @@ def filter_manager(request):
 
         return HttpResponse()
 
-    elif request.method == 'GET':
+    # elif request.method == 'GET':
+    #
+    #     try:
+    #         filters_instance = Filter.objects.all()[0]
+    #
+    #     except:
+    #         filters_instance = Filter.objects.create(last_update_date = datetime.date.today(),
+    #                                                  last_update_time = datetime.datetime.now(),
+    #                                                  category_filter = '',
+    #                                                  time_filter = '',
+    #                                                  deactivate_category = 'No',
+    #                                                  deactivate_time = 'No' )
+    #
+    #     # Return the sum of money spent for the given filters
+    #
+    #     if filters_instance.deactivate_category == 'Yes':
+    #         category_filter = ''
+    #     else:
+    #         category_filter = filters_instance.category_filter
+    #
+    #     if filters_instance.deactivate_time == 'Yes':
+    #         time_filter = ''
+    #         time_filter_start = ''
+    #         time_filter_end = ''
+    #     else:
+    #         time_filter = filters_instance.time_filter
+    #         time_filter_start = get_time_filter(filters_instance.time_filter)[0]
+    #         time_filter_end = get_time_filter(filters_instance.time_filter)[1]
+    #
+    #     if category_filter == '' and time_filter_start != '':
+    #         purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
+    #
+    #     elif category_filter != '' and time_filter_start == '':
+    #         purchase_instance = Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
+    #
+    #     elif category_filter != '' and time_filter_start != '':
+    #         purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
+    #
+    #     else:
+    #         purchase_instance = Purchase.objects.all()
+    #
+    #     # If there are no objects, the sum will be None
+    #     try:
+    #         total_spent = '$' + str(round(purchase_instance.aggregate(Sum('amount'))['amount__sum'], 2))
+    #     except:
+    #         total_spent = '$0'
+    #
+    #     return JsonResponse({'category_filter': category_filter.replace(' ', '').replace('/', '').lower(),
+    #                          'time_filter': time_filter.replace(' ', '').replace('/', '').lower(),
+    #                          'time_filter_start': time_filter_start,
+    #                          'time_filter_end': time_filter_end,
+    #                          'total_spent': total_spent, })
 
-        try:
-            filters_instance = Filter.objects.all()[0]
-
-        except:
-            filters_instance = Filter.objects.create(last_update_date = datetime.date.today(),
-                                                     last_update_time = datetime.datetime.now(),
-                                                     category_filter = '',
-                                                     time_filter = '',
-                                                     deactivate_category = 'No',
-                                                     deactivate_time = 'No' )
-
-        # Return the sum of money spent for the given filters
-
-        if filters_instance.deactivate_category == 'Yes':
-            category_filter = ''
-        else:
-            category_filter = filters_instance.category_filter
-
-        if filters_instance.deactivate_time == 'Yes':
-            time_filter = ''
-            time_filter_start = ''
-            time_filter_end = ''
-        else:
-            time_filter = filters_instance.time_filter
-            time_filter_start = get_time_filter(filters_instance.time_filter)[0]
-            time_filter_end = get_time_filter(filters_instance.time_filter)[1]
-
-        if category_filter == '' and time_filter_start != '':
-            purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
-
-        elif category_filter != '' and time_filter_start == '':
-            purchase_instance = Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
-
-        elif category_filter != '' and time_filter_start != '':
-            purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
-
-        else:
-            purchase_instance = Purchase.objects.all()
-
-        # If there are no objects, the sum will be None
-        try:
-            total_spent = '$' + str(round(purchase_instance.aggregate(Sum('amount'))['amount__sum'], 2))
-        except:
-            total_spent = '$0'
-
-        return JsonResponse({'category_filter': category_filter.replace(' ', '').replace('/', '').lower(),
-                             'time_filter': time_filter.replace(' ', '').replace('/', '').lower(),
-                             'time_filter_start': time_filter_start,
-                             'time_filter_end': time_filter_end,
-                             'total_spent': total_spent, })
+    return JsonResponse()
 
 @login_required
 def manage_mode(request):
