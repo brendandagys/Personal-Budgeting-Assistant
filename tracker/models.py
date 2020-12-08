@@ -15,7 +15,7 @@ def current_datetime():
 
 
 class PurchaseCategory(models.Model):
-    category = models.CharField(primary_key=True, max_length=30, verbose_name='Category')
+    category = models.CharField(blank=True, primary_key=True, max_length=30, verbose_name='Category')
     category_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Category Created DateTime') # Any field with the auto_now attribute set will also inherit editable=False and won't show in admin panel
 
     class Meta:
@@ -27,8 +27,8 @@ class PurchaseCategory(models.Model):
 
 
 # Ensure that these exist, otherwise we'll get an IntegrityError for the existing Purchases
-for category in ['Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
-    temp = PurchaseCategory.objects.get_or_create(category=category)
+# for category in ['', 'Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
+#     temp = PurchaseCategory.objects.get_or_create(category=category)
 
 
 class Purchase(models.Model):
@@ -37,11 +37,10 @@ class Purchase(models.Model):
     date = models.DateField(verbose_name='Date', default=current_date)
     time = models.CharField(max_length=20, verbose_name='Time (24 hr.)', default=current_time)
     item = models.CharField(max_length=100, verbose_name='Item(s)')
-    category = models.CharField(blank=True, null=True, max_length=50, verbose_name='Category')
-    # category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category')
-
+    # category = models.CharField(blank=True, null=True, max_length=50, verbose_name='Category')
+    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='category_1')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    category_2 = models.CharField(blank=True, max_length=50, verbose_name='Category 2') # null=True unnecessary because CharField and TextFields always store blank values as '' in the database
+    category_2 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2') # null=True unnecessary because CharField and TextFields always store blank values as '' in the database
     amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
     description = models.TextField(blank=True, verbose_name='Details')
 
@@ -50,7 +49,7 @@ class Purchase(models.Model):
         verbose_name = 'Purchase'
 
     def __str__(self):
-        return ', '.join([str(self.date), self.time, self.category, self.item, str(self.amount)])
+        return ', '.join([str(self.date), self.time, self.category.category, self.category_2.category, self.item, str(self.amount)])
 
 
 class Filter(models.Model):

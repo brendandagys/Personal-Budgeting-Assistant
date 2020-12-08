@@ -18,6 +18,7 @@ class PurchaseAdmin(ImportExportModelAdmin):
 @admin.register(PurchaseCategory)
 class PurchaseCategoryAdmin(ImportExportModelAdmin):
     resource_class = PurchaseCategory
+    list_display = ('category',)
     readonly_fields = ('category_created_datetime',)
 
 @admin.register(Filter)
