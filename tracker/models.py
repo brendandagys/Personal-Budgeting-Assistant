@@ -15,7 +15,7 @@ def current_datetime():
 
 
 class PurchaseCategory(models.Model):
-    category = models.CharField(blank=True, primary_key=True, max_length=30, verbose_name='Category')
+    category = models.CharField(primary_key=True, max_length=30, verbose_name='Category')
     category_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Category Created DateTime') # Any field with the auto_now attribute set will also inherit editable=False and won't show in admin panel
 
     class Meta:
@@ -38,7 +38,7 @@ class Purchase(models.Model):
     time = models.CharField(max_length=20, verbose_name='Time (24 hr.)', default=current_time)
     item = models.CharField(max_length=100, verbose_name='Item(s)')
     # category = models.CharField(blank=True, null=True, max_length=50, verbose_name='Category')
-    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='category_1')
+    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='category_1') # blank=False by default...
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
     category_2 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2') # null=True unnecessary because CharField and TextFields always store blank values as '' in the database
     amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
@@ -66,6 +66,30 @@ class Filter(models.Model):
 
     def __str__(self):
         return ', '.join([str(self.last_update_date), self.last_update_time])
+
+
+class Account(models.Model):
+    account = models.CharField(primary_key=True, max_length=40, verbose_name='Account')
+    active = models.BooleanField(default=True, verbose_name='Active')
+    account_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Account Created DateTime')
+
+    class Meta:
+        verbose_name_plural = 'Accounts'
+
+    def __str__(self):
+        return ', '.join([str(self.account), str(self.active)])
+
+
+class AccountUpdate(models.Model):
+    account = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Account')
+    value = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Value')
+    timestamp = models.DateTimeField(default=current_datetime, verbose_name='Account Timestamp')
+
+    class Meta:
+        verbose_name_plural = 'Account Updates'
+
+    def __str__(self):
+        return ', '.join([str(self.account), str(self.value), str(self.timestamp)])
 
 
 class Bill(models.Model):
