@@ -12,8 +12,8 @@ class PurchaseResource(resources.ModelResource):
 @admin.register(Purchase)
 class PurchaseAdmin(ImportExportModelAdmin):
     resource_class = PurchaseResource
-    list_display = ('date', 'time', 'category', 'category_2', 'item', 'amount')
-    list_filter = ['date', 'category', 'category_2', 'item']
+    list_display = ('date', 'time', 'category', 'item', 'amount')
+    list_filter = ['date', 'category', 'item']
 
 @admin.register(PurchaseCategory)
 class PurchaseCategoryAdmin(ImportExportModelAdmin):
