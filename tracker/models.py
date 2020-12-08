@@ -39,7 +39,7 @@ class Purchase(models.Model):
     item = models.CharField(max_length=120, verbose_name='Item(s)')
     category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='category_1') # blank=False by default...
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    category_2 = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2')
+    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2')
     amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
     description = models.TextField(blank=True, verbose_name='Details')
 
