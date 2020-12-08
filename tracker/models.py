@@ -23,7 +23,7 @@ class PurchaseCategory(models.Model):
         verbose_name = 'Purchase Category'
 
     def __str__(self):
-        return ', '.join([self.category, str(self.category_created_datetime)])
+        return ', '.join([self.category])
 
 
 # Ensure that these exist, otherwise we'll get an IntegrityError for the existing Purchases
