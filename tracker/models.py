@@ -27,8 +27,8 @@ class PurchaseCategory(models.Model):
 
 
 # Ensure that these exist, otherwise we'll get an IntegrityError for the existing Purchases
-for category in ['', 'Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
-    temp = PurchaseCategory.objects.get_or_create(category=category)
+# for category in ['', 'Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
+#     temp = PurchaseCategory.objects.get_or_create(category=category)
 
 
 class Purchase(models.Model):

@@ -161,8 +161,7 @@ def homepage(request):
     # }
 
     if request.method == 'GET':
-        pass
-        # PurchaseCategory.objects.filter(category='').delete()
+        PurchaseCategory.objects.filter(category='').delete()
         # instance = PurchaseCategory.objects.get(category='Gas')
         # print(instance)
         # for object in Purchase.objects.all():
