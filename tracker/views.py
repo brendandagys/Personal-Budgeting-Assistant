@@ -161,11 +161,12 @@ def homepage(request):
     # }
 
     if request.method == 'GET':
-        instance = PurchaseCategory.objects.get(category='Gas')
-        print(instance)
-        for object in Purchase.objects.all():
-            object.category_2 = None
-            object.save()
+        PurchaseCategory.objects.filter(category='').delete()
+        # instance = PurchaseCategory.objects.get(category='Gas')
+        # print(instance)
+        # for object in Purchase.objects.all():
+        #     object.category_2 = None
+        #     object.save()
 
         # Get all bill instances
         # apple_music_queryset = Bill.objects.filter(bill='Apple Music').order_by('-last_update_date') # Querysets can return zero items
