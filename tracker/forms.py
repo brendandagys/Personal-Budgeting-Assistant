@@ -1,10 +1,9 @@
-from django import forms
-from django.forms import ModelForm, Textarea, CharField, EmailField, ChoiceField # All added for ModelForms
+from django.forms import ModelForm, DecimalField, NumberInput #, Textarea, CharField, EmailField, ChoiceField # All added for ModelForms
 
 import datetime
 from django.utils import timezone
 
-from .models import Purchase
+from .models import Purchase, Account, AccountUpdate
 
 
 class PurchaseForm(ModelForm):
@@ -23,26 +22,18 @@ class PurchaseForm(ModelForm):
         fields = ['date', 'time', 'item', 'category', 'amount', 'category_2', 'amount_2', 'description']
 
 
-#         def clean_date(self):
-#             return self.cleaned_data['date']
-#
-#         def clean_time(self):
-#             return self.cleaned_data['time']
-#
-#         def clean_item(self):
-#             return self.cleaned_data['item']
-#
-#         def clean_category(self):
-#             return self.cleaned_data['category']
-#
-#         def clean_amount(self):
-#             return self.cleaned_data['amount']
-#
-#         def clean_category_2(self):
-#             return self.cleaned_data['category_2']
-#
-#         def clean_amount_2(self):
-#             return self.cleaned_data['amount_2']
-#
-#         def clean_description(self):
-#             return self.cleaned_data['description']
+class AccountForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AccountForm, self).__init__(*args, **kwargs)
+
+        self.fields = {} # Otherwise a field will appear for each field in the model, but we want a specific field to show for each Account
+
+        for account in Account.objects.all():
+            # Get the last value for the account. If it's None, make placeholder value 0
+            last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('timestamp').last() is None else AccountUpdate.objects.filter(account=account).order_by('timestamp').last().value
+            self.fields[account] = DecimalField(label=account.account, max_digits=9, decimal_places=2, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm',
+                                                                                                                                                 'placeholder': '${:20,.2f}'.format(last_value)}))
+
+    class Meta:
+        model = Account
+        exclude = []

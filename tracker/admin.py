@@ -24,6 +24,7 @@ class PurchaseCategoryAdmin(ImportExportModelAdmin):
 @admin.register(Filter)
 class FiltersAdmin(ImportExportModelAdmin):
     resource_class = Filter
+    list_display = ('category_filter_1', 'category_filter_2', 'category_filter_3', 'start_date_filter', 'end_date_filter', 'last_updated')
     readonly_fields = ('last_updated',)
 
 @admin.register(Account)

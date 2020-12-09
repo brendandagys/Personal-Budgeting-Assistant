@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 from django.views import generic
-from .forms import PurchaseForm
+from .forms import PurchaseForm, AccountForm
 from .models import Purchase, Filter, Bill, Alert, Mode, PurchaseCategory
 
 from django.db.models import Sum
@@ -425,47 +425,48 @@ def homepage(request):
 
 
 class PurchaseListView(generic.ListView):
+    queryset = Purchase.objects.order_by('-date')
     context_object_name = 'purchase_list'
-    # queryset = Purchase.objects.order_by('-date')
     template_name = 'tracker/transaction_list.html' # Specify your own template
 
-    def get_time_filter(self, parameter):
+    # def get_time_filter(self, parameter):
 
-        if parameter == 'Last Seven Days':
-            return [date - datetime.timedelta(days=6), date]
-        elif parameter == 'Last 30 Days':
-            return [date - datetime.timedelta(days=29), date]
-        elif parameter == 'Last Three Months':
-            return [date + relativedelta(months=-3), date]
-        elif parameter == 'Last Six Months:':
-            return [date + relativedelta(months=-6), date]
-        elif parameter == 'Last Year':
-            return [date + relativedelta(years=-1), date]
-        elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
-            return [date - datetime.timedelta(days=1+weekday), date]
-        elif parameter == 'One Week Ago':
-            return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
-        elif parameter == 'Two Weeks Ago':
-            return [date + relativedelta(weeks=-2, weekday=SU(-1)), date + relativedelta(weeks=-2, weekday=SA(1))]
-        elif parameter == 'Three Weeks Ago':
-            return [date + relativedelta(weeks=-3, weekday=SU(-1)), date + relativedelta(weeks=-3, weekday=SA(1))]
-        elif parameter == 'Four Weeks Ago':
-            return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
-        elif parameter == 'This Month':
-            return [datetime.datetime(year, month, 1).date(), date]
-        elif parameter == 'One Month Ago':
-            return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
-        elif parameter == 'Two Months Ago':
-            return [date + relativedelta(day=1, months=-2), date + relativedelta(day=31, months=-2)]
-        elif parameter == 'Three Months Ago':
-            return [date + relativedelta(day=1, months=-3), date + relativedelta(day=31, months=-3)]
-        elif parameter == 'Four Months Ago':
-            return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
-        elif parameter == 'This Year':
-            return [datetime.datetime(year, 1, 1).date(), date]
+        # if parameter == 'Last Seven Days':
+        #     return [date - datetime.timedelta(days=6), date]
+        # elif parameter == 'Last 30 Days':
+        #     return [date - datetime.timedelta(days=29), date]
+        # elif parameter == 'Last Three Months':
+        #     return [date + relativedelta(months=-3), date]
+        # elif parameter == 'Last Six Months:':
+        #     return [date + relativedelta(months=-6), date]
+        # elif parameter == 'Last Year':
+        #     return [date + relativedelta(years=-1), date]
+        # elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
+        #     return [date - datetime.timedelta(days=1+weekday), date]
+        # elif parameter == 'One Week Ago':
+        #     return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
+        # elif parameter == 'Two Weeks Ago':
+        #     return [date + relativedelta(weeks=-2, weekday=SU(-1)), date + relativedelta(weeks=-2, weekday=SA(1))]
+        # elif parameter == 'Three Weeks Ago':
+        #     return [date + relativedelta(weeks=-3, weekday=SU(-1)), date + relativedelta(weeks=-3, weekday=SA(1))]
+        # elif parameter == 'Four Weeks Ago':
+        #     return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
+        # elif parameter == 'This Month':
+        #     return [datetime.datetime(year, month, 1).date(), date]
+        # elif parameter == 'One Month Ago':
+        #     return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
+        # elif parameter == 'Two Months Ago':
+        #     return [date + relativedelta(day=1, months=-2), date + relativedelta(day=31, months=-2)]
+        # elif parameter == 'Three Months Ago':
+        #     return [date + relativedelta(day=1, months=-3), date + relativedelta(day=31, months=-3)]
+        # elif parameter == 'Four Months Ago':
+        #     return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
+        # elif parameter == 'This Year':
+        #     return [datetime.datetime(year, 1, 1).date(), date]
+        #
+        # else:
+        #     return [date - datetime.timedelta(days=5000), date]
 
-        else:
-            return [date - datetime.timedelta(days=5000), date]
 
     def get_queryset(self):
 
@@ -501,6 +502,16 @@ class PurchaseListView(generic.ListView):
 
         else:
             return Purchase.objects.all().order_by('-date', '-time')
+
+
+    def get_context_data(self, *args, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(*args, **kwargs)
+
+        context['account_form'] = AccountForm()
+
+        return context
+
 
 @login_required
 def filter_manager(request):
@@ -625,7 +636,7 @@ def filter_manager(request):
     #                          'time_filter_end': time_filter_end,
     #                          'total_spent': total_spent, })
 
-    return JsonResponse()
+    return HttpResponse()
 
 @login_required
 def manage_mode(request):

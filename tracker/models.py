@@ -88,13 +88,14 @@ class Account(models.Model):
 
 
 class AccountUpdate(models.Model):
-    account = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Account')
-    value = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Value')
+    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
+    value = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Value')
     timestamp = models.DateTimeField(default=current_datetime, verbose_name='Account Timestamp')
 
     class Meta:
         verbose_name_plural = 'Account Updates'
         verbose_name = 'Account Update'
+        ordering = ['-timestamp']
 
     def __str__(self):
         return ', '.join([str(self.account), str(self.value), str(self.timestamp)])

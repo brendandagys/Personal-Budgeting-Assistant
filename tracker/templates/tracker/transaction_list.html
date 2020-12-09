@@ -44,6 +44,15 @@
 
         <div class="main_container container-fluid">
 
+            <div class="container-fluid">
+                <form id="account_form" action="" method="POST">
+                    {% csrf_token %}
+                    <table class="center">
+                        {{ account_form }}
+                    </table> </br>
+                </form>
+            </div>
+
             <table style="width:100%;">
 
                 <tr>
