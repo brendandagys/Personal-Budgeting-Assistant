@@ -498,6 +498,12 @@ class PurchaseListView(generic.ListView):
 
         context['purchase_categories_list'] = PurchaseCategory.objects.values_list('category')
 
+        context['accounts_sum'] = 0
+        for account in Account.objects.all():
+            account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
+            context['accounts_sum']+=account_value
+        context['accounts_sum'] = '${:20,.2f}'.format(context['accounts_sum'])            
+
         return context
 
 
