@@ -16,6 +16,23 @@
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
+        <!-- CODE FOR DATEPICKER -->
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <!-- <link rel="stylesheet" href="/resources/demos/style.css"> -->
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script>
+            $( function() {
+                $('#datepicker').datepicker({dateFormat: 'yy-mm-dd'});
+            } );
+        </script>
+
+        <script>
+            $( function() {
+                $('#datepicker_2').datepicker({dateFormat: 'yy-mm-dd'});
+            } );
+        </script>
+
         <title>List of Transactions</title>
 
     </head>
@@ -36,8 +53,6 @@
                     <b><h2 class="total_spent"></h2></b>
                 </div>
 
-            <!-- </hr/> -->
-
             </div>
 
         </div>
@@ -49,9 +64,11 @@
                     {% csrf_token %}
                     <table class="center">
                         {{ account_form }}
-                    </table> </br>
+                    </table>
                 </form>
             </div>
+
+            <hr />
 
             <table style="width:100%;">
 
@@ -148,123 +165,25 @@
                     </td>
                 </tr>
 
-                <tr>
-                    <td colspan="2" style="width:100%; text-align:center; padding-top:10px;">
-                        <p class="filter_headers">Dates Up To Today</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="tLast Seven Days" name="lastsevendays" href="https://brendanspending.herokuapp.com/transactions/">Last Seven Days</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="tLast 30 Days" name="last30days" href="https://brendanspending.herokuapp.com/transactions/">Last 30 Days</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="tLast Three Months" name="lastthreemonths" href="https://brendanspending.herokuapp.com/transactions/">Last Three Months</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="tLast Six Months" name="lastsixmonths" href="https://brendanspending.herokuapp.com/transactions/">Last Six Months</a>
-                    </td>
-                </tr>
-
-                <!-- <tr>
-                    <td colspan="2" style="width:100%; text-align:center;">
-                        <a id="tLast Year" name="lastyear" href="https://brendanspending.herokuapp.com/transactions/">Last Year</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-
-                    </td>
-                </tr> -->
-
-                <tr>
-                    <td colspan="2" style="width:100%; text-align:center; padding-top:10px;">
-                        <p class="filter_headers">Past Week Periods</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="tThis Week" name="thisweek" href="https://brendanspending.herokuapp.com/transactions/">This Week</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="tOne Week Ago" name="oneweekago" href="https://brendanspending.herokuapp.com/transactions/">One Week Ago</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="tTwo Weeks Ago" name="twoweeksago" href="https://brendanspending.herokuapp.com/transactions/">Two Weeks Ago</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="tThree Weeks Ago" name="threeweeksago" href="https://brendanspending.herokuapp.com/transactions/">Three Weeks Ago</a>
-                    </td>
-                </tr>
-
-                <!-- <tr>
-                    <td colspan="2" style="width:100%; text-align:center;">
-                        <a id="tFour Weeks Ago" name="fourweeksago" href="https://brendanspending.herokuapp.com/transactions/">Four Weeks Ago</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-
-                    </td>
-                </tr> -->
-
-                <tr>
-                    <td colspan="2" style="width:100%; text-align:center; padding-top:10px;">
-                        <p class="filter_headers">Past Month Periods</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="tThis Month" name="thismonth" href="https://brendanspending.herokuapp.com/transactions/">This Month</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="tOne Month Ago" name="onemonthago" href="https://brendanspending.herokuapp.com/transactions/">One Month Ago</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="tTwo Months Ago" name="twomonthsago" href="https://brendanspending.herokuapp.com/transactions/">Two Months Ago</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="tThree Months Ago" name="threemonthsago" href="https://brendanspending.herokuapp.com/transactions/">Three Months Ago</a>
-                    </td>
-                </tr>
-
-                <!-- <tr>
-                    <td colspan="2" style="width:100%; text-align:center;">
-                        <a id="tFour Months Ago" name="fourmonthsago" href="https://brendanspending.herokuapp.com/transactions/">Four Months Ago</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-
-                    </td>
-                </tr> -->
-
-                <tr>
-                    <td colspan="2" style="width:100%; text-align:center; padding-top:10px;">
-                        <p class="filter_headers">Calendar Year-To-Date</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td colspan="2" style="width:100%; text-align:center;">
-                        <a id="tThis Year" name="thisyear" href="https://brendanspending.herokuapp.com/transactions/">This Year</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-
-                    </td>
-                </tr>
-
             </table>
 
-            </br>
+            <br />
+
+            <div class="row">
+                <div class="col-sm-5"></div>
+
+                <div align="center" class="col-sm-1">
+                      <p><b><small>From</small></b></p>
+                      <input style="text-align: center" class="form-control" placeholder="Date..." type="text" id="datepicker">
+                </div>
+
+                <div align="center" class="col-sm-1">
+                      <p><b><small>To</small></b></p>
+                      <input style="text-align: center" class="form-control" placeholder="Date..." type="text" id="datepicker_2">
+                </div>
+
+                <div class="col-sm-5"></div>
+            </div>
 
             <!-- <div class="row">
 
@@ -309,42 +228,104 @@
 
     $(document).ready(function() {
 
-        var category_filter
-        var time_filter
+        // var category_filter
+        // var time_filter
 
-        $.ajax({
-            type: 'GET',
-            url: 'filter/',
-            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-            success: function(response) {
-
-                $('.total_spent').text(response['total_spent']);
-                $('.date_span').text(response['time_filter_start'].concat(' - ', response['time_filter_end']));
-
-                $('a[name="' + response['category_filter'] + '"]').wrap('<b></b>').addClass('green_filters');
-                $('a[name="' + response['time_filter'] + '"]').wrap('<b></b>').addClass('green_filters');
-
-            }
-        });
+        // $.ajax({
+        //     type: 'GET',
+        //     url: 'filter/',
+        //     data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        //     success: function(response) {
+        //
+        //         $('.total_spent').text(response['total_spent']);
+        //         $('.date_span').text(response['time_filter_start'].concat(' - ', response['time_filter_end']));
+        //
+        //         $('a[name="' + response['category_filter'] + '"]').wrap('<b></b>').addClass('green_filters');
+        //         $('a[name="' + response['time_filter'] + '"]').wrap('<b></b>').addClass('green_filters');
+        //
+        //     }
+        // });
         //$('a':not('#homepage_link')).on('click', function(e) {
 
-        $('a[id!="homepage_link"]').on('click', function(e) {
-            e.preventDefault()
+        // $('a[id!="homepage_link"]').on('click', function(e) {
+        //     e.preventDefault()
+        //
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: 'filter/',
+        //         data: {
+        //                csrfmiddlewaretoken: '{{ csrf_token }}',
+        //                'filter': event.target.id
+        //         },
+        //         success: function () {
+        //             // console.log('Filter POST successful!');
+        //             location.reload()
+        //         }
+        //     });
+        //     return false;
+        // });
+
+        // Set the 
+        $('#datepicker').val('{{start_date}}');
+        $('#datepicker_2').val('{{end_date}}');
+
+
+        $('#account_form').find(':input').on('change', function(e) {
+            // console.log($(this).attr('id'));
 
             $.ajax({
                 type: 'POST',
-                url: 'filter/',
+                url: 'account_update/',
                 data: {
                        csrfmiddlewaretoken: '{{ csrf_token }}',
-                       'filter': event.target.id
+                       'id': $(this).attr('id'),
+                       'value': $(this).val(),
                 },
+                context: this, // To allow access in the callback functions
                 success: function () {
-                    // console.log('Filter POST successful!');
-                    location.reload()
+                    console.log($(this).attr('id') + ' updated to: ' + $(this).val());
+                },
+                error: function () {
+                    console.log('There was an issue updating the value for ' + $(this).attr('id'));
                 }
             });
-            return false;
         });
+
+
+        $(document).on('change', '#datepicker, #datepicker_2', function(e) {
+            console.log('Start date: ' + $('#datepicker').val());
+            console.log('End date: ' + $('#datepicker_2').val());
+            // Make sure the start date is not later than the end date
+            if($('#datepicker').val() !== '' && $('#datepicker_2').val() !== '' & $('#datepicker').val() > $('#datepicker_2').val()){
+                alert('The start date cannot be later than the end date.');
+                $(this).val('');
+            }
+            else if ($('#datepicker').val().length != 0 && $('#datepicker').val().length != 10 || $('#datepicker_2').val().length != 0 && $('#datepicker_2').val().length != 10) {
+                alert('\nPlease enter a valid date.');
+                $(this).val('');
+            }
+            else {
+                $.ajax({
+                    type: 'POST',
+                    url: 'filter/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'type': 'Date',
+                            'id': $(this).attr('id'),
+                            'filter_value': $(this).val().trim(),
+                    },
+                    context: this, // Add to context so we can access it in the success callback function
+                    success: function(response) {
+                        console.log('Date filter POST success: ' + $(this).val());
+                        // location.reload();
+                    },
+                    error: function() {
+                        console.log('Error!');
+                        alert('Please enter a valid date.');
+                        $(this).val('');
+                    }
+                });
+            }
+        })
 
     });
 

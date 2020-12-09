@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.views import generic
 from .forms import PurchaseForm, AccountForm
-from .models import Purchase, Filter, Bill, Alert, Mode, PurchaseCategory
+from .models import Purchase, Filter, Bill, Alert, Mode, PurchaseCategory, Account, AccountUpdate
 
 from django.db.models import Sum
 
@@ -429,79 +429,60 @@ class PurchaseListView(generic.ListView):
     context_object_name = 'purchase_list'
     template_name = 'tracker/transaction_list.html' # Specify your own template
 
-    # def get_time_filter(self, parameter):
-
-        # if parameter == 'Last Seven Days':
-        #     return [date - datetime.timedelta(days=6), date]
-        # elif parameter == 'Last 30 Days':
-        #     return [date - datetime.timedelta(days=29), date]
-        # elif parameter == 'Last Three Months':
-        #     return [date + relativedelta(months=-3), date]
-        # elif parameter == 'Last Six Months:':
-        #     return [date + relativedelta(months=-6), date]
-        # elif parameter == 'Last Year':
-        #     return [date + relativedelta(years=-1), date]
-        # elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
-        #     return [date - datetime.timedelta(days=1+weekday), date]
-        # elif parameter == 'One Week Ago':
-        #     return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
-        # elif parameter == 'Two Weeks Ago':
-        #     return [date + relativedelta(weeks=-2, weekday=SU(-1)), date + relativedelta(weeks=-2, weekday=SA(1))]
-        # elif parameter == 'Three Weeks Ago':
-        #     return [date + relativedelta(weeks=-3, weekday=SU(-1)), date + relativedelta(weeks=-3, weekday=SA(1))]
-        # elif parameter == 'Four Weeks Ago':
-        #     return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
-        # elif parameter == 'This Month':
-        #     return [datetime.datetime(year, month, 1).date(), date]
-        # elif parameter == 'One Month Ago':
-        #     return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
-        # elif parameter == 'Two Months Ago':
-        #     return [date + relativedelta(day=1, months=-2), date + relativedelta(day=31, months=-2)]
-        # elif parameter == 'Three Months Ago':
-        #     return [date + relativedelta(day=1, months=-3), date + relativedelta(day=31, months=-3)]
-        # elif parameter == 'Four Months Ago':
-        #     return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
-        # elif parameter == 'This Year':
-        #     return [datetime.datetime(year, 1, 1).date(), date]
-        #
-        # else:
-        #     return [date - datetime.timedelta(days=5000), date]
-
 
     def get_queryset(self):
 
-        filters_instance = Filter.objects.last() # Gives object or None
-        # If no filter instance exists or five or more minutes have passed
-        if filters_instance is None or (datetime.datetime.now() - datetime.datetime.strptime(filters_instance.last_update_time.split('.')[0], "%Y-%m-%d %H:%M:%S")).total_seconds()/60 >= 5:
-            category_filter = ''
-            time_filter_start = ''
-            time_filter_end = ''
-            deactivate_category = 'No'
-            deactivate_time = 'No'
+        filter_instance = Filter.objects.last()
 
+        # If none created yet, create an instance
+        if filter_instance is None:
+            filter_instance = Filter.objects.create()
+
+        start_date = filter_instance.start_date_filter
+        end_date = filter_instance.end_date_filter
+
+        if start_date is None:
+            start_date = '2019-01-01'
+
+        if end_date is None:
+            end_date = '2099-12-31'
         else:
-            category_filter = filters_instance.category_filter
-            time_filter_start = self.get_time_filter(filters_instance.time_filter)[0]
-            time_filter_end = self.get_time_filter(filters_instance.time_filter)[1]
-            deactivate_category = filters_instance.deactivate_category
-            deactivate_time = filters_instance.deactivate_time
+            end_date+=datetime.timedelta(days=1)
 
-        if deactivate_category == 'Yes':
-            category_filter = ''
-        if deactivate_time == 'Yes':
-            time_filter_start = ''
+        return Purchase.objects.filter(date__gte=start_date, date__lt=end_date).order_by('-date', '-time')
 
-        if category_filter == '' and time_filter_start != '':
-            return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
 
-        elif category_filter != '' and time_filter_start == '':
-            return Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
-
-        elif category_filter != '' and time_filter_start != '':
-            return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
-
-        else:
-            return Purchase.objects.all().order_by('-date', '-time')
+        # # If no filter instance exists or five or more minutes have passed
+        # if filters_instance is None or (datetime.datetime.now() - datetime.datetime.strptime(filters_instance.last_update_time.split('.')[0], "%Y-%m-%d %H:%M:%S")).total_seconds()/60 >= 5:
+        #     category_filter = ''
+        #     time_filter_start = ''
+        #     time_filter_end = ''
+        #     deactivate_category = 'No'
+        #     deactivate_time = 'No'
+        #
+        # else:
+        #     category_filter = filters_instance.category_filter
+        #     time_filter_start = self.get_time_filter(filters_instance.time_filter)[0]
+        #     time_filter_end = self.get_time_filter(filters_instance.time_filter)[1]
+        #     deactivate_category = filters_instance.deactivate_category
+        #     deactivate_time = filters_instance.deactivate_time
+        #
+        # if deactivate_category == 'Yes':
+        #     category_filter = ''
+        # if deactivate_time == 'Yes':
+        #     time_filter_start = ''
+        #
+        # if category_filter == '' and time_filter_start != '':
+        #     return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
+        #
+        # elif category_filter != '' and time_filter_start == '':
+        #     return Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
+        #
+        # elif category_filter != '' and time_filter_start != '':
+        #     return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
+        #
+        # else:
+        #     return Purchase.objects.all().order_by('-date', '-time')
 
 
     def get_context_data(self, *args, **kwargs):
@@ -510,76 +491,34 @@ class PurchaseListView(generic.ListView):
 
         context['account_form'] = AccountForm()
 
+        filter_instance = Filter.objects.last()
+
+        context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
+        context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
+
+        context['purchase_categories_list'] = PurchaseCategory.objects.values_list('category')
+
         return context
 
 
 @login_required
 def filter_manager(request):
 
-    def get_time_filter(parameter):
-
-        if parameter == 'Last Seven Days':
-            return [date - datetime.timedelta(days=6), date]
-        elif parameter == 'Last 30 Days':
-            return [date - datetime.timedelta(days=29), date]
-        elif parameter == 'Last Three Months':
-            return [date + relativedelta(months=-3), date]
-        elif parameter == 'Last Six Months:':
-            return [date + relativedelta(months=-6), date]
-        elif parameter == 'Last Year':
-            return [date + relativedelta(years=-1), date]
-        elif parameter == 'This Week': # 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday
-            return [date - datetime.timedelta(days=1+weekday), date]
-        elif parameter == 'One Week Ago':
-            return [date + relativedelta(weeks=-1, weekday=SU(-1)), date + relativedelta(weeks=-1, weekday=SA(1))]
-        elif parameter == 'Two Weeks Ago':
-            return [date + relativedelta(weeks=-2, weekday=SU(-1)), date + relativedelta(weeks=-2, weekday=SA(1))]
-        elif parameter == 'Three Weeks Ago':
-            return [date + relativedelta(weeks=-3, weekday=SU(-1)), date + relativedelta(weeks=-3, weekday=SA(1))]
-        elif parameter == 'Four Weeks Ago':
-            return [date + relativedelta(weeks=-4, weekday=SU(-1)), date + relativedelta(weeks=-4, weekday=SA(1))]
-        elif parameter == 'This Month':
-            return [datetime.datetime(year, month, 1).date(), date]
-        elif parameter == 'One Month Ago':
-            return [date + relativedelta(day=1, months=-1), date + relativedelta(day=31, months=-1)]
-        elif parameter == 'Two Months Ago':
-            return [date + relativedelta(day=1, months=-2), date + relativedelta(day=31, months=-2)]
-        elif parameter == 'Three Months Ago':
-            return [date + relativedelta(day=1, months=-3), date + relativedelta(day=31, months=-3)]
-        elif parameter == 'Four Months Ago':
-            return [date + relativedelta(day=1, months=-4), date + relativedelta(day=31, months=-4)]
-        elif parameter == 'This Year':
-            return [datetime.datetime(year, 1, 1).date(), date]
-
-        else:
-            return [datetime.datetime(2019, 12, 1).date(), date]
-
     if request.method == 'POST':
 
-        filters_instance = Filter.objects.all()[0] # Gives object or raises an exception
+        filter_instance = Filter.objects.last()
 
-        filters_instance.last_update_date = datetime.date.today()
-        filters_instance.last_update_time = datetime.datetime.now()
+        if request.POST['type'] == 'Date':
+            filter_value = request.POST['filter_value']
+            if filter_value == '':
+                filter_value = None
 
-        if request.POST['filter'][0] == 'c':
-            if request.POST['filter'][1:] == filters_instance.category_filter:
-                filters_instance.deactivate = 'Yes'
-                filters_instance.category_filter = ''
-            else:
-                filters_instance.category_filter = request.POST['filter'][1:]
+            if request.POST['id'] == 'datepicker':
+                filter_instance.start_date_filter = filter_value
+            elif request.POST['id'] == 'datepicker_2':
+                filter_instance.end_date_filter = filter_value
 
-        elif request.POST['filter'][0] == 't':
-            if request.POST['filter'][1:] == filters_instance.time_filter:
-                filters_instance.deactivate = 'Yes'
-                filters_instance.time_filter = ''
-            else:
-                filters_instance.time_filter = request.POST['filter'][1:]
-
-        else: # 'NO FILTER' was selected
-            filters_instance.category_filter = ''
-            filters_instance.time_filter = ''
-
-        filters_instance.save()
+            filter_instance.save()
 
         return HttpResponse()
 
@@ -638,6 +577,7 @@ def filter_manager(request):
 
     return HttpResponse()
 
+
 @login_required
 def manage_mode(request):
     if request.method == 'GET':
@@ -654,3 +594,11 @@ def manage_mode(request):
         mode_instance.save()
 
         return HttpResponse()
+
+
+@login_required
+def account_update(request):
+    if request.method == 'POST':
+        # print(request.POST['id'])
+        AccountUpdate.objects.create(account=Account.objects.get(pk=request.POST['id'][3:]), value=request.POST['value']) # id is prefixed with 'id_'
+    return HttpResponse()
