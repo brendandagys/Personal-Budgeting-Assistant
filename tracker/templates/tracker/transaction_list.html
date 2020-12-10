@@ -76,7 +76,7 @@
 
                 <tr>
                     <td colspan="2" style="width:100%; text-align:center; padding-bottom:10px;">
-                        <a id="No Filter" class="no_filter" href="https://brendanspending.herokuapp.com/transactions/">NO FILTER</a>
+                        <a id="No Filter" class="no_filter" href="">NO FILTER</a>
                     </td>
                 </tr>
 
@@ -86,86 +86,16 @@
                     </td>
                 </tr>
 
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cCoffee" name="coffee" href="https://brendanspending.herokuapp.com/transactions/">Coffee</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cGroceries" name="groceries" href="https://brendanspending.herokuapp.com/transactions/">Groceries</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cFood/Drinks" name="fooddrinks" class="food" href="https://brendanspending.herokuapp.com/transactions/">Food/Drinks</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cRestaurants" name="restaurants" href="https://brendanspending.herokuapp.com/transactions/">Restaurants</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cGas" name="gas" href="https://brendanspending.herokuapp.com/transactions/">Gas</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cBills" name="bills" href="https://brendanspending.herokuapp.com/transactions/">Bills</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cHousehold Supplies" name="householdsupplies" href="https://brendanspending.herokuapp.com/transactions/">Household Supplies</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cServices" name="services" href="https://brendanspending.herokuapp.com/transactions/">Services</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cDates" name="dates" href="https://brendanspending.herokuapp.com/transactions/">Dates</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cGifts" name="gifts" href="https://brendanspending.herokuapp.com/transactions/">Gifts</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cTickets" name="tickets" href="https://brendanspending.herokuapp.com/transactions/">Tickets</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cElectronics" name="electronics" href="https://brendanspending.herokuapp.com/transactions/">Electronics</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cAppliances" name="appliances" href="https://brendanspending.herokuapp.com/transactions/">Appliances</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cClothes" name="clothes" href="https://brendanspending.herokuapp.com/transactions/">Clothes</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="width:50%; text-align:right; padding-right:10px;">
-                        <a id="cAlcohol" name="alcohol" href="https://brendanspending.herokuapp.com/transactions/">Alcohol</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-                        <a id="cVacations" name="vacations" href="https://brendanspending.herokuapp.com/transactions/">Vacations</a></br>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td colspan="2" style="width:100%; text-align:center;">
-                        <a id="cFees" name="fees" href="https://brendanspending.herokuapp.com/transactions/">Fees</a>
-                    </td>
-                    <td style="width:50%; text-align:left; padding-left:10px;">
-
-                    </td>
-                </tr>
+                {% for filter_tuple in purchase_categories_tuples_list %}
+                    <tr>
+                        <td style="width:50%; text-align:right; padding-right:10px;">
+                            <a id="{{filter_tuple.0}}" href="">{{filter_tuple.0}}</a>
+                        </td>
+                        <td style="width:50%; text-align:left; padding-left:10px;">
+                            <a id="{{filter_tuple.1}}"  href="">{{filter_tuple.1}}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
 
             </table>
 
@@ -249,23 +179,24 @@
         // });
         //$('a':not('#homepage_link')).on('click', function(e) {
 
-        // $('a[id!="homepage_link"]').on('click', function(e) {
-        //     e.preventDefault()
-        //
-        //     $.ajax({
-        //         type: 'POST',
-        //         url: 'filter/',
-        //         data: {
-        //                csrfmiddlewaretoken: '{{ csrf_token }}',
-        //                'filter': event.target.id
-        //         },
-        //         success: function () {
-        //             // console.log('Filter POST successful!');
-        //             location.reload()
-        //         }
-        //     });
-        //     return false;
-        // });
+        $('a[id!="homepage_link"]').on('click', function(e) {
+            e.preventDefault()
+
+            $.ajax({
+                type: 'POST',
+                url: 'filters/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Category',
+                        'id': $(this).attr('id'),
+                },
+                success: function () {
+                    console.log('Filter POST successful!');
+                    location.reload()
+                }
+            });
+            return false;
+        });
+
 
         // Set the
         $('#datepicker').val('{{start_date}}');
@@ -309,7 +240,7 @@
             else {
                 $.ajax({
                     type: 'POST',
-                    url: 'filter/',
+                    url: 'filters/',
                     data: { csrfmiddlewaretoken: '{{ csrf_token }}',
                             'type': 'Date',
                             'id': $(this).attr('id'),

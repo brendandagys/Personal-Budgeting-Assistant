@@ -32,7 +32,7 @@ class AccountForm(ModelForm):
             # Get the last value for the account. If it's None, make placeholder value 0
             last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
             self.fields[account.account] = DecimalField(label=account.account, max_digits=9, decimal_places=2, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px',
-                                                                                                                                                         'placeholder': '${:20,.2f}'.format(last_value)}))
+                                                                                                                                                         'inputmode': 'decimal', 'step': 1, 'placeholder': '${:20,.2f}'.format(last_value)}))
 
     class Meta:
         model = Account

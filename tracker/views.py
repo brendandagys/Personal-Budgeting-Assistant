@@ -496,13 +496,28 @@ class PurchaseListView(generic.ListView):
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
 
-        context['purchase_categories_list'] = PurchaseCategory.objects.values_list('category')
+        # purchase_categories_list = PurchaseCategory.objects.values_list('category') # Used below
+        # context['purchase_categories_list'] = purchase_categories_list
 
         context['accounts_sum'] = 0
         for account in Account.objects.all():
             account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
             context['accounts_sum']+=account_value
         context['accounts_sum'] = '${:20,.2f}'.format(context['accounts_sum'])
+
+
+        purchase_categories_list = []
+        for purchase_category in PurchaseCategory.objects.all().order_by('category'):
+            purchase_categories_list.append(purchase_category.category)
+
+        purchase_categories_tuples_list = []
+        for index in range(0, len(purchase_categories_list), 2):
+            if index != len(purchase_categories_list) - 1:
+                purchase_categories_tuples_list.append((purchase_categories_list[index], purchase_categories_list[index+1]))
+            else:
+                purchase_categories_tuples_list.append((purchase_categories_list[index], ))
+
+        context['purchase_categories_tuples_list'] = purchase_categories_tuples_list
 
         return context
 
@@ -514,8 +529,9 @@ def filter_manager(request):
 
         filter_instance = Filter.objects.last()
 
+        filter_value = request.POST['filter_value']
+
         if request.POST['type'] == 'Date':
-            filter_value = request.POST['filter_value']
             if filter_value == '':
                 filter_value = None
 
@@ -524,7 +540,103 @@ def filter_manager(request):
             elif request.POST['id'] == 'datepicker_2':
                 filter_instance.end_date_filter = filter_value
 
-            filter_instance.save()
+        elif request.POST['type'] == 'Category':
+
+            # Extract the current filter values
+            category_filter_1 = filter_instance.category_filter_1
+            category_filter_2 = filter_instance.category_filter_2
+            category_filter_3 = filter_instance.category_filter_3
+            category_filter_4 = filter_instance.category_filter_4
+            category_filter_5 = filter_instance.category_filter_5
+            category_filter_6 = filter_instance.category_filter_6
+            category_filter_7 = filter_instance.category_filter_7
+            category_filter_8 = filter_instance.category_filter_8
+            category_filter_9 = filter_instance.category_filter_9
+            category_filter_10 = filter_instance.category_filter_10
+
+            print('New filter value: ' + str(filter_value) + '\n')
+
+            # Change filter values as needed
+            if filter_value == 'No Filter':
+                category_filter_1 = None
+                category_filter_2 = None
+                category_filter_3 = None
+                category_filter_4 = None
+                category_filter_5 = None
+                category_filter_6 = None
+                category_filter_7 = None
+                category_filter_8 = None
+                category_filter_9 = None
+                category_filter_10 = None
+
+            # Turn off the filter if the value is the same
+            else:
+                for index, item in enumerate([category_filter_1, category_filter_2, category_filter_3, category_filter_4, category_filter_5, category_filter_6, category_filter_7, category_filter_8, category_filter_9, category_filter_10]):
+                    if item is not None and index != 9 and item != filter_value:
+                        continue
+                    elif item is not None and item == filter_value:
+                        item = None
+                    else:
+                        item = filter_value
+
+                # filter_value_list = sorted(filter_value) # Rename, as front-end passes an array ['a', 'b', etc.]
+
+                # Reset all to be over-written in order
+                category_filter_1 = None
+                category_filter_2 = None
+                category_filter_3 = None
+                category_filter_4 = None
+                category_filter_5 = None
+                category_filter_6 = None
+                category_filter_7 = None
+                category_filter_8 = None
+                category_filter_9 = None
+                category_filter_10 = None
+                # To iterate through
+                slot_list = [designation_filter_1, designation_filter_2, designation_filter_3, designation_filter_4, designation_filter_5, designation_filter_6, designation_filter_7, designation_filter_8, designation_filter_9]
+                # If anything beside 'ALL DESIGNATIONS' was passed...
+                if any([choice != 'ALL DESIGNATIONS' for choice in filter_value_list]):
+                    try:
+                        filter_value_list.remove('ALL DESIGNATIONS') # Only removes the first instance, but there will only ever be one
+                    except Exception:
+                        pass
+
+                    for designation in filter_value_list: # Go through all Designations
+                        for index, slot in enumerate(slot_list):
+                            # Prevent multiple values being written: write if the first row, or the row isn't set and the last row hasn't been set to the same value
+                            if (index == 0 and slot == 'ALL DESIGNATIONS') or (slot == 'ALL DESIGNATIONS' and slot_list[index-1] not in [designation, 'ALL DESIGNATIONS']):
+                                slot_list[index] = designation
+
+                    designation_filter_1 = slot_list[0]
+                    designation_filter_2 = slot_list[1]
+                    designation_filter_3 = slot_list[2]
+                    designation_filter_4 = slot_list[3]
+                    designation_filter_5 = slot_list[4]
+                    designation_filter_6 = slot_list[5]
+                    designation_filter_7 = slot_list[6]
+                    designation_filter_8 = slot_list[7]
+                    designation_filter_9 = slot_list[8]
+
+                    # Prevents the ALL option from not showing if all nine Designations are selected
+                    if all([choice != 'ALL DESIGNATIONS' for choice in slot_list]):
+                        designation_filter_1 = 'ALL DESIGNATIONS'
+                        designation_filter_2 = 'ALL DESIGNATIONS'
+                        designation_filter_3 = 'ALL DESIGNATIONS'
+                        designation_filter_4 = 'ALL DESIGNATIONS'
+                        designation_filter_5 = 'ALL DESIGNATIONS'
+                        designation_filter_6 = 'ALL DESIGNATIONS'
+                        designation_filter_7 = 'ALL DESIGNATIONS'
+                        designation_filter_8 = 'ALL DESIGNATIONS'
+                        designation_filter_9 = 'ALL DESIGNATIONS'
+
+
+
+
+
+
+
+
+        filter_instance.save()
 
         return HttpResponse()
 
