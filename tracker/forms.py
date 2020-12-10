@@ -13,8 +13,8 @@ class PurchaseForm(ModelForm):
             self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
 
         self.fields['item'].widget.attrs.update({'placeholder': 'Item(s)...'})
-        self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...'})
-        self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional...'})
+        self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...', 'inputmode': 'decimal', 'step': 1})
+        self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional...', 'inputmode': 'decimal', 'step': 1})
         self.fields['description'].widget.attrs.update({'rows': 3, 'placeholder': 'Specifics...'})
 
     class Meta:

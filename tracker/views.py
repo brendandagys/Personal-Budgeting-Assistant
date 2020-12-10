@@ -231,9 +231,9 @@ def homepage(request):
             purchase_instance.date = purchase_form.cleaned_data['date']
             purchase_instance.time = purchase_form.cleaned_data['time'].strip()
             purchase_instance.item = purchase_form.cleaned_data['item'].strip()
-            purchase_instance.category = purchase_form.cleaned_data['category'].strip()
+            purchase_instance.category = purchase_form.cleaned_data['category']
             purchase_instance.amount = purchase_form.cleaned_data['amount']
-            purchase_instance.category_2 = purchase_form.cleaned_data['category_2'].strip()
+            purchase_instance.category_2 = purchase_form.cleaned_data['category_2']
             purchase_instance.amount_2 = purchase_form.cleaned_data['amount_2']
             purchase_instance.description = purchase_form.cleaned_data['description'].strip()
 
