@@ -424,6 +424,30 @@ def homepage(request):
     return render(request, 'homepage.html', context=context)
 
 
+@login_required
+def get_json_queryset(request):
+    filter_instance = Filter.objects.last()
+
+    start_date_filter = filter_instance.start_date_filter
+    end_date_filter = filter_instance.end_date_filter
+
+    if start_date_filter is None:
+        start_date_filter = '2019-01-01'
+
+    if end_date_filter is None:
+        end_date_filter = '2099-12-31'
+    else:
+        end_date_filter+=datetime.timedelta(days=1)
+
+    purchase_categories_list = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
+                                                     filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
+                                                     if x is not None]
+
+    data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+
+    return JsonResponse(list(data.values()), safe=False)
+
+
 class PurchaseListView(generic.ListView):
     # queryset = Purchase.objects.order_by('-date')
     # context_object_name = 'purchase_list'
@@ -438,19 +462,6 @@ class PurchaseListView(generic.ListView):
         if filter_instance is None:
             filter_instance = Filter.objects.create()
 
-        # start_date = filter_instance.start_date_filter
-        # end_date = filter_instance.end_date_filter
-        #
-        # if start_date is None:
-        #     start_date = '2019-01-01'
-        #
-        # if end_date is None:
-        #     end_date = '2099-12-31'
-        # else:
-        #     end_date+=datetime.timedelta(days=1)
-
-        # return Purchase.objects.filter(date__gte=start_date, date__lt=end_date).order_by('-date', '-time')
-
 
     def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get a context
@@ -464,6 +475,9 @@ class PurchaseListView(generic.ListView):
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
+        context['purchase_category_filters'] = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
+                                                           filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
+                                                           if x is not None]
 
         # To provide the sum of my accounts
         context['accounts_sum'] = 0

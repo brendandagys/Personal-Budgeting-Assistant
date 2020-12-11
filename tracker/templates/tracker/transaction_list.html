@@ -102,19 +102,19 @@
             <br />
 
             <div class="row">
-                <div class="col-sm-5"></div>
+                <div class="col-sm-4"></div>
 
-                <div align="center" class="col-sm-1">
+                <div align="center" class="col-sm-2">
                       <p><b><small>From</small></b></p>
-                      <input style="text-align: center" class="form-control" placeholder="Date..." type="text" id="datepicker">
+                      <input style="text-align:center; width:112.5px;" class="form-control" placeholder="Date..." type="text" id="datepicker">
                 </div>
 
-                <div align="center" class="col-sm-1">
+                <div align="center" class="col-sm-2">
                       <p><b><small>To</small></b></p>
-                      <input style="text-align: center" class="form-control" placeholder="Date..." type="text" id="datepicker_2">
+                      <input style="text-align:center; width:112.5px;" class="form-control" placeholder="Date..." type="text" id="datepicker_2">
                 </div>
 
-                <div class="col-sm-5"></div>
+                <div class="col-sm-4"></div>
             </div>
 
             <!-- <div class="row">
@@ -160,27 +160,36 @@
 
     $(document).ready(function() {
 
-        // var category_filter
-        // var time_filter
+        // Initial indication of the applied filters
+        var purchase_category_filters = '{{purchase_category_filters}}'.replace(/&#39;/g, ''); // Use regex to replace weird characters, globally (replace affects 1st instance only when a string argument)
+        purchase_category_filters = purchase_category_filters.slice(1, purchase_category_filters.length - 1).split(', '); // Python list comes through as string, so remove the enclosing '[' and ']' | .split() turns string into Array
 
-        // $.ajax({
-        //     type: 'GET',
-        //     url: 'filter/',
-        //     data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-        //     success: function(response) {
-        //
-        //         $('.total_spent').text(response['total_spent']);
-        //         $('.date_span').text(response['time_filter_start'].concat(' - ', response['time_filter_end']));
-        //
-        //         $('a[name="' + response['category_filter'] + '"]').wrap('<b></b>').addClass('green_filters');
-        //         $('a[name="' + response['time_filter'] + '"]').wrap('<b></b>').addClass('green_filters');
-        //
-        //     }
-        // });
-        //$('a':not('#homepage_link')).on('click', function(e) {
+        purchase_category_filters.forEach(function(item, index) { // Simpler than using JQuery
+            $('a[id="' + item + '"]').addClass('green_filters');
+        });
+
+
+        $.ajax({
+            type: 'GET',
+            url: 'get_purchases/',
+            data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+            success: function(response) {
+                console.log('Retrieved purchases!');
+                console.log(response);
+            }
+        });
+
 
         $('a[id!="homepage_link"]').on('click', function(e) {
             e.preventDefault()
+
+            $(this).blur(); // Without this, the anchor link remains selected after being clicked
+            if ($(this).hasClass('green_filters')) {
+                $(this).removeClass('green_filters');
+            }
+            else {
+              $(this).addClass('green_filters');
+            }
 
             $.ajax({
                 type: 'POST',
