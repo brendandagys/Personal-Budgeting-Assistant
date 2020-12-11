@@ -189,9 +189,13 @@
                         'type': 'Category',
                         'id': $(this).attr('id'),
                 },
+                context: this, // To allow access in the callback functions
                 success: function () {
                     console.log('Filter POST successful!');
-                    location.reload()
+                    // location.reload()
+                },
+                error: function() {
+                    console.log('There was an issue updating the filter: ' + $(this).attr('id'));
                 }
             });
             return false;

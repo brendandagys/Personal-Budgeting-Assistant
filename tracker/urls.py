@@ -9,5 +9,5 @@ urlpatterns = [
     path('transactions/filters/', views.filter_manager),
     path('transactions/account_update/', views.account_update),
     path('charts/', views.get_chart_data),
-    path('mode/', views.manage_mode),
+    path('mode/', views.mode_manager),
 ]

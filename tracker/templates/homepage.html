@@ -115,6 +115,32 @@
 
             $(document).ready(function() {
 
+                // Hide 2 fields and add an anchor link button
+                $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').hide();
+                $('#id_amount').after('<tr id="custom_row"><td><a id="custom_anchor_link" style="font-size:1rem;">Add 2nd category</a></td></tr>')
+                // After click, hide the link and re-show the hidden fields
+                $('#custom_anchor_link').on('click', function(e) {
+                    $('#custom_anchor_link').hide();
+                    $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').show();
+                });
+
+
+                $('#id_category').on('change', function(e) {
+                    if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
+                        $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
+                        $('#id_amount').val('2.10');
+                        $('#id_description').text('L, regular.'); // textarea elemented must be inserted into using .text()
+                    }
+                    else if ($('#id_category :selected').text() === 'Gas') {
+                        $('#id_item').val('Gas at Esso');
+                        $('#id_description').text(' L, $/L.');
+                    }
+                    else if ($('#id_category :selected').text() === 'Groceries') {
+                        $('#id_item').val('Groceries at ');
+                    }
+                });
+
+
                 var mode
 
                 $.ajax({
@@ -124,10 +150,10 @@
                     success: function(response) {
                       mode = response['mode'];
                       if (mode === 'All') {
-                        $('button[id="all_mode"]').addClass('btn-success');
+                          $('button[id="all_mode"]').addClass('btn-success');
                       }
                       else if (mode === 'Threshold') {
-                        $('button[id="threshold_mode"]').addClass('btn-success');
+                          $('button[id="threshold_mode"]').addClass('btn-success');
                       }
                       console.log('Retrieved mode: '.concat(mode));
                     }

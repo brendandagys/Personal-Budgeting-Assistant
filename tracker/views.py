@@ -425,8 +425,8 @@ def homepage(request):
 
 
 class PurchaseListView(generic.ListView):
-    queryset = Purchase.objects.order_by('-date')
-    context_object_name = 'purchase_list'
+    # queryset = Purchase.objects.order_by('-date')
+    # context_object_name = 'purchase_list'
     template_name = 'tracker/transaction_list.html' # Specify your own template
 
 
@@ -438,74 +438,42 @@ class PurchaseListView(generic.ListView):
         if filter_instance is None:
             filter_instance = Filter.objects.create()
 
-        start_date = filter_instance.start_date_filter
-        end_date = filter_instance.end_date_filter
-
-        if start_date is None:
-            start_date = '2019-01-01'
-
-        if end_date is None:
-            end_date = '2099-12-31'
-        else:
-            end_date+=datetime.timedelta(days=1)
-
-        return Purchase.objects.filter(date__gte=start_date, date__lt=end_date).order_by('-date', '-time')
-
-
-        # # If no filter instance exists or five or more minutes have passed
-        # if filters_instance is None or (datetime.datetime.now() - datetime.datetime.strptime(filters_instance.last_update_time.split('.')[0], "%Y-%m-%d %H:%M:%S")).total_seconds()/60 >= 5:
-        #     category_filter = ''
-        #     time_filter_start = ''
-        #     time_filter_end = ''
-        #     deactivate_category = 'No'
-        #     deactivate_time = 'No'
+        # start_date = filter_instance.start_date_filter
+        # end_date = filter_instance.end_date_filter
         #
+        # if start_date is None:
+        #     start_date = '2019-01-01'
+        #
+        # if end_date is None:
+        #     end_date = '2099-12-31'
         # else:
-        #     category_filter = filters_instance.category_filter
-        #     time_filter_start = self.get_time_filter(filters_instance.time_filter)[0]
-        #     time_filter_end = self.get_time_filter(filters_instance.time_filter)[1]
-        #     deactivate_category = filters_instance.deactivate_category
-        #     deactivate_time = filters_instance.deactivate_time
-        #
-        # if deactivate_category == 'Yes':
-        #     category_filter = ''
-        # if deactivate_time == 'Yes':
-        #     time_filter_start = ''
-        #
-        # if category_filter == '' and time_filter_start != '':
-        #     return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
-        #
-        # elif category_filter != '' and time_filter_start == '':
-        #     return Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
-        #
-        # elif category_filter != '' and time_filter_start != '':
-        #     return Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
-        #
-        # else:
-        #     return Purchase.objects.all().order_by('-date', '-time')
+        #     end_date+=datetime.timedelta(days=1)
+
+        # return Purchase.objects.filter(date__gte=start_date, date__lt=end_date).order_by('-date', '-time')
 
 
     def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get a context
-        context = super().get_context_data(*args, **kwargs)
+        context = super().get_context_data(*args, **kwargs) # Simply using context = {} works, but being safe...
 
+        # To generate fields for me to update account balances
         context['account_form'] = AccountForm()
 
+        # To fill the datepickers with the current date filters and label the active filters
         filter_instance = Filter.objects.last()
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
 
-        # purchase_categories_list = PurchaseCategory.objects.values_list('category') # Used below
-        # context['purchase_categories_list'] = purchase_categories_list
-
+        # To provide the sum of my accounts
         context['accounts_sum'] = 0
         for account in Account.objects.all():
             account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
+            account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
             context['accounts_sum']+=account_value
         context['accounts_sum'] = '${:20,.2f}'.format(context['accounts_sum'])
 
-
+        # To generate the filter buttons on Purchase Category
         purchase_categories_list = []
         for purchase_category in PurchaseCategory.objects.all().order_by('category'):
             purchase_categories_list.append(purchase_category.category)
@@ -529,9 +497,9 @@ def filter_manager(request):
 
         filter_instance = Filter.objects.last()
 
-        filter_value = request.POST['filter_value']
-
         if request.POST['type'] == 'Date':
+            filter_value = request.POST['filter_value']
+
             if filter_value == '':
                 filter_value = None
 
@@ -541,6 +509,8 @@ def filter_manager(request):
                 filter_instance.end_date_filter = filter_value
 
         elif request.POST['type'] == 'Category':
+
+            filter_value = request.POST['id'] # The filter 'value' is simply stored in the ID
 
             # Extract the current filter values
             category_filter_1 = filter_instance.category_filter_1
@@ -554,150 +524,57 @@ def filter_manager(request):
             category_filter_9 = filter_instance.category_filter_9
             category_filter_10 = filter_instance.category_filter_10
 
-            print('New filter value: ' + str(filter_value) + '\n')
+            print('\nNew filter value: ' + str(filter_value) + '\n')
 
-            # Change filter values as needed
+            # Clear filter values if necessary
             if filter_value == 'No Filter':
-                category_filter_1 = None
-                category_filter_2 = None
-                category_filter_3 = None
-                category_filter_4 = None
-                category_filter_5 = None
-                category_filter_6 = None
-                category_filter_7 = None
-                category_filter_8 = None
-                category_filter_9 = None
-                category_filter_10 = None
+                filter_instance.category_filter_1 = None
+                filter_instance.category_filter_2 = None
+                filter_instance.category_filter_3 = None
+                filter_instance.category_filter_4 = None
+                filter_instance.category_filter_5 = None
+                filter_instance.category_filter_6 = None
+                filter_instance.category_filter_7 = None
+                filter_instance.category_filter_8 = None
+                filter_instance.category_filter_9 = None
+                filter_instance.category_filter_10 = None
 
-            # Turn off the filter if the value is the same
             else:
-                for index, item in enumerate([category_filter_1, category_filter_2, category_filter_3, category_filter_4, category_filter_5, category_filter_6, category_filter_7, category_filter_8, category_filter_9, category_filter_10]):
-                    if item is not None and index != 9 and item != filter_value:
-                        continue
-                    elif item is not None and item == filter_value:
-                        item = None
-                    else:
-                        item = filter_value
+                filter_list = [category_filter_1, category_filter_2, category_filter_3, category_filter_4, category_filter_5, category_filter_6, category_filter_7, category_filter_8, category_filter_9, category_filter_10]
+                filter_list = [x.category if x is not None else x for x in filter_list]
+                # print(filter_list)
 
-                # filter_value_list = sorted(filter_value) # Rename, as front-end passes an array ['a', 'b', etc.]
+                # Turn off the filter if the value is the same
+                if filter_value in filter_list:
+                    filter_list[filter_list.index(filter_value)] = None # Set the filter to be removed to None
+                # Otherwise, place the new value at the first None position
+                else:
+                    for index, item in enumerate(filter_list):
+                        if item is None:
+                            filter_list[index] = filter_value
+                            break
 
-                # Reset all to be over-written in order
-                category_filter_1 = None
-                category_filter_2 = None
-                category_filter_3 = None
-                category_filter_4 = None
-                category_filter_5 = None
-                category_filter_6 = None
-                category_filter_7 = None
-                category_filter_8 = None
-                category_filter_9 = None
-                category_filter_10 = None
-                # To iterate through
-                slot_list = [designation_filter_1, designation_filter_2, designation_filter_3, designation_filter_4, designation_filter_5, designation_filter_6, designation_filter_7, designation_filter_8, designation_filter_9]
-                # If anything beside 'ALL DESIGNATIONS' was passed...
-                if any([choice != 'ALL DESIGNATIONS' for choice in filter_value_list]):
-                    try:
-                        filter_value_list.remove('ALL DESIGNATIONS') # Only removes the first instance, but there will only ever be one
-                    except Exception:
-                        pass
+                # We still want alphabetical, with None values at the end
+                filter_list.sort(key=lambda x: (x is None, x))
 
-                    for designation in filter_value_list: # Go through all Designations
-                        for index, slot in enumerate(slot_list):
-                            # Prevent multiple values being written: write if the first row, or the row isn't set and the last row hasn't been set to the same value
-                            if (index == 0 and slot == 'ALL DESIGNATIONS') or (slot == 'ALL DESIGNATIONS' and slot_list[index-1] not in [designation, 'ALL DESIGNATIONS']):
-                                slot_list[index] = designation
-
-                    designation_filter_1 = slot_list[0]
-                    designation_filter_2 = slot_list[1]
-                    designation_filter_3 = slot_list[2]
-                    designation_filter_4 = slot_list[3]
-                    designation_filter_5 = slot_list[4]
-                    designation_filter_6 = slot_list[5]
-                    designation_filter_7 = slot_list[6]
-                    designation_filter_8 = slot_list[7]
-                    designation_filter_9 = slot_list[8]
-
-                    # Prevents the ALL option from not showing if all nine Designations are selected
-                    if all([choice != 'ALL DESIGNATIONS' for choice in slot_list]):
-                        designation_filter_1 = 'ALL DESIGNATIONS'
-                        designation_filter_2 = 'ALL DESIGNATIONS'
-                        designation_filter_3 = 'ALL DESIGNATIONS'
-                        designation_filter_4 = 'ALL DESIGNATIONS'
-                        designation_filter_5 = 'ALL DESIGNATIONS'
-                        designation_filter_6 = 'ALL DESIGNATIONS'
-                        designation_filter_7 = 'ALL DESIGNATIONS'
-                        designation_filter_8 = 'ALL DESIGNATIONS'
-                        designation_filter_9 = 'ALL DESIGNATIONS'
-
-
-
-
-
-
-
+                filter_instance.category_filter_1 = None if filter_list[0] is None else PurchaseCategory.objects.get(pk=filter_list[0])
+                filter_instance.category_filter_2 = None if filter_list[1] is None else PurchaseCategory.objects.get(pk=filter_list[1])
+                filter_instance.category_filter_3 = None if filter_list[2] is None else PurchaseCategory.objects.get(pk=filter_list[2])
+                filter_instance.category_filter_4 = None if filter_list[3] is None else PurchaseCategory.objects.get(pk=filter_list[3])
+                filter_instance.category_filter_5 = None if filter_list[4] is None else PurchaseCategory.objects.get(pk=filter_list[4])
+                filter_instance.category_filter_6 = None if filter_list[5] is None else PurchaseCategory.objects.get(pk=filter_list[5])
+                filter_instance.category_filter_7 = None if filter_list[6] is None else PurchaseCategory.objects.get(pk=filter_list[6])
+                filter_instance.category_filter_8 = None if filter_list[7] is None else PurchaseCategory.objects.get(pk=filter_list[7])
+                filter_instance.category_filter_9 = None if filter_list[8] is None else PurchaseCategory.objects.get(pk=filter_list[8])
+                filter_instance.category_filter_10 = None if filter_list[9] is None else PurchaseCategory.objects.get(pk=filter_list[9])
 
         filter_instance.save()
 
         return HttpResponse()
 
-    # elif request.method == 'GET':
-    #
-    #     try:
-    #         filters_instance = Filter.objects.all()[0]
-    #
-    #     except:
-    #         filters_instance = Filter.objects.create(last_update_date = datetime.date.today(),
-    #                                                  last_update_time = datetime.datetime.now(),
-    #                                                  category_filter = '',
-    #                                                  time_filter = '',
-    #                                                  deactivate_category = 'No',
-    #                                                  deactivate_time = 'No' )
-    #
-    #     # Return the sum of money spent for the given filters
-    #
-    #     if filters_instance.deactivate_category == 'Yes':
-    #         category_filter = ''
-    #     else:
-    #         category_filter = filters_instance.category_filter
-    #
-    #     if filters_instance.deactivate_time == 'Yes':
-    #         time_filter = ''
-    #         time_filter_start = ''
-    #         time_filter_end = ''
-    #     else:
-    #         time_filter = filters_instance.time_filter
-    #         time_filter_start = get_time_filter(filters_instance.time_filter)[0]
-    #         time_filter_end = get_time_filter(filters_instance.time_filter)[1]
-    #
-    #     if category_filter == '' and time_filter_start != '':
-    #         purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end)).order_by('-date', '-time')
-    #
-    #     elif category_filter != '' and time_filter_start == '':
-    #         purchase_instance = Purchase.objects.filter(Q(category=category_filter) | Q(category_2=category_filter)).order_by('-date', '-time')
-    #
-    #     elif category_filter != '' and time_filter_start != '':
-    #         purchase_instance = Purchase.objects.filter(Q(date__gte=time_filter_start) & Q(date__lte=time_filter_end) & (Q(category=category_filter) | Q(category_2=category_filter))).order_by('-date', '-time')
-    #
-    #     else:
-    #         purchase_instance = Purchase.objects.all()
-    #
-    #     # If there are no objects, the sum will be None
-    #     try:
-    #         total_spent = '$' + str(round(purchase_instance.aggregate(Sum('amount'))['amount__sum'], 2))
-    #     except:
-    #         total_spent = '$0'
-    #
-    #     return JsonResponse({'category_filter': category_filter.replace(' ', '').replace('/', '').lower(),
-    #                          'time_filter': time_filter.replace(' ', '').replace('/', '').lower(),
-    #                          'time_filter_start': time_filter_start,
-    #                          'time_filter_end': time_filter_end,
-    #                          'total_spent': total_spent, })
-
-    return HttpResponse()
-
 
 @login_required
-def manage_mode(request):
+def mode_manager(request):
     if request.method == 'GET':
         mode_instance = Mode.objects.last()
 

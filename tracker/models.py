@@ -76,6 +76,7 @@ class Filter(models.Model):
 
 class Account(models.Model):
     account = models.CharField(primary_key=True, max_length=40, verbose_name='Account')
+    credit = models.BooleanField(default=False, verbose_name='Credit')
     active = models.BooleanField(default=True, verbose_name='Active')
     account_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Account Created DateTime')
 
@@ -84,7 +85,7 @@ class Account(models.Model):
         verbose_name = 'Account'
 
     def __str__(self):
-        return ', '.join([self.account, str(self.active), str(self.account_created_datetime)])
+        return ', '.join([self.account, str(self.credit), str(self.active), str(self.account_created_datetime)])
 
 
 class AccountUpdate(models.Model):
