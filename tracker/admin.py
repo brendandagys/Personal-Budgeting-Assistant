@@ -17,6 +17,10 @@ class AccountResource(resources.ModelResource):
     class Meta:
         model = Account
 
+class AccountUpdateResource(resources.ModelResource):
+    class Meta:
+        model = AccountUpdate
+
 class PurchaseCategoryResource(resources.ModelResource):
     class Meta:
         model = PurchaseCategory
@@ -45,7 +49,7 @@ class AccountAdmin(ImportExportModelAdmin):
 
 @admin.register(AccountUpdate)
 class AccountUpdateAdmin(ImportExportModelAdmin):
-    resource_class = AccountUpdate
+    resource_class = AccountUpdateResource
     readonly_fields = ('timestamp',)
 
 @admin.register(Bill)
