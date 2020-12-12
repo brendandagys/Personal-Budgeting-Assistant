@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Purchase, PurchaseCategory, Filter, Account, AccountUpdate, Alert, Mode
+from .models import Purchase, PurchaseCategory, Filter, Account, AccountUpdate, Bill, Alert, Mode
 
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -9,9 +9,9 @@ class PurchaseResource(resources.ModelResource):
     class Meta:
         model = Purchase
 
-# class BillResource(resources.ModelResource):
-#     class Meta:
-#         model = Bill
+class BillResource(resources.ModelResource):
+    class Meta:
+        model = Bill
 
 class AccountResource(resources.ModelResource):
     class Meta:
@@ -48,9 +48,9 @@ class AccountUpdateAdmin(ImportExportModelAdmin):
     resource_class = AccountUpdate
     readonly_fields = ('timestamp',)
 
-# @admin.register(Bill)
-# class BillAdmin(ImportExportModelAdmin):
-#     resource_class = BillResource
+@admin.register(Bill)
+class BillAdmin(ImportExportModelAdmin):
+    resource_class = BillResource
 
 @admin.register(Alert)
 class AlertAdmin(ImportExportModelAdmin):

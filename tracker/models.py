@@ -109,19 +109,18 @@ class AccountUpdate(models.Model):
         return ', '.join([str(self.account), str(self.value), str(self.timestamp)])
 
 
-# class Bill(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     bill = models.CharField(max_length=40, verbose_name='Bill')
-#     active = models.BooleanField(default=True, verbose_name='Active')
-#     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-#     frequency = models.CharField(max_length=100, verbose_name='Frequency')
-#
-#     class Meta:
-#         verbose_name_plural = 'Bills'
-#         verbose_name = 'Bill'
-#
-#     def __str__(self):
-#         return ', '.join([self.bill, str(self.active), self.frequency])
+class Bill(models.Model):
+    bill = models.CharField(max_length=40, verbose_name='Bill')
+    active = models.BooleanField(default=True, verbose_name='Active')
+    amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
+    frequency = models.CharField(max_length=100, verbose_name='Frequency')
+
+    class Meta:
+        verbose_name_plural = 'Bills'
+        verbose_name = 'Bill'
+
+    def __str__(self):
+        return ', '.join([self.bill, str(self.active), self.frequency])
 
 
 class Alert(models.Model):
