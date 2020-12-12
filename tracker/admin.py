@@ -9,6 +9,18 @@ class PurchaseResource(resources.ModelResource):
     class Meta:
         model = Purchase
 
+class BillResource(resources.ModelResource):
+    class Meta:
+        model = Bill
+
+class AccountResource(resources.ModelResource):
+    class Meta:
+        model = Account
+
+class PurchaseCategoryResource(resources.ModelResource):
+    class Meta:
+        model = PurchaseCategory
+
 @admin.register(Purchase)
 class PurchaseAdmin(ImportExportModelAdmin):
     resource_class = PurchaseResource
@@ -17,7 +29,7 @@ class PurchaseAdmin(ImportExportModelAdmin):
 
 @admin.register(PurchaseCategory)
 class PurchaseCategoryAdmin(ImportExportModelAdmin):
-    resource_class = PurchaseCategory
+    resource_class = PurchaseCategoryResource
     list_display = ('category',)
     readonly_fields = ('category_created_datetime',)
 
@@ -29,7 +41,7 @@ class FiltersAdmin(ImportExportModelAdmin):
 
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):
-    resource_class = Account
+    resource_class = AccountResource
 
 @admin.register(AccountUpdate)
 class AccountUpdateAdmin(ImportExportModelAdmin):
@@ -38,7 +50,7 @@ class AccountUpdateAdmin(ImportExportModelAdmin):
 
 @admin.register(Bill)
 class BillAdmin(ImportExportModelAdmin):
-    resource_class = Bill
+    resource_class = BillResource
 
 @admin.register(Alert)
 class AlertAdmin(ImportExportModelAdmin):

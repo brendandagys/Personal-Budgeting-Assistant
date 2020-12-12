@@ -16,11 +16,16 @@ from .models import Purchase, Filter, Bill, Alert, Mode, PurchaseCategory, Accou
 from django.db.models import Sum
 
 from math import floor
+from decimal import Decimal
 import datetime
 import calendar
 from dateutil.relativedelta import *
 import re
 import pandas as pd
+
+from forex_python.converter import CurrencyRates, CurrencyCodes
+cr = CurrencyRates()
+cc = CurrencyCodes()
 
 # Get information about today's date
 date = datetime.date.today()
@@ -424,6 +429,12 @@ def homepage(request):
     return render(request, 'homepage.html', context=context)
 
 
+def convert_currency(foreign_value, foreign_currency, desired_currency):
+    # foreign_value = account_value # account_value is actually for another currency
+    conversion_rate = cr.get_rate(foreign_currency, desired_currency)
+    return round(foreign_value * Decimal(conversion_rate), 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
+
+
 @login_required
 def get_accounts_sum(request):
     accounts_sum = 0
@@ -431,6 +442,18 @@ def get_accounts_sum(request):
     for account in Account.objects.all():
         account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
         account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
+
+        if account.currency != 'CAD':
+            foreign_value = account_value
+            account_value = convert_currency(account_value, account.currency, 'CAD')
+
+            # Different currency symbol formatting for American dollars
+            USD_suffix = ''
+            if account.currency == 'USD':
+                USD_suffix = ' USD'
+
+            print('\nAccount \'{}\' converted from {}{}{} to ${} CAD.\n'.format(account.account, cc.get_symbol(account.currency), foreign_value, USD_suffix, account_value))
+
         accounts_sum+=account_value
 
     return JsonResponse('${:20,.2f}'.format(accounts_sum), safe=False)
@@ -458,7 +481,7 @@ def get_json_queryset(request):
     queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
 
     purchases_sum = 0
-    for purchase in list(queryset_data.values_list('amount', 'amount_2')):
+    for purchase in list(queryset_data.values_list('amount', 'amount_2')): # Returns a Queryset of tuples
         purchases_sum+=purchase[0]
         if purchase[1] is not None:
             purchases_sum+=purchase[1]
