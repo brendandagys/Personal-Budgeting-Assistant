@@ -15,7 +15,7 @@ def current_datetime():
 
 
 class PurchaseCategory(models.Model):
-    category = models.CharField(primary_key=True, max_length=30, verbose_name='Category')
+    category = models.CharField(max_length=30, verbose_name='Category')
     category_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Category Created DateTime') # Any field with the auto_now attribute set will also inherit editable=False and won't show in admin panel
 
     class Meta:
@@ -81,7 +81,7 @@ class Account(models.Model):
         ('EUR', 'EUR'),
     ]
 
-    account = models.CharField(primary_key=True, max_length=40, verbose_name='Account')
+    account = models.CharField(max_length=40, verbose_name='Account')
     credit = models.BooleanField(default=False, verbose_name='Credit')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
     active = models.BooleanField(default=True, verbose_name='Active')

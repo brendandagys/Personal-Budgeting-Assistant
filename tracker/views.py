@@ -35,6 +35,7 @@ month_name = calendar.month_name[date.month]
 day = date.day
 weekday = date.weekday()
 
+
 @login_required # Don't think this is necessary
 def get_chart_data(request):
 
