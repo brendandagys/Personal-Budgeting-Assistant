@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     path('', views.homepage, name='homepage'),
     path('transactions/', login_required(views.PurchaseListView.as_view()), name='transactions'),
+    path('transactions/get_accounts_sum/', views.get_accounts_sum),
     path('transactions/get_purchases/', views.get_json_queryset),
     path('transactions/filters/', views.filter_manager),
     path('transactions/account_update/', views.account_update),

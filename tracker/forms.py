@@ -13,8 +13,8 @@ class PurchaseForm(ModelForm):
             self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
 
         self.fields['item'].widget.attrs.update({'placeholder': 'Item(s)...'})
-        self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...', 'inputmode': 'decimal', 'step': 1})
-        self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional...', 'inputmode': 'decimal', 'step': 1})
+        self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...', 'inputmode': 'decimal'})
+        self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional...', 'inputmode': 'decimal'})
         self.fields['description'].widget.attrs.update({'rows': 3, 'placeholder': 'Specifics...'})
 
     class Meta:
@@ -32,7 +32,7 @@ class AccountForm(ModelForm):
             # Get the last value for the account. If it's None, make placeholder value 0
             last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
             self.fields[account.account] = DecimalField(label=account.account, max_digits=9, decimal_places=2, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px',
-                                                                                                                                                         'inputmode': 'decimal', 'step': 1, 'placeholder': '${:20,.2f}'.format(last_value)}))
+                                                                                                                                                         'inputmode': 'decimal', 'placeholder': '${:20,.2f}'.format(last_value)}))
 
     class Meta:
         model = Account

@@ -45,12 +45,12 @@
 
                 <div class="navigation_link col-sm-12">
                     <div>
-                        <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">New Entry/Statistics</a>
+                        <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Enter Purchase/View Charts</a>
                     </div>
                 </div>
 
                 <div class="col-sm-12">
-                    <b><h2 class="total_spent"></h2></b>
+                    <b><h2 id="total_spent" class="total_spent"></h2></b>
                 </div>
 
             </div>
@@ -68,7 +68,7 @@
                 </form>
             </div>
 
-            <span style="text-align:center;"><h3>{{accounts_sum}}</h3></span>
+            <span style="text-align:center;"><h3 id="accounts_sum"></h3></span>
 
             <hr />
 
@@ -131,21 +131,12 @@
 
             <div class="purchase_list_div col-sm-12">
 
-                {% if purchase_list %}
-                    <h1 class="purchase_header">Purchase List </h1>
-                    <div class="date_span"></div>
+                <h1 id="purchase_list_header" class="purchase_header">Purchases List </h1>
 
-                    <ul class="list_container">
-                        {% for purchase in purchase_list %}
-                            <li class="purchase_list_items">
-                                <h5><b>{{ purchase.date }}, {{ purchase.time }}</b>: <span class="blue_text">${{ purchase.amount }}</span></h5>
-                                <h5><u>{{ purchase.category }}</u>  {% if purchase.category_2 %} | <u>{{ purchase.category_2 }}</u> {% endif %}| {{ purchase.item }} {% if purchase.description %} | <span class="purchase_description"><i>{{ purchase.description }}</i></span> {% endif %}</h5>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <h4 class="no_purchases">There are no purchases recorded.</h1>
-                {% endif %}
+                <div id="purchase_list_div"></div>
+
+                <!-- <h4 class="no_purchases">There are no purchases recorded.</h1> -->
+
 
             </div>
 
@@ -163,21 +154,91 @@
         // Initial indication of the applied filters
         var purchase_category_filters = '{{purchase_category_filters}}'.replace(/&#39;/g, ''); // Use regex to replace weird characters, globally (replace affects 1st instance only when a string argument)
         purchase_category_filters = purchase_category_filters.slice(1, purchase_category_filters.length - 1).split(', '); // Python list comes through as string, so remove the enclosing '[' and ']' | .split() turns string into Array
-
+        // Indicate the selected filters
         purchase_category_filters.forEach(function(item, index) { // Simpler than using JQuery
             $('a[id="' + item + '"]').addClass('green_filters');
         });
 
+        // Set the date filters
+        $('#datepicker').val('{{start_date}}');
+        $('#datepicker_2').val('{{end_date}}');
 
-        $.ajax({
-            type: 'GET',
-            url: 'get_purchases/',
-            data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
-            success: function(response) {
-                console.log('Retrieved purchases!');
-                console.log(response);
-            }
-        });
+
+        get_accounts_sum = function() {
+            $.ajax({
+                type: 'GET',
+                url: 'get_accounts_sum/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function(response) {
+                    console.log('Retrieved accounts sum!');
+                    console.log(response);
+                    $('#accounts_sum').html(response);
+                }
+            });
+        }
+
+        // Populate the Accounts sum value upon initial page load
+        get_accounts_sum();
+
+
+        // General function to fetch the Queryset and populate the page with it
+        get_queryset = function() {
+            $.ajax({
+                type: 'GET',
+                url: 'get_purchases/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function(response) {
+                    console.log('Retrieved purchases!');
+                    console.log(response); // object
+
+                    $('#total_spent').html(response['purchases_sum']); // Set the total amount spent
+
+                    $('#purchase_list_div').html('');
+                    $('#purchase_list_div').html(
+                        function() {
+                            let purchase_list = '<ul class="list_container">';
+                            $.each(response['data'], function(index, value) {
+                                let date = value.date;
+                                let time = value.time;
+                                let amount = value.amount;
+                                let category = value.category_id;
+                                let amount_2 = value.amount_2;
+                                let category_2 = value.category_2_id;
+                                let item = value.item;
+                                let description = value.description;
+                                let category_spacer = ' ';
+                                let description_spacer = '';
+
+                                if (category_2 === null) {
+                                    category_2 = '';
+                                }
+                                else {
+                                    category_spacer = ' | ';
+                                }
+                                if (amount_2 === null) {
+                                    amount_2 = '';
+                                }
+                                else {
+                                    amount_2 = '+ $'.concat(amount_2);
+                                }
+                                if (description !== '') {
+                                    description_spacer = ' | ';
+                                }
+
+                                purchase_list = purchase_list.concat('<li class="purchase_list_items">');
+                                purchase_list = purchase_list.concat(`<h5><b>${date}, ${time}</b>: <span class="blue_text">$${amount} ${amount_2}</span></h5>`);
+                                purchase_list = purchase_list.concat(`<h5><u>${category}</u>${category_spacer}<u>${category_2}</u> | <b>${item}</b>${description_spacer}<span class="purchase_description"><i>${description}</i></span></h5></li>`);
+                            });
+
+                            return purchase_list.concat('</ul>');
+                        }
+                    );
+                }
+            });
+        }
+
+        // Populate the Purchase list upon initial page load
+        get_queryset();
 
 
         $('a[id!="homepage_link"]').on('click', function(e) {
@@ -201,7 +262,7 @@
                 context: this, // To allow access in the callback functions
                 success: function () {
                     console.log('Filter POST successful!');
-                    // location.reload()
+                    get_queryset();
                 },
                 error: function() {
                     console.log('There was an issue updating the filter: ' + $(this).attr('id'));
@@ -209,11 +270,6 @@
             });
             return false;
         });
-
-
-        // Set the
-        $('#datepicker').val('{{start_date}}');
-        $('#datepicker_2').val('{{end_date}}');
 
 
         $('#account_form').find(':input').on('change', function(e) {
@@ -230,6 +286,7 @@
                 context: this, // To allow access in the callback functions
                 success: function () {
                     console.log($(this).attr('id') + ' updated to: ' + $(this).val());
+                    get_accounts_sum();
                 },
                 error: function () {
                     console.log('There was an issue updating the value for ' + $(this).attr('id'));
@@ -262,7 +319,7 @@
                     context: this, // Add to context so we can access it in the success callback function
                     success: function(response) {
                         console.log('Date filter POST success: ' + $(this).val());
-                        // location.reload();
+                        get_queryset();
                     },
                     error: function() {
                         console.log('Error!');

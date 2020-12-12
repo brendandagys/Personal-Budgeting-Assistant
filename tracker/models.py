@@ -75,8 +75,15 @@ class Filter(models.Model):
 
 
 class Account(models.Model):
+    CURRENCIES = [
+        ('CAD', 'CAD'),
+        ('USD', 'USD'),
+        ('EURO', 'EURO'),
+    ]
+
     account = models.CharField(primary_key=True, max_length=40, verbose_name='Account')
     credit = models.BooleanField(default=False, verbose_name='Credit')
+    currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
     active = models.BooleanField(default=True, verbose_name='Active')
     account_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Account Created DateTime')
 
@@ -103,7 +110,7 @@ class AccountUpdate(models.Model):
 
 
 class Bill(models.Model):
-    bill = models.CharField(primary_key=True, max_length=40, verbose_name = 'Bill')
+    bill = models.CharField(primary_key=True, max_length=40, verbose_name='Bill')
     active = models.BooleanField(default=True, verbose_name='Active')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
     frequency = models.CharField(max_length=100, verbose_name='Frequency')

@@ -425,6 +425,18 @@ def homepage(request):
 
 
 @login_required
+def get_accounts_sum(request):
+    accounts_sum = 0
+
+    for account in Account.objects.all():
+        account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
+        account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
+        accounts_sum+=account_value
+
+    return JsonResponse('${:20,.2f}'.format(accounts_sum), safe=False)
+
+
+@login_required
 def get_json_queryset(request):
     filter_instance = Filter.objects.last()
 
@@ -443,9 +455,15 @@ def get_json_queryset(request):
                                                      filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
                                                      if x is not None]
 
-    data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
 
-    return JsonResponse(list(data.values()), safe=False)
+    purchases_sum = 0
+    for purchase in list(queryset_data.values_list('amount', 'amount_2')):
+        purchases_sum+=purchase[0]
+        if purchase[1] is not None:
+            purchases_sum+=purchase[1]
+
+    return JsonResponse({'data': list(queryset_data.values()), 'purchases_sum': '$' + str(purchases_sum)}, safe=False)
 
 
 class PurchaseListView(generic.ListView):
@@ -478,14 +496,6 @@ class PurchaseListView(generic.ListView):
         context['purchase_category_filters'] = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
                                                            filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
                                                            if x is not None]
-
-        # To provide the sum of my accounts
-        context['accounts_sum'] = 0
-        for account in Account.objects.all():
-            account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
-            account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
-            context['accounts_sum']+=account_value
-        context['accounts_sum'] = '${:20,.2f}'.format(context['accounts_sum'])
 
         # To generate the filter buttons on Purchase Category
         purchase_categories_list = []
