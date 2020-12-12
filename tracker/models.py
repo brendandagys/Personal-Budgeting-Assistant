@@ -110,6 +110,7 @@ class AccountUpdate(models.Model):
 
 
 class Bill(models.Model):
+    id = models.AutoField(primary_key=True)
     bill = models.CharField(max_length=40, verbose_name='Bill')
     active = models.BooleanField(default=True, verbose_name='Active')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
