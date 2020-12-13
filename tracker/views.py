@@ -430,10 +430,14 @@ def homepage(request):
     return render(request, 'homepage.html', context=context)
 
 
+def get_exchange_rate(foreign_currency, desired_currency):
+    return Decimal(cr.get_rate(foreign_currency, desired_currency), 2)
+
+
 def convert_currency(foreign_value, foreign_currency, desired_currency):
     # foreign_value = account_value # account_value is actually for another currency
-    conversion_rate = cr.get_rate(foreign_currency, desired_currency)
-    return round(foreign_value * Decimal(conversion_rate), 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
+    conversion_rate = get_exchange_rate(foreign_currency, desired_currency)
+    return round(foreign_value * conversion, 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
 
 
 @login_required
@@ -642,6 +646,6 @@ def mode_manager(request):
 @login_required
 def account_update(request):
     if request.method == 'POST':
-        # print(request.POST['id'])
-        AccountUpdate.objects.create(account=Account.objects.get(pk=request.POST['id'][3:]), value=request.POST['value']) # id is prefixed with 'id_'
+        account = Account.objects.get(pk=request.POST['id'][3:])
+        AccountUpdate.objects.create(account=account, value=request.POST['value'], exchange_rate=get_exchange_rate(account.currency, 'CAD')) # id is prefixed with 'id_'
     return HttpResponse()

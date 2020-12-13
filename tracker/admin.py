@@ -28,13 +28,13 @@ class PurchaseCategoryResource(resources.ModelResource):
 @admin.register(Purchase)
 class PurchaseAdmin(ImportExportModelAdmin):
     resource_class = PurchaseResource
-    list_display = ('date', 'time', 'category', 'category_2', 'item', 'amount')
+    list_display = ('date', 'time', 'category', 'category_2', 'item', 'amount', 'amount_2', 'description')
     list_filter = ['date', 'category', 'item']
 
 @admin.register(PurchaseCategory)
 class PurchaseCategoryAdmin(ImportExportModelAdmin):
     resource_class = PurchaseCategoryResource
-    list_display = ('category',)
+    list_display = ('category', 'category_created_datetime')
     readonly_fields = ('category_created_datetime',)
 
 @admin.register(Filter)
@@ -46,21 +46,27 @@ class FiltersAdmin(ImportExportModelAdmin):
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):
     resource_class = AccountResource
+    list_display = ('account', 'active', 'credit', 'currency', 'account_created_datetime')
     readonly_fields = ('account_created_datetime',)
 
 @admin.register(AccountUpdate)
 class AccountUpdateAdmin(ImportExportModelAdmin):
     resource_class = AccountUpdateResource
+    list_display = ('account', 'value', 'timestamp')
     readonly_fields = ('timestamp',)
 
 @admin.register(Bill)
 class BillAdmin(ImportExportModelAdmin):
     resource_class = BillResource
+    list_display = ('bill', 'active', 'amount', 'frequency')
 
 @admin.register(Alert)
 class AlertAdmin(ImportExportModelAdmin):
     resource_class = Alert
+    list_display = ('type', 'percent', 'date_sent')
+    readonly_fields = ('date_sent',)
 
 @admin.register(Mode)
 class ModeAdmin(ImportExportModelAdmin):
     resource_class = Mode
+    list_display = ('mode',)

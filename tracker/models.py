@@ -91,6 +91,7 @@ class Account(models.Model):
     class Meta:
         verbose_name_plural = 'Accounts'
         verbose_name = 'Account'
+        ordering = ['account']
 
     def __str__(self):
         return ', '.join([self.account, str(self.credit), str(self.active), str(self.account_created_datetime)])
@@ -99,6 +100,7 @@ class Account(models.Model):
 class AccountUpdate(models.Model):
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
     value = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Value')
+    exchange_rate = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name='Exchange Rate')
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Account Timestamp')
 
     class Meta:
@@ -119,6 +121,7 @@ class Bill(models.Model):
     class Meta:
         verbose_name_plural = 'Bills'
         verbose_name = 'Bill'
+        ordering = ['-amount']
 
     def __str__(self):
         return ', '.join([self.bill, str(self.active), self.frequency])
@@ -132,6 +135,7 @@ class Alert(models.Model):
     class Meta:
         verbose_name_plural = 'Alerts'
         verbose_name = 'Alert'
+        ordering = ['-date_sent', 'type']
 
     def __str__(self):
         return ', '.join([self.type, str(self.percent), str(self.date_sent)])
