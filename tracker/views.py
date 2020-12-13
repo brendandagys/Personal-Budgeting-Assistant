@@ -479,9 +479,9 @@ def get_json_queryset(request):
     else:
         end_date_filter+=datetime.timedelta(days=1)
 
-    purchase_categories_list = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
-                                                     filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
-                                                     if x is not None]
+    purchase_categories_list = [x.id for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
+                                               filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
+                                               if x is not None]
 
     queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
 

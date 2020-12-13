@@ -52,7 +52,7 @@ class AccountAdmin(ImportExportModelAdmin):
 @admin.register(AccountUpdate)
 class AccountUpdateAdmin(ImportExportModelAdmin):
     resource_class = AccountUpdateResource
-    list_display = ('account', 'value', 'timestamp')
+    list_display = ('account', 'value', 'exchange_rate', 'timestamp')
     readonly_fields = ('timestamp',)
 
 @admin.register(Bill)
