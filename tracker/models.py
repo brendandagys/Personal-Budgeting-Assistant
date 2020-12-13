@@ -100,7 +100,7 @@ class Account(models.Model):
 class AccountUpdate(models.Model):
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
     value = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Value')
-    exchange_rate = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name='Exchange Rate')
+    exchange_rate = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD')
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Account Timestamp')
 
     class Meta:

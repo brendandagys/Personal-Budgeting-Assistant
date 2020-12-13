@@ -609,16 +609,16 @@ def filter_manager(request):
                 # We still want alphabetical, with None values at the end
                 filter_list.sort(key=lambda x: (x is None, x))
 
-                filter_instance.category_filter_1 = None if filter_list[0] is None else PurchaseCategory.objects.get(pk=filter_list[0])
-                filter_instance.category_filter_2 = None if filter_list[1] is None else PurchaseCategory.objects.get(pk=filter_list[1])
-                filter_instance.category_filter_3 = None if filter_list[2] is None else PurchaseCategory.objects.get(pk=filter_list[2])
-                filter_instance.category_filter_4 = None if filter_list[3] is None else PurchaseCategory.objects.get(pk=filter_list[3])
-                filter_instance.category_filter_5 = None if filter_list[4] is None else PurchaseCategory.objects.get(pk=filter_list[4])
-                filter_instance.category_filter_6 = None if filter_list[5] is None else PurchaseCategory.objects.get(pk=filter_list[5])
-                filter_instance.category_filter_7 = None if filter_list[6] is None else PurchaseCategory.objects.get(pk=filter_list[6])
-                filter_instance.category_filter_8 = None if filter_list[7] is None else PurchaseCategory.objects.get(pk=filter_list[7])
-                filter_instance.category_filter_9 = None if filter_list[8] is None else PurchaseCategory.objects.get(pk=filter_list[8])
-                filter_instance.category_filter_10 = None if filter_list[9] is None else PurchaseCategory.objects.get(pk=filter_list[9])
+                filter_instance.category_filter_1 = None if filter_list[0] is None else PurchaseCategory.objects.get(category=filter_list[0])
+                filter_instance.category_filter_2 = None if filter_list[1] is None else PurchaseCategory.objects.get(category=filter_list[1])
+                filter_instance.category_filter_3 = None if filter_list[2] is None else PurchaseCategory.objects.get(category=filter_list[2])
+                filter_instance.category_filter_4 = None if filter_list[3] is None else PurchaseCategory.objects.get(category=filter_list[3])
+                filter_instance.category_filter_5 = None if filter_list[4] is None else PurchaseCategory.objects.get(category=filter_list[4])
+                filter_instance.category_filter_6 = None if filter_list[5] is None else PurchaseCategory.objects.get(category=filter_list[5])
+                filter_instance.category_filter_7 = None if filter_list[6] is None else PurchaseCategory.objects.get(category=filter_list[6])
+                filter_instance.category_filter_8 = None if filter_list[7] is None else PurchaseCategory.objects.get(category=filter_list[7])
+                filter_instance.category_filter_9 = None if filter_list[8] is None else PurchaseCategory.objects.get(category=filter_list[8])
+                filter_instance.category_filter_10 = None if filter_list[9] is None else PurchaseCategory.objects.get(category=filter_list[9])
 
         filter_instance.save()
 

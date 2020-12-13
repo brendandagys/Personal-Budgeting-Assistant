@@ -28,7 +28,7 @@ class AccountForm(ModelForm):
 
         self.fields = {} # Otherwise a field will appear for each field in the model, but we want a specific field to show for each Account
 
-        for account in Account.objects.all():
+        for account in Account.objects.all().order_by('id'):
             # Get the last value for the account. If it's None, make placeholder value 0
             last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
             self.fields[account.pk] = DecimalField(label=account.account, max_digits=9, decimal_places=2, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px',
