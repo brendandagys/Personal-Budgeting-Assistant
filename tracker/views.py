@@ -431,7 +431,7 @@ def homepage(request):
 
 
 def get_exchange_rate(foreign_currency, desired_currency):
-    return Decimal(cr.get_rate(foreign_currency, desired_currency), 2)
+    return Decimal(cr.get_rate(foreign_currency, desired_currency))
 
 
 def convert_currency(foreign_value, foreign_currency, desired_currency):
