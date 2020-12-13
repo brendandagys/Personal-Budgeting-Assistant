@@ -40,12 +40,13 @@ class PurchaseCategoryAdmin(ImportExportModelAdmin):
 @admin.register(Filter)
 class FiltersAdmin(ImportExportModelAdmin):
     resource_class = Filter
-    list_display = ('id', 'category_filter_1', 'category_filter_2', 'category_filter_3', 'start_date_filter', 'end_date_filter', 'last_updated')
+    list_display = ('category_filter_1', 'category_filter_2', 'category_filter_3', 'start_date_filter', 'end_date_filter', 'last_updated')
     readonly_fields = ('last_updated',)
 
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):
     resource_class = AccountResource
+    readonly_fields = ('account_created_datetime',)
 
 @admin.register(AccountUpdate)
 class AccountUpdateAdmin(ImportExportModelAdmin):

@@ -21,6 +21,7 @@ class PurchaseCategory(models.Model):
     class Meta:
         verbose_name_plural = 'Purchase Categories'
         verbose_name = 'Purchase Category'
+        ordering = ['id']
 
     def __str__(self):
         return ', '.join([self.category])
