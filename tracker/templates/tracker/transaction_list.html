@@ -252,6 +252,11 @@
                 context: this, // To allow access in the callback functions
                 success: function () {
                     console.log('Filter POST successful!');
+
+                    if ($(this).attr('id') === 'No Filter') {
+                        $('a[id!="homepage_link"]').removeClass('green_filters');
+                    }
+
                     get_queryset();
                 },
                 error: function() {

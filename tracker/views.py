@@ -483,15 +483,32 @@ def get_json_queryset(request):
                                                filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
                                                if x is not None]
 
-    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+    # If the list is all None, nothing would be returned
+    if len(purchase_categories_list) >= 1:
+        queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+    else:
+        queryset_data = Purchase.objects.filter(date__gte=start_date_filter, date__lt=end_date_filter).order_by('-date', '-time')
 
+    purchases_list = list(queryset_data.values()) # List of dictionaries
+
+    # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show because it's a foreign key
+    purchase_category_dict = {}
+    for object in PurchaseCategory.objects.all().values('id', 'category'):
+        purchase_category_dict[object['id']] = object['category']
+    # Update the id for each purchase category
+    for dict in purchases_list:
+        dict['category_id'] = purchase_category_dict[dict['category_id']]
+        if dict['category_2_id'] is not None:
+            dict['category_2_id'] = purchase_category_dict[dict['category_2_id']]
+
+    # Get the total cost of all of the purchases
     purchases_sum = 0
     for purchase in list(queryset_data.values_list('amount', 'amount_2')): # Returns a Queryset of tuples
         purchases_sum+=purchase[0]
         if purchase[1] is not None:
             purchases_sum+=purchase[1]
 
-    return JsonResponse({'data': list(queryset_data.values()), 'purchases_sum': '$' + str(purchases_sum)}, safe=False)
+    return JsonResponse({'data': purchases_list, 'purchases_sum': '$' + str(purchases_sum)}, safe=False)
 
 
 class PurchaseListView(generic.ListView):
