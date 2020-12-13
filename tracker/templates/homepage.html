@@ -122,6 +122,34 @@
                 $('#id_amount').after('<tr id="custom_row"><td><a id="custom_anchor_link" style="font-size:1rem; line-height:2.55;">Add 2nd category</a></td></tr>')
                 $('#id_description').after('<tr id="custom_row_2"><td><a id="custom_anchor_link_2" style="font-size:1rem;">Change currency</a></td></tr>')
 
+
+                // Jump to the PurchaseCategory select element when 5 digits are put into the Time field
+                $('#id_time').on('keyup', function(e) {
+                    // console.log($(this).val());
+                    if ($(this).val().length > 4) {
+                        $('#id_category').focus();
+                    }
+                });
+
+
+                // Auto-fill and focus to specific fields when specific PurchaseCategories are selected
+                $('#id_category').on('change', function(e) {
+                    if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
+                        $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
+                        $('#id_amount').val('2.10');
+                        $('#id_description').focus().val('L, regular.'); // textarea elemented must be inserted into using .text()
+                    }
+                    else if ($('#id_category :selected').text() === 'Gas') {
+                        $('#id_item').val('Gas at Esso');
+                        $('#id_description').text(' L, $/L.');
+                        $('#id_description').focus();
+                    }
+                    else if ($('#id_category :selected').text() === 'Groceries') {
+                        $('#id_item').focus().val('Groceries at ');
+                    }
+                });
+
+
                 // After click, hide the links and re-show the hidden fields
                 $('#custom_anchor_link').on('click', function(e) {
                     $('#custom_anchor_link').hide();
@@ -130,22 +158,8 @@
 
                 $('#custom_anchor_link_2').on('click', function(e) {
                     $('#custom_anchor_link_2').hide();
+                    $('#id_currency').val('EUR'); // REMOVE WHEN FUNCTIONALITY IS ADDED TO CHANGE DEFAULT CURRENCY
                     $('#id_currency,label[for="id_currency"]').show();
-                });
-
-                $('#id_category').on('change', function(e) {
-                    if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
-                        $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
-                        $('#id_amount').val('2.10');
-                        $('#id_description').text('L, regular.'); // textarea elemented must be inserted into using .text()
-                    }
-                    else if ($('#id_category :selected').text() === 'Gas') {
-                        $('#id_item').val('Gas at Esso');
-                        $('#id_description').text(' L, $/L.');
-                    }
-                    else if ($('#id_category :selected').text() === 'Groceries') {
-                        $('#id_item').val('Groceries at ');
-                    }
                 });
 
 
