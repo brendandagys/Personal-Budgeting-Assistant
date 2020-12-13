@@ -34,7 +34,7 @@ class PurchaseAdmin(ImportExportModelAdmin):
 @admin.register(PurchaseCategory)
 class PurchaseCategoryAdmin(ImportExportModelAdmin):
     resource_class = PurchaseCategoryResource
-    list_display = ('id', 'category', 'category_created_datetime')
+    list_display = ('id', 'category', 'threshold', 'threshold_rolling_days', 'category_created_datetime')
     readonly_fields = ('category_created_datetime',)
 
 @admin.register(Filter)

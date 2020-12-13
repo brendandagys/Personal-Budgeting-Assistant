@@ -21,7 +21,9 @@ CURRENCIES = [
 
 class PurchaseCategory(models.Model):
     category = models.CharField(max_length=30, verbose_name='Category')
-    category_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Category Created DateTime') # Any field with the auto_now attribute set will also inherit editable=False and won't show in admin panel
+    threshold = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Threshold')
+    threshold_rolling_days = models.PositiveIntegerField(default=30, verbose_name='Threshold Rolling Days')
+    category_created_datetime = models.DateTimeField(auto_now_add=True, verbose_name='Category Created DateTime') # Any field with the auto_now attribute set will also inherit editable=False and won't show in admin panel
 
     class Meta:
         verbose_name_plural = 'Purchase Categories'
@@ -29,7 +31,7 @@ class PurchaseCategory(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return ', '.join([self.category])
+        return ', '.join([self.category, str(self.threshold), str(self.threshold_rolling_days), str(self.category_created_datetime)])
 
 
 class Purchase(models.Model):
@@ -82,7 +84,7 @@ class Account(models.Model):
     credit = models.BooleanField(default=False, verbose_name='Credit')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
     active = models.BooleanField(default=True, verbose_name='Active')
-    account_created_datetime = models.DateTimeField(default=current_datetime, verbose_name='Account Created DateTime')
+    account_created_datetime = models.DateTimeField(auto_now_add=True, verbose_name='Account Created DateTime')
 
     class Meta:
         verbose_name_plural = 'Accounts'
@@ -125,7 +127,7 @@ class Bill(models.Model):
 
 class Alert(models.Model):
     type = models.CharField(max_length=20, verbose_name = 'Type')
-    percent = models.IntegerField(verbose_name = 'Percent')
+    percent = models.PositiveIntegerField(verbose_name = 'Percent')
     date_sent = models.DateField(verbose_name='Date Sent')
 
     class Meta:

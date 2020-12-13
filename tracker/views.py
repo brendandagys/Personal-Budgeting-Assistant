@@ -655,7 +655,7 @@ def filter_manager(request):
 
 @login_required
 def preferences(request):
-    pass
+    return HttpResponse()
 
 
 @login_required
