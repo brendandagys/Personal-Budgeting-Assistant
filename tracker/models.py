@@ -31,7 +31,7 @@ class PurchaseCategory(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return ', '.join([self.category, str(self.threshold), str(self.threshold_rolling_days), str(self.category_created_datetime)])
+        return ', '.join([self.category, str(self.threshold), str(self.threshold_rolling_days) + ' days'])
 
 
 class Purchase(models.Model):

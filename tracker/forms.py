@@ -18,6 +18,13 @@ class PurchaseForm(ModelForm):
         self.fields['description'].widget.attrs.update({'rows': 3, 'placeholder': 'Specifics...'})
         self.fields['currency'].widget.attrs.update({'placeholder': 'Currency...'})
 
+        # The choices that display in the form field match models.py __str__ ... I want __str__ for Admin, but only the category text in the form field
+        category_choices = []
+        for choice in self.fields['category'].choices:
+            category_choices.append((choice[0], choice[1].split(',')[0])) # (1, 'Coffee, None, 30, 2020-12-12 18:39:00')
+        self.fields['category'].choices = category_choices
+        self.fields['category_2'].choices = category_choices
+
     class Meta:
         model = Purchase
         fields = ['date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency']

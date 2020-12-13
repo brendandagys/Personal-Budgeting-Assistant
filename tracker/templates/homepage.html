@@ -134,10 +134,21 @@
 
                 // Auto-fill and focus to specific fields when specific PurchaseCategories are selected
                 $('#id_category').on('change', function(e) {
+                    $('#id_item').val('');
+                    $('#id_amount').val('');
+                    $('#id_category_2').val('');
+                    $('#id_amount_2').val('');
+                    if ($('#id_category :selected').text() === 'Gas') {
+                        $('#id_description').text('');
+                    }
+                    else {
+                        $('#id_description').val('');
+                    }
+
                     if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
                         $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
                         $('#id_amount').val('2.10');
-                        $('#id_description').focus().val('L, regular.'); // textarea elemented must be inserted into using .text()
+                        $('#id_description').focus().val('L, regular. '); // textarea elemented must be inserted into using .text()
                     }
                     else if ($('#id_category :selected').text() === 'Gas') {
                         $('#id_item').val('Gas at Esso');
