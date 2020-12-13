@@ -437,7 +437,7 @@ def get_exchange_rate(foreign_currency, desired_currency):
 def convert_currency(foreign_value, foreign_currency, desired_currency):
     # foreign_value = account_value # account_value is actually for another currency
     conversion_rate = get_exchange_rate(foreign_currency, desired_currency)
-    return round(foreign_value * conversion, 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
+    return round(foreign_value * conversion_rate, 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
 
 
 @login_required
