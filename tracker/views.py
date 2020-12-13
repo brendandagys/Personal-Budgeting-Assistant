@@ -41,6 +41,15 @@ def get_chart_data(request):
 
     if request.method == 'GET':
         category = request.GET['category']
+
+        # temp_dict = {'All': 'All', 'Coffee': 1, 'Food/Drinks': 2, 'Groceries': 3, 'Gas': 4, 'Services': 7}
+        # category = temp_dict[category]
+        try:
+            category = PurchaseCategory.objects.get(id=category)
+            category_name = category.category
+        except:
+            category_name = 'All'
+
         if request.GET['filter'] == 'Wee': # I slice 2 - 5 in the JavaScript, so only three characters are sent
             days_filter = 'Weeks'
         else:
@@ -66,7 +75,7 @@ def get_chart_data(request):
 
             for x in labels:
                 if category == 'All':
-                    queryset = Purchase.objects.filter(date=x).exclude(category='Bills').values('amount').aggregate(Sum('amount'))
+                    queryset = Purchase.objects.filter(date=x).exclude(category=6).values('amount').aggregate(Sum('amount'))
                 else:
                     queryset = Purchase.objects.filter(Q(date=x) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount')) # Get all purchase amounts on that date
 
@@ -150,7 +159,7 @@ def get_chart_data(request):
                 else:
                     values.append(set['amount__sum'])
 
-        json[category] = {'labels': labels, 'values': values}
+        json[category_name] = {'labels': labels, 'values': values}
 
         # print(json)
 
@@ -508,13 +517,13 @@ def get_json_queryset(request):
         if purchase[1] is not None:
             purchases_sum+=purchase[1]
 
-    return JsonResponse({'data': purchases_list, 'purchases_sum': '$' + str(purchases_sum)}, safe=False)
+    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum)}, safe=False)
 
 
 class PurchaseListView(generic.ListView):
     # queryset = Purchase.objects.order_by('-date')
     # context_object_name = 'purchase_list'
-    template_name = 'tracker/transaction_list.html' # Specify your own template
+    template_name = 'tracker/activity.html' # Specify your own template
 
 
     def get_queryset(self):
@@ -640,6 +649,11 @@ def filter_manager(request):
         filter_instance.save()
 
         return HttpResponse()
+
+
+@login_required
+def preferences(request):
+    pass
 
 
 @login_required

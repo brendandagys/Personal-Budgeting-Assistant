@@ -46,6 +46,7 @@
                 <div class="navigation_link col-sm-12">
                     <div>
                         <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Enter Purchase/View Charts</a>
+                        <a id="activity_link" style="position:fixed; top:5px; right:5px;" class="btn-primary btn-sm" href="{% url 'preferences' %}">Preferences</a>
                     </div>
                 </div>
 
@@ -89,10 +90,10 @@
                 {% for filter_tuple in purchase_categories_tuples_list %}
                     <tr>
                         <td style="width:50%; text-align:right; padding-right:10px;">
-                            <a id="{{filter_tuple.0}}" href="">{{filter_tuple.0}}</a>
+                            <a id="{{filter_tuple.0}}" class="filter_identifier" href="">{{filter_tuple.0}}</a>
                         </td>
                         <td style="width:50%; text-align:left; padding-left:10px;">
-                            <a id="{{filter_tuple.1}}"  href="">{{filter_tuple.1}}</a>
+                            <a id="{{filter_tuple.1}}"  class="filter_identifier" href="">{{filter_tuple.1}}</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -231,7 +232,7 @@
         get_queryset();
 
 
-        $('a[id!="homepage_link"]').on('click', function(e) {
+        $('a.filter_identifier').on('click', function(e) {
             e.preventDefault()
 
             $(this).blur(); // Without this, the anchor link remains selected after being clicked

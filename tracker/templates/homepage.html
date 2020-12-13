@@ -29,7 +29,7 @@
             <div class="row">
 
                 <div class="navigation_link col-sm-12">
-                    <a class="homepage_link" href="{% url 'transactions' %}">Purchases/Account Balances</a>
+                    <a class="homepage_link" href="{% url 'activity' %}">Purchases/Account Balances</a>
                 </div>
 
                 <div class="col-sm-12">
@@ -218,7 +218,7 @@
                     $.ajax({
                         type: 'GET',
                         url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Food/Drinks', 'filter': filter },
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '2', 'filter': filter },
                         success: function(response) {
                                 console.log(response);
                             var ctx = document.getElementById('myChart2').getContext('2d');
@@ -272,7 +272,7 @@
                     $.ajax({
                         type: 'GET',
                         url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Groceries', 'filter': filter },
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '3', 'filter': filter },
                         success: function(response) {
                                 console.log(response);
                             var ctx = document.getElementById('myChart3').getContext('2d');
@@ -326,7 +326,7 @@
                     $.ajax({
                         type: 'GET',
                         url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Coffee', 'filter': filter },
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '1', 'filter': filter },
                         success: function(response) {
                                 console.log(response);
                             var ctx = document.getElementById('myChart4').getContext('2d');
@@ -380,7 +380,7 @@
                     $.ajax({
                         type: 'GET',
                         url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Gas', 'filter': filter },
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '4', 'filter': filter },
                         success: function(response) {
                                 console.log(response);
                             var ctx = document.getElementById('myChart5').getContext('2d');
@@ -434,7 +434,7 @@
                     $.ajax({
                         type: 'GET',
                         url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'Services', 'filter': filter },
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '7', 'filter': filter },
                         success: function(response) {
                                 console.log(response);
                             var ctx = document.getElementById('myChart6').getContext('2d');
