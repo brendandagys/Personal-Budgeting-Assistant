@@ -16,10 +16,11 @@ class PurchaseForm(ModelForm):
         self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...', 'inputmode': 'decimal'})
         self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional...', 'inputmode': 'decimal'})
         self.fields['description'].widget.attrs.update({'rows': 3, 'placeholder': 'Specifics...'})
+        self.fields['currency'].widget.attrs.update({'placeholder': 'Currency...'})
 
     class Meta:
         model = Purchase
-        fields = ['date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description']
+        fields = ['date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency']
 
 
 class AccountForm(ModelForm):

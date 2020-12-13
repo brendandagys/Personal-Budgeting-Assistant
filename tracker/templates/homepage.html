@@ -20,7 +20,7 @@
          <!-- JQuery -->
          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-         <title>Brendan's Spending Tracker</title>
+         <title>Brendan's Finances Tracker</title>
     </head>
 
     <body>
@@ -111,19 +111,27 @@
 
         <script>
 
-            $('button').hide();
+            $('button').hide(); // Hide the chart buttons as soon as possible, as they jump into place otherwise
+            $('label[for="id_amount"]').attr('style', 'position:relative; bottom:12px;'); // Was appearing too low...
+            $('label[for="id_description"]').attr('style', 'position:relative; bottom:9px;'); // Was appearing too low...
 
             $(document).ready(function() {
 
                 // Hide 2 fields and add an anchor link button
-                $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').hide();
-                $('#id_amount').after('<tr id="custom_row"><td><a id="custom_anchor_link" style="font-size:1rem;">Add 2nd category</a></td></tr>')
-                // After click, hide the link and re-show the hidden fields
+                $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"],#id_currency,label[for="id_currency"]').hide();
+                $('#id_amount').after('<tr id="custom_row"><td><a id="custom_anchor_link" style="font-size:1rem; line-height:2.55;">Add 2nd category</a></td></tr>')
+                $('#id_description').after('<tr id="custom_row_2"><td><a id="custom_anchor_link_2" style="font-size:1rem;">Change currency</a></td></tr>')
+
+                // After click, hide the links and re-show the hidden fields
                 $('#custom_anchor_link').on('click', function(e) {
                     $('#custom_anchor_link').hide();
                     $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').show();
                 });
 
+                $('#custom_anchor_link_2').on('click', function(e) {
+                    $('#custom_anchor_link_2').hide();
+                    $('#id_currency,label[for="id_currency"]').show();
+                });
 
                 $('#id_category').on('change', function(e) {
                     if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery

@@ -13,6 +13,11 @@ def current_time():
 def current_datetime():
     return timezone.now()
 
+CURRENCIES = [
+    ('CAD', 'CAD'),
+    ('USD', 'USD'),
+    ('EUR', 'EUR'),
+]
 
 class PurchaseCategory(models.Model):
     category = models.CharField(max_length=30, verbose_name='Category')
@@ -27,11 +32,6 @@ class PurchaseCategory(models.Model):
         return ', '.join([self.category])
 
 
-# Ensure that these exist, otherwise we'll get an IntegrityError for the existing Purchases
-# for category in ['', 'Coffee', 'Food/Drinks', 'Groceries', 'Restaurants', 'Bills', 'Gas', 'Household Supplies', 'Services', 'Dates', 'Gifts', 'Tickets', 'Electronics', 'Appliances', 'Clothes', 'Alcohol', 'Vacation', 'Fees']:
-#     temp = PurchaseCategory.objects.get_or_create(category=category)
-
-
 class Purchase(models.Model):
     # null and blank arguments are False by default
     # null doesn't allow null in the database, blank is not database-related; it prevents '' in forms
@@ -43,6 +43,8 @@ class Purchase(models.Model):
     category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2')
     amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
     description = models.TextField(blank=True, verbose_name='Details')
+    currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
+    exchange_rate = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD')
 
     class Meta:
         verbose_name_plural = 'Purchases'
@@ -76,12 +78,6 @@ class Filter(models.Model):
 
 
 class Account(models.Model):
-    CURRENCIES = [
-        ('CAD', 'CAD'),
-        ('USD', 'USD'),
-        ('EUR', 'EUR'),
-    ]
-
     account = models.CharField(max_length=40, verbose_name='Account')
     credit = models.BooleanField(default=False, verbose_name='Credit')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
@@ -100,7 +96,7 @@ class Account(models.Model):
 class AccountUpdate(models.Model):
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
     value = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Value')
-    exchange_rate = models.DecimalField(default=1, max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD')
+    exchange_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD') # Default 1 unnecessary as we always run get_exchange_rate()
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Account Timestamp')
 
     class Meta:

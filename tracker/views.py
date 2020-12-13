@@ -251,6 +251,8 @@ def homepage(request):
             purchase_instance.category_2 = purchase_form.cleaned_data['category_2']
             purchase_instance.amount_2 = purchase_form.cleaned_data['amount_2']
             purchase_instance.description = purchase_form.cleaned_data['description'].strip()
+            purchase_instance.currency = purchase_form.cleaned_data['currency']
+            purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
 
             # Clean time fields
             time = purchase_instance.time
@@ -284,152 +286,152 @@ def homepage(request):
 
             purchase_instance.time = time
             purchase_instance.save()
-
-        # ALERTS
-        mode_instance = Mode.objects.last()
-
-        if mode_instance is None:
-            mode_instance = Mode.objects.create( mode='All' )
-
-        if mode_instance.mode == 'All':
-            total_spent_to_date_coffee = Purchase.objects.filter((Q(category='Coffee') | Q(category_2='Coffee')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-            total_spent_to_date_groceries = Purchase.objects.filter((Q(category='Groceries') | Q(category_2='Groceries')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-            total_spent_to_date_food_drinks = Purchase.objects.filter((Q(category='Food/Drinks') | Q(category_2='Food/Drinks')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-            total_spent_to_date_restaurants = Purchase.objects.filter((Q(category='Restaurants') | Q(category_2='Restaurants')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-            total_spent_to_date_gas = Purchase.objects.filter((Q(category='Gas') | Q(category_2='Gas')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-            total_spent_to_date_dates = Purchase.objects.filter((Q(category='Dates') | Q(category_2='Dates')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-            total_spent_to_date_household_supplies = Purchase.objects.filter((Q(category='Household Supplies') | Q(category_2='Household Supplies')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-
-            a = total_spent_to_date_coffee['amount__sum']
-            b = total_spent_to_date_groceries['amount__sum']
-            c = total_spent_to_date_food_drinks['amount__sum']
-            d = total_spent_to_date_restaurants['amount__sum']
-            e = total_spent_to_date_gas['amount__sum']
-            f = total_spent_to_date_dates['amount__sum']
-            g = total_spent_to_date_household_supplies['amount__sum']
-            # If no money has been spent in a category, it will be None. This converts it to 0 if so
-            def check_none(variable):
-                if variable is None:
-                    return 0
-                else:
-                    return variable
-
-            a = check_none(a); b = check_none(b); c = check_none(c); d = check_none(d); e = check_none(e); f = check_none(f); g = check_none(g)
-
-            coffee_maximum = 20
-            groceries_maximum = 150
-            food_drinks_maximum = 50
-            restaurants_maximum = 100
-            gas_maximum = 75
-            dates_maximum = 100
-            household_supplies_maximum = 30
-
-            email_body = """\
-<html>
-<head></head>
-<body style="border-radius: 20px; padding: 1rem; color: black; font-size: 0.80rem; background-color: #d5e9fb">
-<u><h3>Monthly Spending in {}:</h3></u>
-<p style="margin-bottom: 0px; font-family: monospace; color: black"><b>Coffee</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
-<p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Groceries</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
-<p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Food/Drinks</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
-<p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Restaurants</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
-<p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Gas</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
-<p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Dates</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
-<p style="margin-top: 0px; font-family: monospace; color: black"><b>Household Supplies</b>: <span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
-</body>
-</html>
-""".format(month_name,
-           a, coffee_maximum, round((a/coffee_maximum)*100, 1),
-           b, groceries_maximum, round((b/groceries_maximum)*100, 1),
-           c, food_drinks_maximum, round((c/food_drinks_maximum)*100, 1),
-           d, restaurants_maximum, round((d/restaurants_maximum)*100, 1),
-           e, gas_maximum, round((e/gas_maximum)*100, 1),
-           f, dates_maximum, round((f/dates_maximum)*100, 1),
-           g, household_supplies_maximum, round((g/household_supplies_maximum)*100, 1) )
-
-            email_message = EmailMessage('Spending Alert', email_body, from_email='Spending Helper <spendinghelper@gmail.com>', to=['brendandagys@gmail.com'])
-            email_message.content_subtype = 'html'
-            email_message.send()
-
-        elif mode_instance.mode == 'Threshold':
-
-            def check_spending(category, maximum):
-                # Get all purchases of the specific type for the current month
-                alert_queryset = Alert.objects.filter(type=category, date_sent__gte=datetime.datetime(year, month, 1))
-                # If no alerts have been created, make one
-                if len(alert_queryset) == 0:
-                    instance = Alert.objects.create( type=category,
-                                                     percent=0,
-                                                     date_sent=datetime.datetime(year, month, 1) )
-                # Otherwise take the first alert received (there will only be one...four in total)
-                else:
-                    instance = alert_queryset[0]
-                    # Check if a new month has begun, and reset if so
-                    if month != instance.date_sent.month:
-                        instance.date_sent.month = month
-                        instance.percent = 0
-
-                highest_threshold_reached = instance.percent
-
-                # Get total spent this month on the specific type
-                total_spent_to_date = Purchase.objects.filter((Q(category=category) | Q(category_2=category)) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
-                total_spent_to_date = total_spent_to_date['amount__sum']
-
-                send_email = True
-
-                if total_spent_to_date is None:
-                    total_spent_to_date = 0
-
-                if total_spent_to_date >= maximum:
-                    instance.percent = 100
-                    if highest_threshold_reached == 100:
-                        send_email = False
-
-                elif total_spent_to_date >= floor(maximum * 0.75):
-                    instance.percent = 75
-                    if highest_threshold_reached >= 75:
-                        send_email = False
-
-                elif total_spent_to_date >= floor(maximum * 0.5):
-                    instance.percent = 50
-                    if highest_threshold_reached >= 50:
-                        send_email = False
-
-                elif total_spent_to_date >= floor(maximum * 0.25): # and (instance.percent < 25 or instance.percent in (50, 75, 100)):
-                    instance.percent = 25
-                    if highest_threshold_reached >= 25:
-                        send_email = False
-
-                else:
-                    instance.percent = 0
-                    instance.save()
-                    return
-
-                instance.save()
-
-                if send_email is True:
-                    email_body = """\
-<html>
-  <head></head>
-  <body style="border-radius: 20px; padding: 1rem; color: black; font-size: 1.1rem; background-color: #d5e9fb">
-    <h3>You have reached {0}% of your monthly spending on {1}.</h3> </br>
-    <p>Spent in {2}: ${3}/${4}</p> </br>
-  </body>
-</html>
-""".format(round((total_spent_to_date/maximum)*100, 1), category, month_name, round(total_spent_to_date, 2), maximum)
-
-                    email_message = EmailMessage('Spending Alert for {0}'.format(category), email_body, from_email='Spending Helper <spendinghelper@gmail.com>', to=['brendandagys@gmail.com'])
-                    email_message.content_subtype = 'html'
-                    email_message.send()
-
-            # Run the function
-            check_spending('Coffee', 20)
-            check_spending('Groceries', 150)
-            check_spending('Food/Drinks', 50)
-            check_spending('Dates', 100)
-            check_spending('Restaurants', 100)
-            check_spending('Gas', 65)
-            check_spending('Household Supplies', 20)
+#
+#         # ALERTS
+#         mode_instance = Mode.objects.last()
+#
+#         if mode_instance is None:
+#             mode_instance = Mode.objects.create( mode='All' )
+#
+#         if mode_instance.mode == 'All':
+#             total_spent_to_date_coffee = Purchase.objects.filter((Q(category='Coffee') | Q(category_2='Coffee')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#             total_spent_to_date_groceries = Purchase.objects.filter((Q(category='Groceries') | Q(category_2='Groceries')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#             total_spent_to_date_food_drinks = Purchase.objects.filter((Q(category='Food/Drinks') | Q(category_2='Food/Drinks')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#             total_spent_to_date_restaurants = Purchase.objects.filter((Q(category='Restaurants') | Q(category_2='Restaurants')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#             total_spent_to_date_gas = Purchase.objects.filter((Q(category='Gas') | Q(category_2='Gas')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#             total_spent_to_date_dates = Purchase.objects.filter((Q(category='Dates') | Q(category_2='Dates')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#             total_spent_to_date_household_supplies = Purchase.objects.filter((Q(category='Household Supplies') | Q(category_2='Household Supplies')) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#
+#             a = total_spent_to_date_coffee['amount__sum']
+#             b = total_spent_to_date_groceries['amount__sum']
+#             c = total_spent_to_date_food_drinks['amount__sum']
+#             d = total_spent_to_date_restaurants['amount__sum']
+#             e = total_spent_to_date_gas['amount__sum']
+#             f = total_spent_to_date_dates['amount__sum']
+#             g = total_spent_to_date_household_supplies['amount__sum']
+#             # If no money has been spent in a category, it will be None. This converts it to 0 if so
+#             def check_none(variable):
+#                 if variable is None:
+#                     return 0
+#                 else:
+#                     return variable
+#
+#             a = check_none(a); b = check_none(b); c = check_none(c); d = check_none(d); e = check_none(e); f = check_none(f); g = check_none(g)
+#
+#             coffee_maximum = 20
+#             groceries_maximum = 150
+#             food_drinks_maximum = 50
+#             restaurants_maximum = 100
+#             gas_maximum = 75
+#             dates_maximum = 100
+#             household_supplies_maximum = 30
+#
+#             email_body = """\
+# <html>
+# <head></head>
+# <body style="border-radius: 20px; padding: 1rem; color: black; font-size: 0.80rem; background-color: #d5e9fb">
+# <u><h3>Monthly Spending in {}:</h3></u>
+# <p style="margin-bottom: 0px; font-family: monospace; color: black"><b>Coffee</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
+# <p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Groceries</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
+# <p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Food/Drinks</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
+# <p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Restaurants</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
+# <p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Gas</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
+# <p style="margin-bottom: 0px; margin-top: 0px; font-family: monospace; color: black"><b>Dates</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
+# <p style="margin-top: 0px; font-family: monospace; color: black"><b>Household Supplies</b>: <span style="display: inline-block; width: 70px;">${}/${}</span> - <b>({}%)</b></p> </br>
+# </body>
+# </html>
+# """.format(month_name,
+#            a, coffee_maximum, round((a/coffee_maximum)*100, 1),
+#            b, groceries_maximum, round((b/groceries_maximum)*100, 1),
+#            c, food_drinks_maximum, round((c/food_drinks_maximum)*100, 1),
+#            d, restaurants_maximum, round((d/restaurants_maximum)*100, 1),
+#            e, gas_maximum, round((e/gas_maximum)*100, 1),
+#            f, dates_maximum, round((f/dates_maximum)*100, 1),
+#            g, household_supplies_maximum, round((g/household_supplies_maximum)*100, 1) )
+#
+#             email_message = EmailMessage('Spending Alert', email_body, from_email='Spending Helper <spendinghelper@gmail.com>', to=['brendandagys@gmail.com'])
+#             email_message.content_subtype = 'html'
+#             email_message.send()
+#
+#         elif mode_instance.mode == 'Threshold':
+#
+#             def check_spending(category, maximum):
+#                 # Get all purchases of the specific type for the current month
+#                 alert_queryset = Alert.objects.filter(type=category, date_sent__gte=datetime.datetime(year, month, 1))
+#                 # If no alerts have been created, make one
+#                 if len(alert_queryset) == 0:
+#                     instance = Alert.objects.create( type=category,
+#                                                      percent=0,
+#                                                      date_sent=datetime.datetime(year, month, 1) )
+#                 # Otherwise take the first alert received (there will only be one...four in total)
+#                 else:
+#                     instance = alert_queryset[0]
+#                     # Check if a new month has begun, and reset if so
+#                     if month != instance.date_sent.month:
+#                         instance.date_sent.month = month
+#                         instance.percent = 0
+#
+#                 highest_threshold_reached = instance.percent
+#
+#                 # Get total spent this month on the specific type
+#                 total_spent_to_date = Purchase.objects.filter((Q(category=category) | Q(category_2=category)) & Q(date__gte=datetime.datetime(year, month, 1))).aggregate(Sum('amount'))
+#                 total_spent_to_date = total_spent_to_date['amount__sum']
+#
+#                 send_email = True
+#
+#                 if total_spent_to_date is None:
+#                     total_spent_to_date = 0
+#
+#                 if total_spent_to_date >= maximum:
+#                     instance.percent = 100
+#                     if highest_threshold_reached == 100:
+#                         send_email = False
+#
+#                 elif total_spent_to_date >= floor(maximum * 0.75):
+#                     instance.percent = 75
+#                     if highest_threshold_reached >= 75:
+#                         send_email = False
+#
+#                 elif total_spent_to_date >= floor(maximum * 0.5):
+#                     instance.percent = 50
+#                     if highest_threshold_reached >= 50:
+#                         send_email = False
+#
+#                 elif total_spent_to_date >= floor(maximum * 0.25): # and (instance.percent < 25 or instance.percent in (50, 75, 100)):
+#                     instance.percent = 25
+#                     if highest_threshold_reached >= 25:
+#                         send_email = False
+#
+#                 else:
+#                     instance.percent = 0
+#                     instance.save()
+#                     return
+#
+#                 instance.save()
+#
+#                 if send_email is True:
+#                     email_body = """\
+# <html>
+#   <head></head>
+#   <body style="border-radius: 20px; padding: 1rem; color: black; font-size: 1.1rem; background-color: #d5e9fb">
+#     <h3>You have reached {0}% of your monthly spending on {1}.</h3> </br>
+#     <p>Spent in {2}: ${3}/${4}</p> </br>
+#   </body>
+# </html>
+# """.format(round((total_spent_to_date/maximum)*100, 1), category, month_name, round(total_spent_to_date, 2), maximum)
+#
+#                     email_message = EmailMessage('Spending Alert for {0}'.format(category), email_body, from_email='Spending Helper <spendinghelper@gmail.com>', to=['brendandagys@gmail.com'])
+#                     email_message.content_subtype = 'html'
+#                     email_message.send()
+#
+#             # Run the function
+#             check_spending('Coffee', 20)
+#             check_spending('Groceries', 150)
+#             check_spending('Food/Drinks', 50)
+#             check_spending('Dates', 100)
+#             check_spending('Restaurants', 100)
+#             check_spending('Gas', 65)
+#             check_spending('Household Supplies', 20)
 
     # This returns a blank form, (to clear for the next submission if request.method == 'POST')
     purchase_form = PurchaseForm()
