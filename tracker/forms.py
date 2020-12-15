@@ -12,6 +12,8 @@ class PurchaseForm(ModelForm):
         for field in iter(self.fields):
             self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
 
+        self.fields['date'].widget.attrs.update({'inputmode': 'numeric'})
+        self.fields['time'].widget.attrs.update({'inputmode': 'numeric'})
         self.fields['item'].widget.attrs.update({'placeholder': 'Item(s)...'})
         self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...', 'inputmode': 'decimal'})
         self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional...', 'inputmode': 'decimal'})

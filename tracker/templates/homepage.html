@@ -123,7 +123,20 @@
                 $('#id_description').after('<tr id="custom_row_2"><td><a id="custom_anchor_link_2" style="font-size:1rem;">Change currency</a></td></tr>')
 
 
+                // Clear the date and time fields when clicked, as we only would if we wanted to alter the values
+                $('#id_date,#id_time').on('focus', function(e) {
+                    $(this).val('');
+                });
+
+
                 // Jump to the PurchaseCategory select element when 5 digits are put into the Time field
+                $('#id_date').on('keyup', function(e) {
+                    // console.log($(this).val());
+                    if ($(this).val().length > 9) {
+                        $('#id_time').focus();
+                    }
+                });
+
                 $('#id_time').on('keyup', function(e) {
                     // console.log($(this).val());
                     if ($(this).val().length > 4) {
