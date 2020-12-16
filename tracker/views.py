@@ -282,6 +282,12 @@ def homepage(request):
 
             purchase_instance.save()
 
+            amount_2 = 0
+            if purchase_instance.amount_2 is not None:
+                amount_2 = purchase_instance.amount_2
+            
+            AccountUpdate.objects.create(account=Account.objects.get(id=3), value=purchase_instance.amount + amount_2, exchange_rate=purchase_instance.exchange_rate)
+
             return redirect('homepage')
 #
 #         # ALERTS
@@ -471,6 +477,15 @@ def get_accounts_sum(request):
         accounts_sum+=account_value
 
     return JsonResponse('${:20,.2f}'.format(accounts_sum), safe=False)
+
+
+@login_required
+def reset_credit_card(request):
+    chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+    credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+    AccountUpdate.objects.create(account=Account.objects.get(id=3), value=0, exchange_rate=1)
+    AccountUpdate.objects.create(account=Account.objects.get(id=1), value=chequing_balance-credit_card_balance, exchange_rate=1)
+    return JsonResponse('${:20,.2f}'.format(chequing_balance-credit_card_balance), safe=False)
 
 
 @login_required

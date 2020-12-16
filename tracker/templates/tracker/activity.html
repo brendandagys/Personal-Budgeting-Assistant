@@ -70,6 +70,7 @@
                 </form>
             </div>
 
+            <div style="margin-top: 15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-xs btn-success">Reset Credit Card</button></div>
             <span style="text-align:center;"><h3 id="accounts_sum"></h3></span>
 
             <hr />
@@ -123,7 +124,7 @@
 
             <div class="purchase_list_div col-sm-12">
 
-                <h1 id="purchase_list_header" class="purchase_header">Purchases List </h1>
+                <h1 id="purchase_list_header" class="purchase_header">Purchases List (<span id="purchases_count"></span>)</h1>
 
                 <div id="purchase_list_div"></div>
 
@@ -191,6 +192,7 @@
                     console.log(response); // object
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent
+                    $('#purchases_count').html(response['data'].length);
 
                     $('#purchase_list_div').html('');
                     $('#purchase_list_div').html(
@@ -299,6 +301,28 @@
         });
 
 
+        $(document).on('click', '#reset_credit_card', function (e) {
+            if ($('#id_3').attr('placeholder').slice(1).trim() !== '0.00') { // I believe this really equals 0.00
+                $.ajax({
+                    type: 'POST',
+                    url: 'reset_credit_card/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function(response) {
+                        $('#id_3').val('');
+                        $('#id_3').attr('placeholder', '$                0.00');
+                        $('#id_1').val('');
+                        $('#id_1').attr('placeholder', response);
+                        get_accounts_sum();
+                        console.log('Credit card successfully reset!');
+                    },
+                    error: function() {
+                        console.log('Error resetting credit card.!');
+                    },
+                });
+            }
+        });
+
+
         $(document).on('change', '#datepicker, #datepicker_2', function(e) {
             console.log('Start date: ' + $('#datepicker').val());
             console.log('End date: ' + $('#datepicker_2').val());
@@ -321,7 +345,7 @@
                             'filter_value': $(this).val().trim(),
                     },
                     context: this, // Add to context so we can access it in the success callback function
-                    success: function(response) {
+                    success: function() {
                         console.log('Date filter POST success: ' + $(this).val());
                         get_queryset();
                     },

@@ -92,7 +92,7 @@ class Account(models.Model):
         ordering = ['account']
 
     def __str__(self):
-        return ', '.join([self.account, str(self.credit), str(self.active), str(self.account_created_datetime)])
+        return ', '.join([self.account])#, str(self.credit), str(self.active), str(self.account_created_datetime)])
 
 
 class AccountUpdate(models.Model):

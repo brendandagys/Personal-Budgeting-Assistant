@@ -46,13 +46,14 @@ class FiltersAdmin(ImportExportModelAdmin):
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):
     resource_class = AccountResource
-    list_display = ('account', 'active', 'credit', 'currency', 'account_created_datetime')
+    list_display = ('id', 'account', 'active', 'credit', 'currency', 'account_created_datetime')
     readonly_fields = ('account_created_datetime',)
 
 @admin.register(AccountUpdate)
 class AccountUpdateAdmin(ImportExportModelAdmin):
     resource_class = AccountUpdateResource
     list_display = ('account', 'value', 'exchange_rate', 'timestamp')
+    list_filter = ['account']
     readonly_fields = ('timestamp',)
 
 @admin.register(Bill)
