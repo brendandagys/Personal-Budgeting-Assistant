@@ -123,26 +123,57 @@
                 $('#id_description').after('<tr id="custom_row_2"><td><a id="custom_anchor_link_2" style="font-size:1rem;">Change currency</a></td></tr>')
 
 
-                // Clear the date and time fields when clicked, as we only would if we wanted to alter the values
+                // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
                 $('#id_date,#id_time').on('focus', function(e) {
                     $(this).val('');
                 });
 
 
-                // Jump to the PurchaseCategory select element when 5 digits are put into the Time field
-                $('#id_date').on('keyup', function(e) {
-                    // console.log($(this).val());
-                    if ($(this).val().length > 9) {
-                        $('#id_time').focus();
+                // Limit text entry to only numbers
+                $('#id_date, #id_time').on('keydown', function(e) {
+                    if (e.key === '-' || (!Number.isInteger(parseInt(e.key)) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) ||
+                       ($(this).attr('id') === 'id_date' && $(this).val().length > 9 ||
+                        $(this).attr('id') === 'id_time' && $(this).val().length > 5) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) { // Still necessary to check if it's a letter because forms.py attributes aren't working
+                        e.preventDefault();
                     }
-                });
 
-                $('#id_time').on('keyup', function(e) {
-                    // console.log($(this).val());
-                    if ($(this).val().length > 4) {
-                        $('#id_category').focus();
+                    if ($(this).attr('id') === 'id_date' && [4,7].includes($(this).val().length) && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
+                        $(this).val($(this).val() + '-');
                     }
-                });
+                    else if ($(this).attr('id') === 'id_time' && $(this).val().length === 2 && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
+                        $(this).val($(this).val() + ':');
+                    }
+
+                    if($(this).attr('id') === 'id_date') {
+                        if ($(this).val().length === 5 && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                        else if ($(this).val().length === 6 && $(this).val()[5] === '1' && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                        else if ($(this).val().length === 6 && $(this).val()[5] === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                        else if ($(this).val().length === 8 && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                        else if ($(this).val().length === 9 && $(this).val()[8] === '3' && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                    }
+
+                    if($(this).attr('id') === 'id_time') {
+                        if ($(this).val().length === 0 && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                        else if ($(this).val() === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                        else if ($(this).val().length === 3 && !['0', '1', '2', '3', '4', '5', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                            e.preventDefault();
+                        }
+                    }
+                })
 
 
                 // Auto-fill and focus to specific fields when specific PurchaseCategories are selected

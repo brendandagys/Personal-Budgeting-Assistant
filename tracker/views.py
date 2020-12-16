@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 # from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -168,6 +168,33 @@ def get_chart_data(request):
 @login_required
 def homepage(request):
 
+    # def clean_time_string(time_string): # Will be a string of 0 - 4 numbers, no colon
+    #     time_string = time_string.replace(':', '')
+    #
+    #     if len(time_string) == 4:
+    #         if time_string[0:2] in ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
+    #                                 '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']:
+    #             if int(time_string[2]) in range(6) and int(time_string[3]) in range(10): # Normal time
+    #                 return time_string[0:2] + ':' + time_string[2:4]
+    #             else:
+    #                 return time_string[0:2] + ':00' # If last two digits don't make sense, just save on the hour
+    #
+    #     elif len(time_string) == 1: # Number is enforced in the front-end
+    #         return '0' + time_string + ':00'
+    #
+    #     elif len(time_string) == 2:
+    #         if time_string in ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
+    #                            '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']:
+    #             return time_string[0:2] + ':' + time_string[2:4]
+    #
+    #     elif len(time_string) == 3:
+    #         if int(time_string[1:]) in range(60):
+    #             return '0' + time_string[0] + ':' + time_string[1:]
+    #         else:
+    #             return '0' + time_string[0] + ':00'
+    #
+    #     return '00:00'
+
     # bill_information = {
     # 'Apple Music': [7, 'Apple Music', 5.64, 'Monthly fee for Apple Music subscription.'],
     # 'Cell phone plan': [13, 'Cell phone plan', 41.81, 'Monthly fee for cell phone plan with Public Mobile.'],
@@ -242,9 +269,8 @@ def homepage(request):
         purchase_instance = Purchase()
 
         if purchase_form.is_valid():
-
             purchase_instance.date = purchase_form.cleaned_data['date']
-            purchase_instance.time = purchase_form.cleaned_data['time'].strip()
+            purchase_instance.time = purchase_form.cleaned_data['time'] # Cleaning done in forms.py
             purchase_instance.item = purchase_form.cleaned_data['item'].strip()
             purchase_instance.category = purchase_form.cleaned_data['category']
             purchase_instance.amount = purchase_form.cleaned_data['amount']
@@ -254,38 +280,9 @@ def homepage(request):
             purchase_instance.currency = purchase_form.cleaned_data['currency']
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
 
-            # Clean time fields
-            time = purchase_instance.time
-
-            if len(time) == 0:
-                time = '00:00'
-
-            elif len(time) == 1:
-                if time in [str(x) for x in range(10)]:
-                    time = '0' + time + ':00'
-                else:
-                    time = '00:00'
-
-            elif time [0:2] in ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
-                                '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']:
-                if len(time) == 5 and time[2] == ':' and int(time[3]) in range(6) and int(time[4]) in range(10):
-                    pass
-                elif len(time) == 4 and int(time[2]) in range(6) and int(time[3]) in range(10):
-                    time = time[0:2] + ':' + time[2:4]
-                else:
-                    time = time[0:2] + ':00'
-
-            elif time[0] in [str(x) for x in range(10)] and time[1] == ':':
-                if len(time) == 4 and int(time[2]) in range(6) and int(time[3]) in range(10):
-                    time = '0' + time
-                else:
-                    time = '0' + time[0] + ':00'
-
-            else:
-                time = '00:00'
-
-            purchase_instance.time = time
             purchase_instance.save()
+
+            return redirect('homepage')
 #
 #         # ALERTS
 #         mode_instance = Mode.objects.last()
@@ -432,6 +429,7 @@ def homepage(request):
 #             check_spending('Restaurants', 100)
 #             check_spending('Gas', 65)
 #             check_spending('Household Supplies', 20)
+
 
     # This returns a blank form, (to clear for the next submission if request.method == 'POST')
     purchase_form = PurchaseForm()

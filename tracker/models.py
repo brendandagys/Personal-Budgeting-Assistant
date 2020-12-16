@@ -38,7 +38,7 @@ class Purchase(models.Model):
     # null and blank arguments are False by default
     # null doesn't allow null in the database, blank is not database-related; it prevents '' in forms
     date = models.DateField(verbose_name='Date', default=current_date)
-    time = models.CharField(default=current_time, max_length=5, verbose_name='Time (24 hr.)')
+    time = models.CharField(blank=True, default=current_time, max_length=5, verbose_name='Time (24 hr.)')
     item = models.CharField(max_length=100, verbose_name='Item(s)')
     category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='category_1') # blank=False by default...
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')

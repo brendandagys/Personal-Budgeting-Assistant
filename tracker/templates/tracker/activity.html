@@ -45,7 +45,7 @@
 
                 <div class="navigation_link col-sm-12">
                     <div>
-                        <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Enter Purchase/View Charts</a>
+                        <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Go Home</a>
                         <a id="activity_link" style="position:fixed; top:5px; right:5px;" class="btn-primary btn-sm" href="{% url 'preferences' %}">Preferences</a>
                         <a id="admin_link" style="position:fixed; top:40px; right:20px; z-index:900;" class="btn-link btn-sm" href="{% url 'admin:index' %}">Admin</a>
                     </div>
@@ -108,12 +108,12 @@
 
                 <div align="center" class="col-sm-2">
                       <p><b><small>From</small></b></p>
-                      <input style="text-align:center; width:112.5px;" class="form-control" placeholder="Date..." type="text" id="datepicker">
+                      <input style="text-align:center; width:112.5px; inputmode: numeric" class="form-control" placeholder="Date..." type="text" id="datepicker">
                 </div>
 
                 <div align="center" class="col-sm-2">
                       <p><b><small>To</small></b></p>
-                      <input style="text-align:center; width:112.5px;" class="form-control" placeholder="Date..." type="text" id="datepicker_2">
+                      <input style="text-align:center; width:112.5px; inputmode: numeric" class="form-control" placeholder="Date..." type="text" id="datepicker_2">
                 </div>
 
                 <div class="col-sm-4"></div>
@@ -154,6 +154,13 @@
         // Set the date filters
         $('#datepicker').val('{{start_date}}');
         $('#datepicker_2').val('{{end_date}}');
+
+        // Limit text entry to only numbers
+        $('#datepicker, #datepicker_2').on('keydown', function(e) {
+            if (e.key === '-' || ($(this).val().length > 7 && !['Backspace', 'Enter', 'Tab'].includes(e.key))) { // Letters are already blocked because of inputmode:numeric in style attribute
+                e.preventDefault();
+            }
+        });
 
 
         get_accounts_sum = function() {
@@ -300,7 +307,7 @@
                 alert('The start date cannot be later than the end date.');
                 $(this).val('');
             }
-            else if ($('#datepicker').val().length != 0 && $('#datepicker').val().length != 10 || $('#datepicker_2').val().length != 0 && $('#datepicker_2').val().length != 10) {
+            else if ($('#datepicker').val().length != 0 && $('#datepicker').val().length != 8 || $('#datepicker_2').val().length != 0 && $('#datepicker_2').val().length != 8) {
                 alert('\nPlease enter a valid date.');
                 $(this).val('');
             }
