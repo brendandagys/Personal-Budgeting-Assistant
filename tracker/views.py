@@ -282,11 +282,15 @@ def homepage(request):
 
             purchase_instance.save()
 
+            # Deal with the 2nd amount, which may be None
             amount_2 = 0
             if purchase_instance.amount_2 is not None:
                 amount_2 = purchase_instance.amount_2
-            
-            AccountUpdate.objects.create(account=Account.objects.get(id=3), value=purchase_instance.amount + amount_2, exchange_rate=purchase_instance.exchange_rate)
+
+            # Get the latest credit card balance
+            credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first()
+
+            AccountUpdate.objects.create(account=Account.objects.get(id=3), value=credit_card_balance + purchase_instance.amount + amount_2, exchange_rate=purchase_instance.exchange_rate)
 
             return redirect('homepage')
 #
