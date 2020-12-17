@@ -16,23 +16,6 @@
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-        <!-- CODE FOR DATEPICKER -->
-        <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-        <!-- <link rel="stylesheet" href="/resources/demos/style.css"> -->
-        <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> -->
-        <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> --> -->
-        <!-- <script>
-            $( function() {
-                $('#datepicker').datepicker({dateFormat: 'yy-mm-dd'});
-            } );
-        </script>
-
-        <script>
-            $( function() {
-                $('#datepicker_2').datepicker({dateFormat: 'yy-mm-dd'});
-            } );
-        </script> -->
-
         <title>Finances Activity</title>
 
     </head>
@@ -46,7 +29,7 @@
                 <div class="navigation_link col-sm-12">
                     <div>
                         <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Go Home</a>
-                        <a id="activity_link" style="position:fixed; top:5px; right:5px;" class="btn-primary btn-sm" href="{% url 'preferences' %}">Preferences</a>
+                        <a id="activity_link" style="position:fixed; top:7px; right:5px;" class="btn-primary btn-sm" href="{% url 'preferences' %}">Preferences</a>
                         <a id="admin_link" style="position:fixed; top:40px; right:20px; z-index:900;" class="btn-link btn-sm" href="{% url 'admin:index' %}">Admin</a>
                     </div>
                 </div>
@@ -109,12 +92,12 @@
 
                 <div align="center" class="col-sm-2">
                       <p><b><small>From</small></b></p>
-                      <input style="text-align:center; width:112.5px; inputmode: numeric" class="form-control" placeholder="Date..." type="text" id="datepicker">
+                      <input style="text-align:center; width:112.5px;" class="form-control" inputmode: "numeric" placeholder="Date..." type="text" id="datepicker">
                 </div>
 
                 <div align="center" class="col-sm-2">
                       <p><b><small>To</small></b></p>
-                      <input style="text-align:center; width:112.5px; inputmode: numeric" class="form-control" placeholder="Date..." type="text" id="datepicker_2">
+                      <input style="text-align:center; width:112.5px;" class="form-control" inputmode: "numeric" placeholder="Date..." type="text" id="datepicker_2">
                 </div>
 
                 <div class="col-sm-4"></div>
