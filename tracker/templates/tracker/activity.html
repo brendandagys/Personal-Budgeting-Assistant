@@ -62,7 +62,7 @@
 
                 <tr>
                     <td colspan="2" style="width:100%; text-align:center; padding-bottom:10px;">
-                        <a id="No Filter" class="no_filter" href="">NO FILTER</a>
+                        <a id="All Categories" class="no_filter filter_identifier" href="">ALL CATEGORIES</a>
                     </td>
                 </tr>
 
@@ -273,8 +273,11 @@
                 success: function () {
                     console.log('Filter POST successful!');
 
-                    if ($(this).attr('id') === 'No Filter') {
-                        $('a[id!="homepage_link"]').removeClass('green_filters');
+                    if ($(this).attr('id') === 'All Categories') {
+                        $('a.filter_identifier').addClass('green_filters');
+                    }
+                    else {
+                        $('#All Categories').removeClass('green_filters');
                     }
 
                     get_queryset();

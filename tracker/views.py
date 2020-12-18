@@ -476,7 +476,7 @@ def get_accounts_sum(request):
             if account.currency == 'USD':
                 USD_suffix = ' USD'
 
-            print('\nAccount \'{}\' converted from {}{}{} to ${} CAD.\n'.format(account.account, cc.get_symbol(account.currency), foreign_value, USD_suffix, account_value))
+            print('Account \'{}\' converted from {}{}{} to ${} CAD.'.format(account.account, cc.get_symbol(account.currency), foreign_value, USD_suffix, account_value))
 
         accounts_sum+=account_value
 
@@ -558,6 +558,11 @@ class PurchaseListView(generic.ListView):
         # Call the base implementation first to get a context
         context = super().get_context_data(*args, **kwargs) # Simply using context = {} works, but being safe...
 
+        # To generate the filter buttons on Purchase Category and provide context for the green_filters class
+        purchase_categories_list = []
+        for purchase_category in PurchaseCategory.objects.all().order_by('category'):
+            purchase_categories_list.append(purchase_category.category)
+
         # To generate fields for me to update account balances
         context['account_form'] = AccountForm()
 
@@ -570,10 +575,13 @@ class PurchaseListView(generic.ListView):
                                                            filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
                                                            if x is not None]
 
+        # If ALL CATEGORIES was clicked, all filters should get the green_filters class
+        if len(context['purchase_category_filters']) == 0:
+            purchase_categories_list.append('All Categories') # For the so-named button
+            context['purchase_category_filters'] = purchase_categories_list
+
         # To generate the filter buttons on Purchase Category
-        purchase_categories_list = []
-        for purchase_category in PurchaseCategory.objects.all().order_by('category'):
-            purchase_categories_list.append(purchase_category.category)
+        # purchase_categories_list = get_purchase_categories_list()
 
         purchase_categories_tuples_list = []
         for index in range(0, len(purchase_categories_list), 2):
@@ -623,8 +631,7 @@ def filter_manager(request):
 
             print('\nNew filter value: ' + str(filter_value) + '\n')
 
-            # Clear filter values if necessary
-            if filter_value == 'No Filter':
+            def reset_filters():
                 filter_instance.category_filter_1 = None
                 filter_instance.category_filter_2 = None
                 filter_instance.category_filter_3 = None
@@ -636,10 +643,20 @@ def filter_manager(request):
                 filter_instance.category_filter_9 = None
                 filter_instance.category_filter_10 = None
 
+                filter_instance.save()
+                return HttpResponse()
+
+            # Clear filter values if necessary
+            if filter_value == 'All Categories':
+                reset_filters()
+
             else:
                 filter_list = [category_filter_1, category_filter_2, category_filter_3, category_filter_4, category_filter_5, category_filter_6, category_filter_7, category_filter_8, category_filter_9, category_filter_10]
                 filter_list = [x.category if x is not None else x for x in filter_list]
-                # print(filter_list)
+                filter_list_unique = [x for x in filter_list if x]
+                print(filter_list_unique)
+                if len(filter_list_unique) == 10: # Otherwise, there's an available slot...
+                    return reset_filters()
 
                 # Turn off the filter if the value is the same
                 if filter_value in filter_list:
