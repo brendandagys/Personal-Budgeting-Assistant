@@ -107,7 +107,7 @@
 
             <div class="purchase_list_div col-sm-12">
 
-                <h1 id="purchase_list_header" class="purchase_header">Purchases List (<span id="purchases_count"></span>)</h1>
+                <h1 id="purchase_list_header" class="purchase_header">Purchases (<span id="purchases_count"></span>)</h1>
 
                 <div id="purchase_list_div"></div>
 
@@ -128,11 +128,16 @@
     $(document).ready(function() {
 
         // Initial indication of the applied filters
-        var purchase_category_filters = '{{purchase_category_filters}}'.replace(/&#39;/g, ''); // Use regex to replace weird characters, globally (replace affects 1st instance only when a string argument)
-        purchase_category_filters = purchase_category_filters.slice(1, purchase_category_filters.length - 1).split(', '); // Python list comes through as string, so remove the enclosing '[' and ']' | .split() turns string into Array
-        // Indicate the selected filters
-        purchase_category_filters.forEach(function(item, index) { // Simpler than using JQuery
-            $('a[id="' + item + '"]').addClass('green_filters');
+        $.ajax({
+            type: 'GET',
+            url: 'filters/',
+            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+            success: function(response) {
+                $.each(response, function(index, category_filter) {
+                      $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
+                      // console.log(category_filter);
+                });
+            }
         });
 
         // Set the date filters
@@ -201,7 +206,13 @@
                     console.log(response); // object
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent
-                    $('#purchases_count').html(response['data'].length);
+                    if (response['data'].length > 0) {
+                        $('#purchase_list_header').html('Purchases (<span id="purchases_count"></span>)');
+                        $('#purchases_count').html(response['data'].length);
+                    }
+                    else {
+                        $('#purchase_list_header').html('No purchases to list!');
+                    }
 
                     $('#purchase_list_div').html('');
                     $('#purchase_list_div').html(
@@ -255,12 +266,6 @@
             e.preventDefault()
 
             $(this).blur(); // Without this, the anchor link remains selected after being clicked
-            if ($(this).hasClass('green_filters')) {
-                $(this).removeClass('green_filters');
-            }
-            else {
-              $(this).addClass('green_filters');
-            }
 
             $.ajax({
                 type: 'POST',
@@ -270,16 +275,13 @@
                         'id': $(this).attr('id'),
                 },
                 context: this, // To allow access in the callback functions
-                success: function () {
+                success: function (response) {
                     console.log('Filter POST successful!');
-
-                    if ($(this).attr('id') === 'All Categories') {
-                        $('a.filter_identifier').addClass('green_filters');
-                    }
-                    else {
-                        $('#All Categories').removeClass('green_filters');
-                    }
-
+                    $('a.filter_identifier').removeClass('green_filters');
+                    $.each(response, function(index, category_filter) {
+                          $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
+                          // console.log(category_filter);
+                    });
                     get_queryset();
                 },
                 error: function() {

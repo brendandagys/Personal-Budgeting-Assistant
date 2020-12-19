@@ -508,14 +508,13 @@ def get_json_queryset(request):
         end_date_filter+=datetime.timedelta(days=1)
 
     purchase_categories_list = [x.id for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
-                                               filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
+                                               filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
+                                               filter_instance.category_filter_11, filter_instance.category_filter_12, filter_instance.category_filter_13, filter_instance.category_filter_14, filter_instance.category_filter_15,
+                                               filter_instance.category_filter_16, filter_instance.category_filter_17, filter_instance.category_filter_18, filter_instance.category_filter_19, filter_instance.category_filter_20,
+                                               filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                if x is not None]
 
-    # If the list is all None, nothing would be returned
-    if len(purchase_categories_list) >= 1:
-        queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
-    else:
-        queryset_data = Purchase.objects.filter(date__gte=start_date_filter, date__lt=end_date_filter).order_by('-date', '-time')
+    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
 
     purchases_list = list(queryset_data.values()) # List of dictionaries
 
@@ -572,16 +571,13 @@ class PurchaseListView(generic.ListView):
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
         context['purchase_category_filters'] = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
-                                                           filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10]
-                                                           if x is not None]
+                                                                     filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
+                                                                     filter_instance.category_filter_11, filter_instance.category_filter_12, filter_instance.category_filter_13, filter_instance.category_filter_14, filter_instance.category_filter_15,
+                                                                     filter_instance.category_filter_16, filter_instance.category_filter_17, filter_instance.category_filter_18, filter_instance.category_filter_19, filter_instance.category_filter_20,
+                                                                     filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
+                                                                     if x is not None]
 
-        # If ALL CATEGORIES was clicked, all filters should get the green_filters class
-        if len(context['purchase_category_filters']) == 0:
-            purchase_categories_list.append('All Categories') # For the so-named button
-            context['purchase_category_filters'] = purchase_categories_list
-
-        # To generate the filter buttons on Purchase Category
-        # purchase_categories_list = get_purchase_categories_list()
+        context['purchase_category_filters'] = purchase_categories_list
 
         purchase_categories_tuples_list = []
         for index in range(0, len(purchase_categories_list), 2):
@@ -598,9 +594,47 @@ class PurchaseListView(generic.ListView):
 @login_required
 def filter_manager(request):
 
-    if request.method == 'POST':
+    filter_instance = Filter.objects.last()
 
-        filter_instance = Filter.objects.last()
+    if request.method == 'POST' and request.POST['type'] != 'Date' or request.method == 'GET':
+        # Generate a comprehensive list of PurchaseCategories
+        full_category_filter_list = []
+        for purchase_category in PurchaseCategory.objects.all():
+            full_category_filter_list.append(purchase_category.category)
+        full_category_filter_list.sort()
+        print('Full category filter list: ' + str(full_category_filter_list))
+
+        # Extract the current filter values
+        category_filter_1 = filter_instance.category_filter_1; category_filter_2 = filter_instance.category_filter_2
+        category_filter_3 = filter_instance.category_filter_3; category_filter_4 = filter_instance.category_filter_4
+        category_filter_5 = filter_instance.category_filter_5; category_filter_6 = filter_instance.category_filter_6
+        category_filter_7 = filter_instance.category_filter_7; category_filter_8 = filter_instance.category_filter_8
+        category_filter_9 = filter_instance.category_filter_9; category_filter_10 = filter_instance.category_filter_10
+        category_filter_11 = filter_instance.category_filter_11; category_filter_12 = filter_instance.category_filter_12
+        category_filter_13 = filter_instance.category_filter_13; category_filter_14 = filter_instance.category_filter_14
+        category_filter_15 = filter_instance.category_filter_15; category_filter_16 = filter_instance.category_filter_16
+        category_filter_17 = filter_instance.category_filter_17; category_filter_18 = filter_instance.category_filter_18
+        category_filter_19 = filter_instance.category_filter_19; category_filter_20 = filter_instance.category_filter_20
+        category_filter_21 = filter_instance.category_filter_21; category_filter_22 = filter_instance.category_filter_22
+        category_filter_23 = filter_instance.category_filter_23; category_filter_24 = filter_instance.category_filter_24
+        category_filter_25 = filter_instance.category_filter_25
+
+        # Make a list of the currently applied filters
+        current_filter_list = [x.category if x is not None else x for x in [category_filter_1, category_filter_2, category_filter_3, category_filter_4, category_filter_5, category_filter_6, category_filter_7, category_filter_8, category_filter_9, category_filter_10,
+                       category_filter_11, category_filter_12, category_filter_13, category_filter_14, category_filter_15, category_filter_16, category_filter_17, category_filter_18, category_filter_19, category_filter_20,
+                       category_filter_21, category_filter_22, category_filter_23, category_filter_24, category_filter_25]]
+        current_filter_list_unique = sorted(list(set([x for x in current_filter_list if x])))
+        print('Originally applied filters: ' + str(current_filter_list_unique))
+
+    if request.method == 'GET':
+        if len(current_filter_list_unique) == len(full_category_filter_list):
+            current_filter_list_unique.append('All Categories')
+        return JsonResponse(current_filter_list_unique, safe=False)
+
+    if request.method == 'POST':
+        # Get the filter that was clicked
+        filter_value = request.POST['id'] # The filter 'value' is simply stored in the ID
+        print('Clicked filter value: ' + str(filter_value))
 
         if request.POST['type'] == 'Date':
             filter_value = request.POST['filter_value']
@@ -613,78 +647,90 @@ def filter_manager(request):
             elif request.POST['id'] == 'datepicker_2':
                 filter_instance.end_date_filter = filter_value
 
+            filter_instance.save()
+
+            return HttpResponse()
+
         elif request.POST['type'] == 'Category':
 
-            filter_value = request.POST['id'] # The filter 'value' is simply stored in the ID
+            def set_filters(filter_list):
+                reset_filters()
 
-            # Extract the current filter values
-            category_filter_1 = filter_instance.category_filter_1
-            category_filter_2 = filter_instance.category_filter_2
-            category_filter_3 = filter_instance.category_filter_3
-            category_filter_4 = filter_instance.category_filter_4
-            category_filter_5 = filter_instance.category_filter_5
-            category_filter_6 = filter_instance.category_filter_6
-            category_filter_7 = filter_instance.category_filter_7
-            category_filter_8 = filter_instance.category_filter_8
-            category_filter_9 = filter_instance.category_filter_9
-            category_filter_10 = filter_instance.category_filter_10
-
-            print('\nNew filter value: ' + str(filter_value) + '\n')
-
-            def reset_filters():
-                filter_instance.category_filter_1 = None
-                filter_instance.category_filter_2 = None
-                filter_instance.category_filter_3 = None
-                filter_instance.category_filter_4 = None
-                filter_instance.category_filter_5 = None
-                filter_instance.category_filter_6 = None
-                filter_instance.category_filter_7 = None
-                filter_instance.category_filter_8 = None
-                filter_instance.category_filter_9 = None
-                filter_instance.category_filter_10 = None
+                try:
+                    filter_instance.category_filter_1 = None if filter_list[0] is None else PurchaseCategory.objects.get(category=filter_list[0])
+                    filter_instance.category_filter_2 = None if filter_list[1] is None else PurchaseCategory.objects.get(category=filter_list[1])
+                    filter_instance.category_filter_3 = None if filter_list[2] is None else PurchaseCategory.objects.get(category=filter_list[2])
+                    filter_instance.category_filter_4 = None if filter_list[3] is None else PurchaseCategory.objects.get(category=filter_list[3])
+                    filter_instance.category_filter_5 = None if filter_list[4] is None else PurchaseCategory.objects.get(category=filter_list[4])
+                    filter_instance.category_filter_6 = None if filter_list[5] is None else PurchaseCategory.objects.get(category=filter_list[5])
+                    filter_instance.category_filter_7 = None if filter_list[6] is None else PurchaseCategory.objects.get(category=filter_list[6])
+                    filter_instance.category_filter_8 = None if filter_list[7] is None else PurchaseCategory.objects.get(category=filter_list[7])
+                    filter_instance.category_filter_9 = None if filter_list[8] is None else PurchaseCategory.objects.get(category=filter_list[8])
+                    filter_instance.category_filter_10 = None if filter_list[9] is None else PurchaseCategory.objects.get(category=filter_list[9])
+                    filter_instance.category_filter_11 = None if filter_list[10] is None else PurchaseCategory.objects.get(category=filter_list[10])
+                    filter_instance.category_filter_12 = None if filter_list[11] is None else PurchaseCategory.objects.get(category=filter_list[11])
+                    filter_instance.category_filter_13 = None if filter_list[12] is None else PurchaseCategory.objects.get(category=filter_list[12])
+                    filter_instance.category_filter_14 = None if filter_list[13] is None else PurchaseCategory.objects.get(category=filter_list[13])
+                    filter_instance.category_filter_15 = None if filter_list[14] is None else PurchaseCategory.objects.get(category=filter_list[14])
+                    filter_instance.category_filter_16 = None if filter_list[15] is None else PurchaseCategory.objects.get(category=filter_list[15])
+                    filter_instance.category_filter_17 = None if filter_list[16] is None else PurchaseCategory.objects.get(category=filter_list[16])
+                    filter_instance.category_filter_18 = None if filter_list[17] is None else PurchaseCategory.objects.get(category=filter_list[17])
+                    filter_instance.category_filter_19 = None if filter_list[18] is None else PurchaseCategory.objects.get(category=filter_list[18])
+                    filter_instance.category_filter_20 = None if filter_list[19] is None else PurchaseCategory.objects.get(category=filter_list[19])
+                    filter_instance.category_filter_21 = None if filter_list[20] is None else PurchaseCategory.objects.get(category=filter_list[20])
+                    filter_instance.category_filter_22 = None if filter_list[21] is None else PurchaseCategory.objects.get(category=filter_list[21])
+                    filter_instance.category_filter_23 = None if filter_list[22] is None else PurchaseCategory.objects.get(category=filter_list[22])
+                    filter_instance.category_filter_24 = None if filter_list[23] is None else PurchaseCategory.objects.get(category=filter_list[23])
+                    filter_instance.category_filter_25 = None if filter_list[24] is None else PurchaseCategory.objects.get(category=filter_list[24])
+                except: # If list passed in is not long enough...
+                    pass
 
                 filter_instance.save()
-                return HttpResponse()
+
+            def reset_filters():
+                filter_instance.category_filter_1 = None; filter_instance.category_filter_2 = None; filter_instance.category_filter_3 = None
+                filter_instance.category_filter_4 = None; filter_instance.category_filter_5 = None; filter_instance.category_filter_6 = None
+                filter_instance.category_filter_7 = None; filter_instance.category_filter_8 = None; filter_instance.category_filter_9 = None
+                filter_instance.category_filter_10 = None; filter_instance.category_filter_11 = None; filter_instance.category_filter_12 = None
+                filter_instance.category_filter_13 = None; filter_instance.category_filter_14 = None; filter_instance.category_filter_15 = None
+                filter_instance.category_filter_16 = None; filter_instance.category_filter_17 = None; filter_instance.category_filter_18 = None
+                filter_instance.category_filter_19 = None; filter_instance.category_filter_20 = None; filter_instance.category_filter_21 = None
+                filter_instance.category_filter_22 = None; filter_instance.category_filter_23 = None; filter_instance.category_filter_24 = None
+                filter_instance.category_filter_25 = None
+
+                filter_instance.save()
+
 
             # Clear filter values if necessary
             if filter_value == 'All Categories':
                 reset_filters()
+                if len(current_filter_list_unique) == len(full_category_filter_list):
+                    return JsonResponse([], safe=False) # safe=False necessary for non-dict objects to be serialized
+                else:
+                    set_filters(full_category_filter_list)
+                    full_category_filter_list.append('All Categories')
+                    return JsonResponse(full_category_filter_list, safe=False) # safe=False necessary for non-dict objets to be serialized
 
             else:
-                filter_list = [category_filter_1, category_filter_2, category_filter_3, category_filter_4, category_filter_5, category_filter_6, category_filter_7, category_filter_8, category_filter_9, category_filter_10]
-                filter_list = [x.category if x is not None else x for x in filter_list]
-                filter_list_unique = [x for x in filter_list if x]
-                print(filter_list_unique)
-                if len(filter_list_unique) == 10: # Otherwise, there's an available slot...
-                    return reset_filters()
+                if len(current_filter_list_unique) == 25: # Otherwise, there's an available slot...
+                    reset_filters()
+                    return JsonResponse([], safe=False) # safe=False necessary for non-dict objects to be serialized
 
-                # Turn off the filter if the value is the same
-                if filter_value in filter_list:
-                    filter_list[filter_list.index(filter_value)] = None # Set the filter to be removed to None
-                # Otherwise, place the new value at the first None position
                 else:
-                    for index, item in enumerate(filter_list):
-                        if item is None:
-                            filter_list[index] = filter_value
-                            break
+                    if filter_value in current_filter_list_unique:
+                        current_filter_list_unique.remove(filter_value)
+                    else:
+                        current_filter_list_unique.append(filter_value)
 
-                # We still want alphabetical, with None values at the end
-                filter_list.sort(key=lambda x: (x is None, x))
+                    current_filter_list_unique.sort()
+                    print('New applied filter list: ' + str(current_filter_list_unique))
 
-                filter_instance.category_filter_1 = None if filter_list[0] is None else PurchaseCategory.objects.get(category=filter_list[0])
-                filter_instance.category_filter_2 = None if filter_list[1] is None else PurchaseCategory.objects.get(category=filter_list[1])
-                filter_instance.category_filter_3 = None if filter_list[2] is None else PurchaseCategory.objects.get(category=filter_list[2])
-                filter_instance.category_filter_4 = None if filter_list[3] is None else PurchaseCategory.objects.get(category=filter_list[3])
-                filter_instance.category_filter_5 = None if filter_list[4] is None else PurchaseCategory.objects.get(category=filter_list[4])
-                filter_instance.category_filter_6 = None if filter_list[5] is None else PurchaseCategory.objects.get(category=filter_list[5])
-                filter_instance.category_filter_7 = None if filter_list[6] is None else PurchaseCategory.objects.get(category=filter_list[6])
-                filter_instance.category_filter_8 = None if filter_list[7] is None else PurchaseCategory.objects.get(category=filter_list[7])
-                filter_instance.category_filter_9 = None if filter_list[8] is None else PurchaseCategory.objects.get(category=filter_list[8])
-                filter_instance.category_filter_10 = None if filter_list[9] is None else PurchaseCategory.objects.get(category=filter_list[9])
+                    set_filters(current_filter_list_unique)
 
-        filter_instance.save()
+                    if len(current_filter_list_unique) == len(full_category_filter_list):
+                        current_filter_list_unique.append('All Categories')
 
-        return HttpResponse()
+                    return JsonResponse(current_filter_list_unique, safe=False) # safe=False necessary for non-dict objects to be serialized
 
 
 @login_required
