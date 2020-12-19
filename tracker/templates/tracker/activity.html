@@ -289,42 +289,9 @@
             return false;
         });
 
-        // When the credit card balance is decreased, views.py will decrement the chequing balance. This maintains the proper values in the front-end
-        $('#id_3').on('change', function(e) {
-            if (parseFloat($(this).attr('placeholder').substring(1).trim().replace(',', '')) > $(this).val()) {
-                // console.log(parseFloat($('#id_1').attr('placeholder').substring(1).trim().replace(',', '')));
-                // console.log(parseFloat($(this).attr('placeholder').substring(1).trim().replace(',', '')));
-                // console.log(parseFloat($(this).val()));
-
-                if ($(this).val().trim() !== '') {
-                    let new_chequing_balance = parseFloat($('#id_1').attr('placeholder').substring(1).trim().replace(',', '')) - ($(this).attr('placeholder').substring(1).trim().replace(',', '') - $(this).val());
-                    let new_credit_card_balance = $(this).val();
-
-                    $.ajax({
-                        type: 'POST',
-                        url: 'format_placeholders/',
-                        data: {
-                               csrfmiddlewaretoken: '{{ csrf_token }}',
-                               'chequing': new_chequing_balance,
-                               'credit_card': new_credit_card_balance,
-                        },
-                        context: this, // To allow access in the callback functions
-                        success: function (response) {
-                          console.log(response['chequing']);
-                            $('#id_1').attr('placeholder', response['chequing']);
-                            $(this).attr('placeholder', response['credit_card']);
-                        },
-                    });
-
-                    $('#id_1').attr('placeholder', parseFloat($('#id_1').attr('placeholder').substring(1).trim().replace(',', '')) - ($(this).attr('placeholder').substring(1).trim() - $(this).val()))
-                }
-            }
-        });
-
 
         $('#account_form').find(':input').on('change', function(e) {
-            // console.log($(this).attr('id'));
-            if ($(this).val().trim() !== '') {
+            if ($(this).val().trim() !== '' && parseFloat($(this).val()) !== parseFloat($(this).attr('placeholder').substring(1).trim().replace(',', ''))) { // When the value is cleared or the placeholder value is typed, this function shouldn't run
                 $.ajax({
                     type: 'POST',
                     url: 'account_update/',
@@ -334,8 +301,11 @@
                            'value': $(this).val(),
                     },
                     context: this, // To allow access in the callback functions
-                    success: function () {
+                    success: function (response) {
                         console.log($(this).attr('id') + ' updated to: ' + $(this).val());
+                        $.each(response, function(id, account_placeholder) {
+                            $('#' + id).attr('placeholder', account_placeholder);
+                        });
                         get_accounts_sum();
                     },
                     error: function () {
