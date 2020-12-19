@@ -459,6 +459,10 @@ def convert_currency(foreign_value, foreign_currency, desired_currency):
     return round(foreign_value * conversion_rate, 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
 
 
+def format_placeholders(request):
+    return JsonResponse({'chequing': '${:20,.2f}'.format(Decimal(request.POST['chequing'])), 'credit_card': '${:20,.2f}'.format(Decimal(request.POST['credit_card']))}, safe=False)
+
+
 @login_required
 def get_accounts_sum(request):
     accounts_sum = 0
@@ -713,6 +717,13 @@ def mode_manager(request):
 @login_required
 def account_update(request):
     if request.method == 'POST':
+        if request.POST['id'][3:] == '3': # If the Account updated was my credit card, check if the balance was paid off rather than added to
+            credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+            if Decimal(request.POST['value']) < credit_card_balance: # Then the balance was paid off, and the chequing account should be decremented
+                chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value
+                AccountUpdate.objects.create(account=Account.objects.get(pk=1), value=chequing_balance-(credit_card_balance - Decimal(request.POST['value'])), exchange_rate=1)
+
         account = Account.objects.get(pk=request.POST['id'][3:])
         AccountUpdate.objects.create(account=account, value=request.POST['value'], exchange_rate=get_exchange_rate(account.currency, 'CAD')) # id is prefixed with 'id_'
+
     return HttpResponse()
