@@ -48,595 +48,67 @@
             </div>
         </div>
 
+
+
+        <table style="width:100%;">
+            <br>
+            <tr>
+                <td colspan="2" style="width:100%; text-align:center; padding-bottom:10px;">
+                    <a id="All Categories" class="no_filter filter_identifier" href="">ALL CATEGORIES</a>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="width:100%; text-align:center;">
+                    <p class="filter_headers">Categories</p>
+                </td>
+            </tr>
+
+            {% for filter_tuple in purchase_categories_tuples_list %}
+                <tr>
+                    <td style="width:50%; text-align:right; padding-right:10px;">
+                        <a id="{{filter_tuple.0}}" class="filter_identifier" href="">{{filter_tuple.0}}</a>
+                    </td>
+                    <td style="width:50%; text-align:left; padding-left:10px;">
+                        <a id="{{filter_tuple.1}}"  class="filter_identifier" href="">{{filter_tuple.1}}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </table>
+
+        <br />
+
+        <div class="row">
+            <div class="col-sm-4"></div>
+
+            <div align="center" class="col-sm-2">
+                  <p><b><small>From</small></b></p>
+                  <input style="text-align:center; width:112.5px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker">
+            </div>
+
+            <div align="center" class="col-sm-2">
+                  <p><b><small>To</small></b></p>
+                  <input style="text-align:center; width:112.5px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker_2">
+            </div>
+
+            <div class="col-sm-4"></div>
+        </div>
+
+        <br>
+
+
         <div class="bottom_div">
 
             <div class="row">
-                <div class="chart col-sm-12 col-md-6">
-                    <h3>All Purchases (Excluding Bills)</h3>
-                    <canvas id="myChart1" width="400" height="400"></canvas>
-                    <button id="1_100" type="button" class="button btn btn-primary">100 Days</button>
-                    <button id="1_050" type="button" class="button btn btn-success">50 Days</button>
-                    <button id="1_025" type="button" class="button btn btn-primary">25 Days</button>
-                    <button id="1_Weeks" type="button" class="button btn btn-primary">12 Weeks</button>
-                </div>
-                <div class="chart col-sm-12 col-md-6">
-                    <h3>Food/Drinks</h3>
-                    <canvas id="myChart2" width="400" height="400"></canvas>
-                    <button id="2_100" type="button" class="button btn btn-primary">100 Days</button>
-                    <button id="2_050" type="button" class="button btn btn-success">50 Days</button>
-                    <button id="2_025" type="button" class="button btn btn-primary">25 Days</button>
-                    <button id="2_Weeks" type="button" class="button btn btn-primary">12 Weeks</button>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="chart col-sm-12 col-md-6">
-                    <h3>Groceries</h3>
-                    <canvas id="myChart3" width="400" height="400"></canvas>
-                    <button id="3_100" type="button" class="button btn btn-primary">100 Days</button>
-                    <button id="3_050" type="button" class="button btn btn-success">50 Days</button>
-                    <button id="3_025" type="button" class="button btn btn-primary">25 Days</button>
-                    <button id="3_Weeks" type="button" class="button btn btn-primary">12 Weeks</button>
-                </div>
-                <div class="chart col-sm-12 col-md-6">
-                    <h3>Coffee</h3>
-                    <canvas id="myChart4" width="400" height="400"></canvas>
-                    <button id="4_100" type="button" class="button btn btn-primary">100 Days</button>
-                    <button id="4_050" type="button" class="button btn btn-success">50 Days</button>
-                    <button id="4_025" type="button" class="button btn btn-primary">25 Days</button>
-                    <button id="4_Weeks" type="button" class="button btn btn-primary">12 Weeks</button>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="chart col-sm-12 col-md-6">
-                    <h3>Gas</h3>
-                    <canvas id="myChart5" width="400" height="400"></canvas>
-                    <button id="5_100" type="button" class="button btn btn-primary">100 Days</button>
-                    <button id="5_050" type="button" class="button btn btn-success">50 Days</button>
-                    <button id="5_025" type="button" class="button btn btn-primary">25 Days</button>
-                    <button id="5_Weeks" type="button" class="button btn btn-primary">12 Weeks</button>
-                </div>
-                <div class="chart col-sm-12 col-md-6">
-                    <h3>Services</h3>
-                    <canvas id="myChart6" width="400" height="400"></canvas>
-                    <button id="6_100" type="button" class="button btn btn-primary">100 Days</button>
-                    <button id="6_050" type="button" class="button btn btn-success">50 Days</button>
-                    <button id="6_025" type="button" class="button btn btn-primary">25 Days</button>
-                    <button id="6_Weeks" type="button" class="button btn btn-primary">12 Weeks</button>
+                <div class="chart col-sm-12">
+                    <h3>Purchases</h3>
+                    <canvas id="myChart1" width="400" height="200"></canvas>
                 </div>
             </div>
 
         </div>
 
-        <script>
-
-            $('button').hide(); // Hide the chart buttons as soon as possible, as they jump into place otherwise
-            $('label[for="id_amount"]').attr('style', 'position:relative; bottom:12px;'); // Was appearing too low...
-            $('label[for="id_description"]').attr('style', 'position:relative; bottom:9px;'); // Was appearing too low...
-
-            $(document).ready(function() {
-
-                // Hide 2 fields and add an anchor link button
-                $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"],#id_currency,label[for="id_currency"]').hide();
-                $('#id_amount').after('<tr id="custom_row"><td><a id="custom_anchor_link" style="font-size:1rem; line-height:2.55;">Add 2nd category</a></td></tr>')
-                $('#id_description').after('<tr id="custom_row_2"><td><a id="custom_anchor_link_2" style="font-size:1rem;">Change currency</a></td></tr>')
-
-
-                // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
-                $('#id_date,#id_time').on('focus', function(e) {
-                    $(this).val('');
-                });
-
-
-                // Limit text entry to only numbers
-                $('#id_date, #id_time').on('keydown', function(e) {
-                    if (e.key === '-' || (!Number.isInteger(parseInt(e.key)) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) ||
-                       ($(this).attr('id') === 'id_date' && $(this).val().length > 9 ||
-                        $(this).attr('id') === 'id_time' && $(this).val().length > 5) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) { // Still necessary to check if it's a letter because forms.py attributes aren't working
-                        e.preventDefault();
-                    }
-
-                    if ($(this).attr('id') === 'id_date' && [4,7].includes($(this).val().length) && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
-                        $(this).val($(this).val() + '-');
-                    }
-                    else if ($(this).attr('id') === 'id_time' && $(this).val().length === 2 && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
-                        $(this).val($(this).val() + ':');
-                    }
-
-                    if($(this).attr('id') === 'id_date') {
-                        if ($(this).val().length === 5 && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                        else if ($(this).val().length === 6 && $(this).val()[5] === '1' && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                        else if ($(this).val().length === 6 && $(this).val()[5] === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                        else if ($(this).val().length === 8 && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                        else if ($(this).val().length === 9 && $(this).val()[8] === '3' && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                    }
-
-                    if($(this).attr('id') === 'id_time') {
-                        if ($(this).val().length === 0 && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                        else if ($(this).val() === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                        else if ($(this).val().length === 3 && !['0', '1', '2', '3', '4', '5', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                    }
-                })
-
-
-                // Auto-fill and focus to specific fields when specific PurchaseCategories are selected
-                $('#id_category').on('change', function(e) {
-                    $('#id_item').val('');
-                    $('#id_amount').val('');
-                    $('#id_category_2').val('');
-                    $('#id_amount_2').val('');
-                    if ($('#id_category :selected').text() === 'Gas') {
-                        $('#id_description').text('');
-                    }
-                    else {
-                        $('#id_description').val('');
-                    }
-
-                    if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
-                        $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
-                        $('#id_amount').val('2.10');
-                        $('#id_description').focus().val('L, regular. '); // textarea elemented must be inserted into using .text()
-                    }
-                    else if ($('#id_category :selected').text() === 'Gas') {
-                        $('#id_item').val('Gas at Esso');
-                        $('#id_description').text(' L, $/L.');
-                        $('#id_description').focus();
-                    }
-                    else if ($('#id_category :selected').text() === 'Groceries') {
-                        $('#id_item').focus().val('Groceries at ');
-                    }
-                });
-
-
-                // After click, hide the links and re-show the hidden fields
-                $('#custom_anchor_link').on('click', function(e) {
-                    $('#custom_anchor_link').hide();
-                    $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').show();
-                });
-
-                $('#custom_anchor_link_2').on('click', function(e) {
-                    $('#custom_anchor_link_2').hide();
-                    $('#id_currency').val('EUR'); // REMOVE WHEN FUNCTIONALITY IS ADDED TO CHANGE DEFAULT CURRENCY
-                    $('#id_currency,label[for="id_currency"]').show();
-                });
-
-
-                var mode
-
-                $.ajax({
-                    type: 'GET',
-                    url: 'mode/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
-                    success: function(response) {
-                      mode = response['mode'];
-                      if (mode === 'All') {
-                          $('button[id="all_mode"]').addClass('btn-success');
-                      }
-                      else if (mode === 'Threshold') {
-                          $('button[id="threshold_mode"]').addClass('btn-success');
-                      }
-                      console.log('Retrieved mode: '.concat(mode));
-                    }
-                });
-
-                function chart_1(filter='50') {
-
-                    $.ajax({
-                        type: 'GET',
-                        url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'All', 'filter': filter },
-                        success: function(response) {
-                                console.log(response);
-                            var ctx = document.getElementById('myChart1').getContext('2d');
-                            var myChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: response['All']['labels'],
-                                    datasets: [{
-                                        label: 'Dollars Spent',
-                                        data: response['All']['values'],
-                                        backgroundColor: [
-                                            // 'rgba(255, 99, 132, 0.2)',
-                                            'rgba(54, 162, 235, 0.2)',
-                                            // 'rgba(255, 206, 86, 0.2)',
-                                            // 'rgba(75, 192, 192, 0.2)',
-                                            // 'rgba(153, 102, 255, 0.2)',
-                                            // 'rgba(255, 159, 64, 0.2)'
-                                        ],
-                                        borderColor: [
-                                            // 'rgba(255, 99, 132, 1)',
-                                            'rgba(54, 162, 235, 1)',
-                                            // 'rgba(255, 206, 86, 1)',
-                                            // 'rgba(75, 192, 192, 1)',
-                                            // 'rgba(153, 102, 255, 1)',
-                                            // 'rgba(255, 159, 64, 1)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        yAxes: [{
-                                            ticks: {
-                                                beginAtZero: true
-                                            }
-                                        }],
-                                        xAxes: [{
-                                            ticks: {
-                                                fontSize: 8
-                                            }
-                                        }]
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-
-                function chart_2(filter='50') {
-
-                    $.ajax({
-                        type: 'GET',
-                        url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '2', 'filter': filter },
-                        success: function(response) {
-                                console.log(response);
-                            var ctx = document.getElementById('myChart2').getContext('2d');
-                            var myChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: response['Food/Drinks']['labels'],
-                                    datasets: [{
-                                        label: 'Dollars Spent',
-                                        data: response['Food/Drinks']['values'],
-                                        backgroundColor: [
-                                            'rgba(255, 99, 132, 0.2)',
-                                            // 'rgba(54, 162, 235, 0.2)',
-                                            // 'rgba(255, 206, 86, 0.2)',
-                                            // 'rgba(75, 192, 192, 0.2)',
-                                            // 'rgba(153, 102, 255, 0.2)',
-                                            // 'rgba(255, 159, 64, 0.2)'
-                                        ],
-                                        borderColor: [
-                                            'rgba(255, 99, 132, 1)',
-                                            // 'rgba(54, 162, 235, 1)',
-                                            // 'rgba(255, 206, 86, 1)',
-                                            // 'rgba(75, 192, 192, 1)',
-                                            // 'rgba(153, 102, 255, 1)',
-                                            // 'rgba(255, 159, 64, 1)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        yAxes: [{
-                                            ticks: {
-                                                beginAtZero: true
-                                            }
-                                        }],
-                                        xAxes: [{
-                                            ticks: {
-                                                fontSize: 8
-                                            }
-                                        }]
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-
-                function chart_3(filter='50') {
-
-                    $.ajax({
-                        type: 'GET',
-                        url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '3', 'filter': filter },
-                        success: function(response) {
-                                console.log(response);
-                            var ctx = document.getElementById('myChart3').getContext('2d');
-                            var myChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: response['Groceries']['labels'],
-                                    datasets: [{
-                                        label: 'Dollars Spent',
-                                        data: response['Groceries']['values'],
-                                        backgroundColor: [
-                                            // 'rgba(255, 99, 132, 0.2)',
-                                            // 'rgba(54, 162, 235, 0.2)',
-                                            'rgba(255, 206, 86, 0.2)',
-                                            // 'rgba(75, 192, 192, 0.2)',
-                                            // 'rgba(153, 102, 255, 0.2)',
-                                            // 'rgba(255, 159, 64, 0.2)'
-                                        ],
-                                        borderColor: [
-                                            // 'rgba(255, 99, 132, 1)',
-                                            // 'rgba(54, 162, 235, 1)',
-                                            'rgba(255, 206, 86, 1)',
-                                            // 'rgba(75, 192, 192, 1)',
-                                            // 'rgba(153, 102, 255, 1)',
-                                            // 'rgba(255, 159, 64, 1)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        yAxes: [{
-                                            ticks: {
-                                                beginAtZero: true
-                                            }
-                                        }],
-                                        xAxes: [{
-                                            ticks: {
-                                                fontSize: 8
-                                            }
-                                        }]
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-
-                function chart_4(filter='50') {
-
-                    $.ajax({
-                        type: 'GET',
-                        url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '1', 'filter': filter },
-                        success: function(response) {
-                                console.log(response);
-                            var ctx = document.getElementById('myChart4').getContext('2d');
-                            var myChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: response['Coffee']['labels'],
-                                    datasets: [{
-                                        label: 'Dollars Spent',
-                                        data: response['Coffee']['values'],
-                                        backgroundColor: [
-                                            // 'rgba(255, 99, 132, 0.2)',
-                                            // 'rgba(54, 162, 235, 0.2)',
-                                            // 'rgba(255, 206, 86, 0.2)',
-                                            // 'rgba(75, 192, 192, 0.2)',
-                                            'rgba(153, 102, 255, 0.2)',
-                                            // 'rgba(255, 159, 64, 0.2)'
-                                        ],
-                                        borderColor: [
-                                            // 'rgba(255, 99, 132, 1)',
-                                            // 'rgba(54, 162, 235, 1)',
-                                            // 'rgba(255, 206, 86, 1)',
-                                            // 'rgba(75, 192, 192, 1)',
-                                            'rgba(153, 102, 255, 1)',
-                                            // 'rgba(255, 159, 64, 1)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        yAxes: [{
-                                            ticks: {
-                                                beginAtZero: true
-                                            }
-                                        }],
-                                        xAxes: [{
-                                            ticks: {
-                                                fontSize: 8
-                                            }
-                                        }]
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-
-                function chart_5(filter='50') {
-
-                    $.ajax({
-                        type: 'GET',
-                        url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '4', 'filter': filter },
-                        success: function(response) {
-                                console.log(response);
-                            var ctx = document.getElementById('myChart5').getContext('2d');
-                            var myChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: response['Gas']['labels'],
-                                    datasets: [{
-                                        label: 'Dollars Spent',
-                                        data: response['Gas']['values'],
-                                        backgroundColor: [
-                                            // 'rgba(255, 99, 132, 0.2)',
-                                            // 'rgba(54, 162, 235, 0.2)',
-                                            // 'rgba(255, 206, 86, 0.2)',
-                                            'rgba(75, 192, 192, 0.2)',
-                                            // 'rgba(153, 102, 255, 0.2)',
-                                            // 'rgba(255, 159, 64, 0.2)'
-                                        ],
-                                        borderColor: [
-                                            // 'rgba(255, 99, 132, 1)',
-                                            // 'rgba(54, 162, 235, 1)',
-                                            // 'rgba(255, 206, 86, 1)',
-                                            'rgba(75, 192, 192, 1)',
-                                            // 'rgba(153, 102, 255, 1)',
-                                            // 'rgba(255, 159, 64, 1)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        yAxes: [{
-                                            ticks: {
-                                                beginAtZero: true
-                                            }
-                                        }],
-                                        xAxes: [{
-                                            ticks: {
-                                                fontSize: 8
-                                            }
-                                        }]
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-
-                function chart_6(filter='50') {
-
-                    $.ajax({
-                        type: 'GET',
-                        url: 'charts/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': '7', 'filter': filter },
-                        success: function(response) {
-                                console.log(response);
-                            var ctx = document.getElementById('myChart6').getContext('2d');
-                            var myChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: response['Services']['labels'],
-                                    datasets: [{
-                                        label: 'Dollars Spent',
-                                        data: response['Services']['values'],
-                                        backgroundColor: [
-                                            // 'rgba(255, 99, 132, 0.2)',
-                                            // 'rgba(54, 162, 235, 0.2)',
-                                            // 'rgba(255, 206, 86, 0.2)',
-                                            // 'rgba(75, 192, 192, 0.2)',
-                                            // 'rgba(153, 102, 255, 0.2)',
-                                            'rgba(255, 159, 64, 0.2)'
-                                        ],
-                                        borderColor: [
-                                            // 'rgba(255, 99, 132, 1)',
-                                            // 'rgba(54, 162, 235, 1)',
-                                            // 'rgba(255, 206, 86, 1)',
-                                            // 'rgba(75, 192, 192, 1)',
-                                            // 'rgba(153, 102, 255, 1)',
-                                            'rgba(255, 159, 64, 1)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        yAxes: [{
-                                            ticks: {
-                                                beginAtZero: true
-                                            }
-                                        }],
-                                        xAxes: [{
-                                            ticks: {
-                                                fontSize: 8
-                                            }
-                                        }]
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-
-                chart_1();
-                chart_2();
-                chart_3();
-                chart_4();
-                chart_5();
-                chart_6();
-
-                $('button').fadeIn(3000);
-                // Pass the desired filter, taken from the last 3 characters of the button's id
-                $('button[id^="1"]').on('click', function(e) { chart_1(this.id.slice(2, 5)) } );
-                $('button[id^="2"]').on('click', function(e) { chart_2(this.id.slice(2, 5)) } );
-                $('button[id^="3"]').on('click', function(e) { chart_3(this.id.slice(2, 5)) } );
-                $('button[id^="4"]').on('click', function(e) { chart_4(this.id.slice(2, 5)) } );
-                $('button[id^="5"]').on('click', function(e) { chart_5(this.id.slice(2, 5)) } );
-                $('button[id^="6"]').on('click', function(e) { chart_6(this.id.slice(2, 5)) } );
-
-                $('button[id^="1"]').on('click', function(e) {
-                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
-                    $(this).addClass('btn-success');
-                });
-
-                $('button[id^="2"]').on('click', function(e) {
-                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
-                    $(this).addClass('btn-success');
-                });
-
-                $('button[id^="3"]').on('click', function(e) {
-                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
-                    $(this).addClass('btn-success');
-                });
-
-                $('button[id^="4"]').on('click', function(e) {
-                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
-                    $(this).addClass('btn-success');
-                });
-
-                $('button[id^="5"]').on('click', function(e) {
-                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
-                    $(this).addClass('btn-success');
-                });
-
-                $('button[id^="6"]').on('click', function(e) {
-                    $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
-                    $(this).addClass('btn-success');
-                });
-
-                $('button[id="all_mode"]').on('click', function(e) {
-                    $.ajax({
-                        type: 'POST',
-                        url: 'mode/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'All'},
-                        success: function(response) {
-                          $(this).addClass('btn-success');
-                          $('button[id="all_mode"]').addClass('btn-success');
-                          $('button[id="threshold_mode"]').removeClass('btn-success');
-                          console.log('Updated mode to All!');
-                        }
-                    });
-                });
-
-                $('button[id="threshold_mode"]').on('click', function(e) {
-                    $.ajax({
-                        type: 'POST',
-                        url: 'mode/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'Threshold'},
-                        success: function(response) {
-                          $(this).addClass('btn-success');
-                          $('button[id="threshold_mode"]').addClass('btn-success');
-                          $('button[id="all_mode"]').removeClass('btn-success');
-                          console.log('Updated mode to Threshold!');
-                        }
-                    });
-                });
-
-            });
-
-        </script>
 
         <hr>
 
@@ -646,5 +118,367 @@
         </div>
 
     </body>
+
+    <script>
+
+        $('label[for="id_amount"]').attr('style', 'position:relative; bottom:12px;'); // Was appearing too low...
+        $('label[for="id_description"]').attr('style', 'position:relative; bottom:9px;'); // Was appearing too low...
+
+        $(document).ready(function() {
+            // Initial indication of the applied filters
+            $.ajax({
+                type: 'GET',
+                url: 'filters/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'page': 'Homepage',                     },
+                success: function(response) {
+                    $.each(response, function(index, category_filter) {
+                          $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
+                          // console.log(category_filter);
+                    });
+                }
+            });
+
+            // Set the date filters
+            $('#datepicker').val('{{start_date}}');
+            $('#datepicker_2').val('{{end_date}}');
+
+
+            // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
+            $('#datepicker,#datepicker_2').on('focus', function(e) {
+                $(this).val('');
+            });
+
+
+            // Limit text entry to only numbers
+            $('#datepicker, #datepicker_2').on('keydown', function(e) {
+                // console.log($(this).val().length);
+                if ([4,7].includes($(this).val().length) && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
+                    $(this).val($(this).val() + '-');
+                }
+                if ((!Number.isInteger(parseInt(e.key)) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) || ($(this).val().length > 9  && !['Backspace', 'Enter', 'Tab'].includes(e.key))) { // Still necessary to check if it's a letter because forms.py attributes aren't working
+                    e.preventDefault();
+                }
+                if ($(this).val().length === 5 && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                    e.preventDefault();
+                }
+                else if ($(this).val().length === 6 && $(this).val()[5] === '1' && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                    e.preventDefault();
+                }
+                else if ($(this).val().length === 6 && $(this).val()[5] === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                    e.preventDefault();
+                }
+                else if ($(this).val().length === 8 && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                    e.preventDefault();
+                }
+                else if ($(this).val().length === 9 && $(this).val()[8] === '3' && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            // Hide 2 fields and add an anchor link button
+            $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"],#id_currency,label[for="id_currency"]').hide();
+            $('#id_amount').after('<tr id="custom_row"><td><a id="custom_anchor_link" style="font-size:1rem; line-height:2.55;">Add 2nd category</a></td></tr>')
+            $('#id_description').after('<tr id="custom_row_2"><td><a id="custom_anchor_link_2" style="font-size:1rem;">Change currency</a></td></tr>')
+
+
+            // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
+            $('#id_date,#id_time').on('focus', function(e) {
+                $(this).val('');
+            });
+
+
+            // Limit text entry to only numbers
+            $('#id_date, #id_time').on('keydown', function(e) {
+                if (e.key === '-' || (!Number.isInteger(parseInt(e.key)) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) ||
+                   ($(this).attr('id') === 'id_date' && $(this).val().length > 9 ||
+                    $(this).attr('id') === 'id_time' && $(this).val().length > 5) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) { // Still necessary to check if it's a letter because forms.py attributes aren't working
+                    e.preventDefault();
+                }
+
+                if ($(this).attr('id') === 'id_date' && [4,7].includes($(this).val().length) && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
+                    $(this).val($(this).val() + '-');
+                }
+                else if ($(this).attr('id') === 'id_time' && $(this).val().length === 2 && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
+                    $(this).val($(this).val() + ':');
+                }
+
+                if($(this).attr('id') === 'id_date') {
+                    if ($(this).val().length === 5 && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    else if ($(this).val().length === 6 && $(this).val()[5] === '1' && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    else if ($(this).val().length === 6 && $(this).val()[5] === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    else if ($(this).val().length === 8 && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    else if ($(this).val().length === 9 && $(this).val()[8] === '3' && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                }
+
+                if($(this).attr('id') === 'id_time') {
+                    if ($(this).val().length === 0 && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    else if ($(this).val() === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    else if ($(this).val().length === 3 && !['0', '1', '2', '3', '4', '5', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                }
+            })
+
+
+            // Auto-fill and focus to specific fields when specific PurchaseCategories are selected
+            $('#id_category').on('change', function(e) {
+                $('#id_item').val('');
+                $('#id_amount').val('');
+                $('#id_category_2').val('');
+                $('#id_amount_2').val('');
+                if ($('#id_category :selected').text() === 'Gas') {
+                    $('#id_description').text('');
+                }
+                else {
+                    $('#id_description').val('');
+                }
+
+                if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
+                    $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
+                    $('#id_amount').val('2.10');
+                    $('#id_description').focus().val('L, regular. '); // textarea elemented must be inserted into using .text()
+                }
+                else if ($('#id_category :selected').text() === 'Gas') {
+                    $('#id_item').val('Gas at Esso');
+                    $('#id_description').text(' L, $/L.');
+                    $('#id_description').focus();
+                }
+                else if ($('#id_category :selected').text() === 'Groceries') {
+                    $('#id_item').focus().val('Groceries at ');
+                }
+            });
+
+
+            // After click, hide the links and re-show the hidden fields
+            $('#custom_anchor_link').on('click', function(e) {
+                $('#custom_anchor_link').hide();
+                $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').show();
+            });
+
+            $('#custom_anchor_link_2').on('click', function(e) {
+                $('#custom_anchor_link_2').hide();
+                $('#id_currency').val('EUR'); // REMOVE WHEN FUNCTIONALITY IS ADDED TO CHANGE DEFAULT CURRENCY
+                $('#id_currency,label[for="id_currency"]').show();
+            });
+
+
+            $('a.filter_identifier').on('click', function(e) {
+                e.preventDefault()
+
+                $(this).blur(); // Without this, the anchor link remains selected after being clicked
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'filters/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'page': 'Homepage',
+                            'type': 'Category',
+                            'id': $(this).attr('id'),
+                    },
+                    context: this, // To allow access in the callback functions
+                    success: function (response) {
+                        console.log('Filter POST successful!');
+                        $('a.filter_identifier').removeClass('green_filters');
+                        $.each(response, function(index, category_filter) {
+                              $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
+                              // console.log(category_filter);
+                        });
+                    },
+                    error: function() {
+                        console.log('There was an issue updating the filter: ' + $(this).attr('id'));
+                    }
+                });
+                return false;
+            });
+
+
+            // When switching from a date to blank string, the 'change' event does not fire
+            $(document).on('focusout', '#datepicker, #datepicker_2', function(e) {
+                if ($(this).val() === '') {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'filters/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                                'page': 'Homepage',
+                                'type': 'Date',
+                                'id': $(this).attr('id'),
+                                'filter_value': $(this).val(), },
+                        context: this,
+                        success: function(response) {
+                            console.log('Date filter updated!');
+                        },
+                        error: function() {
+                            console.log('Error updating date filter.');
+                        },
+                  });
+                }
+            });
+
+
+            $(document).on('change', '#datepicker, #datepicker_2', function(e) {
+                console.log('Start date: ' + $('#datepicker').val());
+                console.log('End date: ' + $('#datepicker_2').val());
+
+                // Make sure the start date is not later than the end date
+                if($('#datepicker').val() !== '' && $('#datepicker_2').val() !== '' & $('#datepicker').val() > $('#datepicker_2').val()){
+                    alert('The start date cannot be later than the end date.');
+                    $(this).val('');
+                }
+                else if ($('#datepicker').val().length != 0 && $('#datepicker').val().length != 10 || $('#datepicker_2').val().length != 0 && $('#datepicker_2').val().length != 10) {
+                    alert('\nPlease enter a valid date.');
+                    $(this).val('');
+                }
+                else {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'filters/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                                'page': 'Homepage',
+                                'type': 'Date',
+                                'id': $(this).attr('id'),
+                                'filter_value': $(this).val(), },
+                        context: this,
+                        success: function(response) {
+                            console.log('Date filter updated!');
+                        },
+                        error: function() {
+                            console.log('Error updating date filter.');
+                        },
+                    });
+                }
+            })
+
+
+            var mode;
+
+            $.ajax({
+                type: 'GET',
+                url: 'mode/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+                success: function(response) {
+                  mode = response['mode'];
+                  if (mode === 'All') {
+                      $('button[id="all_mode"]').addClass('btn-success');
+                  }
+                  else if (mode === 'Threshold') {
+                      $('button[id="threshold_mode"]').addClass('btn-success');
+                  }
+                  console.log('Retrieved mode: '.concat(mode));
+                }
+            });
+
+            function chart_1(filter='50') {
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'charts/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'All', 'filter': filter },
+                    success: function(response) {
+                            console.log(response);
+                        var ctx = document.getElementById('myChart1').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: response['All']['labels'],
+                                datasets: [{
+                                    label: 'Dollars Spent',
+                                    data: response['All']['values'],
+                                    backgroundColor: [
+                                        // 'rgba(255, 99, 132, 0.2)',
+                                        'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(255, 206, 86, 0.2)',
+                                        // 'rgba(75, 192, 192, 0.2)',
+                                        // 'rgba(153, 102, 255, 0.2)',
+                                        // 'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        // 'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        // 'rgba(255, 206, 86, 1)',
+                                        // 'rgba(75, 192, 192, 1)',
+                                        // 'rgba(153, 102, 255, 1)',
+                                        // 'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            chart_1();
+
+            $('button').fadeIn(3000);
+            // Pass the desired filter, taken from the last 3 characters of the button's id
+            $('button[id^="1"]').on('click', function(e) { chart_1(this.id.slice(2, 5)) } );
+
+            $('button[id^="1"]').on('click', function(e) {
+                $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
+                $(this).addClass('btn-success');
+            });
+
+
+
+            $('button[id="all_mode"]').on('click', function(e) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'mode/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'All'},
+                    success: function(response) {
+                      $(this).addClass('btn-success');
+                      $('button[id="all_mode"]').addClass('btn-success');
+                      $('button[id="threshold_mode"]').removeClass('btn-success');
+                      console.log('Updated mode to All!');
+                    }
+                });
+            });
+
+            $('button[id="threshold_mode"]').on('click', function(e) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'mode/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'Threshold'},
+                    success: function(response) {
+                      $(this).addClass('btn-success');
+                      $('button[id="threshold_mode"]').addClass('btn-success');
+                      $('button[id="all_mode"]').removeClass('btn-success');
+                      console.log('Updated mode to Threshold!');
+                    }
+                });
+            });
+
+        });
+
+    </script>
 
 </html>

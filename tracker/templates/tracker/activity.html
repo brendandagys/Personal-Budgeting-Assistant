@@ -131,7 +131,8 @@
         $.ajax({
             type: 'GET',
             url: 'filters/',
-            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+            data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                    'page': 'Purchases',                     },
             success: function(response) {
                 $.each(response, function(index, category_filter) {
                       $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
@@ -209,9 +210,11 @@
                     if (response['data'].length > 0) {
                         $('#purchase_list_header').html('Purchases (<span id="purchases_count"></span>)');
                         $('#purchases_count').html(response['data'].length);
+                        $('#no_purchases_spacing').hide();
                     }
-                    else {
-                        $('#purchase_list_header').html('No purchases to list!');
+                    else if ($('#purchase_list_header').text() !== 'No purchases to list!') {
+                        $('#purchase_list_header').text('No purchases to list!');
+                        $('#purchase_list_header').after('<div id="no_purchases_spacing"><br><hr></div>');
                     }
 
                     $('#purchase_list_div').html('');
@@ -262,36 +265,6 @@
         get_queryset();
 
 
-        $('a.filter_identifier').on('click', function(e) {
-            e.preventDefault()
-
-            $(this).blur(); // Without this, the anchor link remains selected after being clicked
-
-            $.ajax({
-                type: 'POST',
-                url: 'filters/',
-                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                        'type': 'Category',
-                        'id': $(this).attr('id'),
-                },
-                context: this, // To allow access in the callback functions
-                success: function (response) {
-                    console.log('Filter POST successful!');
-                    $('a.filter_identifier').removeClass('green_filters');
-                    $.each(response, function(index, category_filter) {
-                          $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
-                          // console.log(category_filter);
-                    });
-                    get_queryset();
-                },
-                error: function() {
-                    console.log('There was an issue updating the filter: ' + $(this).attr('id'));
-                }
-            });
-            return false;
-        });
-
-
         $('#account_form').find(':input').on('change', function(e) {
             if ($(this).val().trim() !== '' && parseFloat($(this).val()) !== parseFloat($(this).attr('placeholder').substring(1).trim().replace(',', ''))) { // When the value is cleared or the placeholder value is typed, this function shouldn't run
                 $.ajax({
@@ -339,6 +312,38 @@
             }
         });
 
+
+        $('a.filter_identifier').on('click', function(e) {
+            e.preventDefault()
+
+            $(this).blur(); // Without this, the anchor link remains selected after being clicked
+
+            $.ajax({
+                type: 'POST',
+                url: 'filters/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'page': 'Purchases',
+                        'type': 'Category',
+                        'id': $(this).attr('id'),
+                },
+                context: this, // To allow access in the callback functions
+                success: function (response) {
+                    console.log('Filter POST successful!');
+                    $('a.filter_identifier').removeClass('green_filters');
+                    $.each(response, function(index, category_filter) {
+                          $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
+                          // console.log(category_filter);
+                    });
+                    get_queryset();
+                },
+                error: function() {
+                    console.log('There was an issue updating the filter: ' + $(this).attr('id'));
+                }
+            });
+            return false;
+        });
+
+
         // When switching from a date to blank string, the 'change' event does not fire
         $(document).on('focusout', '#datepicker, #datepicker_2', function(e) {
             if ($(this).val() === '') {
@@ -346,6 +351,7 @@
                     type: 'POST',
                     url: 'filters/',
                     data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'page': 'Purchases',
                             'type': 'Date',
                             'id': $(this).attr('id'),
                             'filter_value': $(this).val(), },
@@ -380,6 +386,7 @@
                     type: 'POST',
                     url: 'filters/',
                     data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'page': 'Purchases',
                             'type': 'Date',
                             'id': $(this).attr('id'),
                             'filter_value': $(this).val(), },

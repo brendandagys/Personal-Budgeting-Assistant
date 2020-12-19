@@ -89,6 +89,7 @@ class Filter(models.Model):
     class Meta:
         verbose_name_plural = 'Filters'
         verbose_name = 'Filter'
+        ordering = ['id']
 
     def __str__(self):
         return ', '.join([str(self.category_filter_1), str(self.start_date_filter), str(self.end_date_filter)])

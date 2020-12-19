@@ -36,6 +36,129 @@ day = date.day
 weekday = date.weekday()
 
 
+def get_purchase_categories_tuples_list():
+    # To generate the filter buttons on Purchase Category and provide context for the green_filters class
+    purchase_categories_list = []
+    for purchase_category in PurchaseCategory.objects.all().order_by('category'):
+        purchase_categories_list.append(purchase_category.category)
+
+    purchase_categories_tuples_list = []
+    for index in range(0, len(purchase_categories_list), 2):
+        if index != len(purchase_categories_list) - 1:
+            purchase_categories_tuples_list.append((purchase_categories_list[index], purchase_categories_list[index+1]))
+        else:
+            purchase_categories_tuples_list.append((purchase_categories_list[index], ))
+
+    return purchase_categories_tuples_list
+
+
+def get_exchange_rate(foreign_currency, desired_currency):
+    return Decimal(cr.get_rate(foreign_currency, desired_currency))
+
+
+def convert_currency(foreign_value, foreign_currency, desired_currency):
+    # foreign_value = account_value # account_value is actually for another currency
+    conversion_rate = get_exchange_rate(foreign_currency, desired_currency)
+    return round(foreign_value * conversion_rate, 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
+
+
+@login_required
+def account_update(request):
+    if request.method == 'POST':
+        dict = { request.POST['id']: '${:20,.2f}'.format(Decimal(request.POST['value'])) }
+
+        if request.POST['id'][3:] == '3': # If the Account updated was my credit card, check if the balance was paid off rather than added to
+            credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+            if Decimal(request.POST['value']) < credit_card_balance: # If the balance was paid off, the chequing account should be decremented
+                chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value
+                AccountUpdate.objects.create(account=Account.objects.get(pk=1), value=chequing_balance-(credit_card_balance - Decimal(request.POST['value'])), exchange_rate=1)
+                dict.update({'id_1': '${:20,.2f}'.format(Decimal(chequing_balance-(credit_card_balance - Decimal(request.POST['value']))))})
+
+        account = Account.objects.get(pk=request.POST['id'][3:])
+        AccountUpdate.objects.create(account=account, value=request.POST['value'], exchange_rate=get_exchange_rate(account.currency, 'CAD')) # id is prefixed with 'id_'
+
+        return JsonResponse(dict)
+
+
+@login_required
+def reset_credit_card(request):
+    chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+    credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+    AccountUpdate.objects.create(account=Account.objects.get(id=3), value=0, exchange_rate=1)
+    AccountUpdate.objects.create(account=Account.objects.get(id=1), value=chequing_balance-credit_card_balance, exchange_rate=1)
+    return JsonResponse('${:20,.2f}'.format(chequing_balance-credit_card_balance), safe=False)
+
+
+@login_required
+def get_accounts_sum(request):
+    accounts_sum = 0
+
+    for account in Account.objects.all():
+        account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
+        account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
+
+        if account.currency != 'CAD':
+            foreign_value = account_value
+            account_value = convert_currency(account_value, account.currency, 'CAD')
+
+            # Different currency symbol formatting for American dollars
+            USD_suffix = ''
+            if account.currency == 'USD':
+                USD_suffix = ' USD'
+
+            print('Account \'{}\' converted from {}{}{} to ${} CAD.'.format(account.account, cc.get_symbol(account.currency), foreign_value, USD_suffix, account_value))
+
+        accounts_sum+=account_value
+
+    return JsonResponse('${:20,.2f}'.format(accounts_sum), safe=False)
+
+
+@login_required
+def get_json_queryset(request):
+    filter_instance = Filter.objects.first()
+
+    start_date_filter = filter_instance.start_date_filter
+    end_date_filter = filter_instance.end_date_filter
+
+    if start_date_filter is None:
+        start_date_filter = '2019-01-01'
+
+    if end_date_filter is None:
+        end_date_filter = '2099-12-31'
+    else:
+        end_date_filter+=datetime.timedelta(days=1)
+
+    purchase_categories_list = [x.id for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
+                                               filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
+                                               filter_instance.category_filter_11, filter_instance.category_filter_12, filter_instance.category_filter_13, filter_instance.category_filter_14, filter_instance.category_filter_15,
+                                               filter_instance.category_filter_16, filter_instance.category_filter_17, filter_instance.category_filter_18, filter_instance.category_filter_19, filter_instance.category_filter_20,
+                                               filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
+                                               if x is not None]
+
+    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+
+    purchases_list = list(queryset_data.values()) # List of dictionaries
+
+    # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show because it's a foreign key
+    purchase_category_dict = {}
+    for object in PurchaseCategory.objects.all().values('id', 'category'):
+        purchase_category_dict[object['id']] = object['category']
+    # Update the id for each purchase category
+    for dict in purchases_list:
+        dict['category_id'] = purchase_category_dict[dict['category_id']]
+        if dict['category_2_id'] is not None:
+            dict['category_2_id'] = purchase_category_dict[dict['category_2_id']]
+
+    # Get the total cost of all of the purchases
+    purchases_sum = 0
+    for purchase in list(queryset_data.values_list('amount', 'amount_2')): # Returns a Queryset of tuples
+        purchases_sum+=purchase[0]
+        if purchase[1] is not None:
+            purchases_sum+=purchase[1]
+
+    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum)}, safe=False)
+
+
 @login_required # Don't think this is necessary
 def get_chart_data(request):
 
@@ -160,40 +283,13 @@ def get_chart_data(request):
                     values.append(set['amount__sum'])
 
         json[category_name] = {'labels': labels, 'values': values}
-
         # print(json)
 
         return JsonResponse(json)
 
+
 @login_required
 def homepage(request):
-
-    # def clean_time_string(time_string): # Will be a string of 0 - 4 numbers, no colon
-    #     time_string = time_string.replace(':', '')
-    #
-    #     if len(time_string) == 4:
-    #         if time_string[0:2] in ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
-    #                                 '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']:
-    #             if int(time_string[2]) in range(6) and int(time_string[3]) in range(10): # Normal time
-    #                 return time_string[0:2] + ':' + time_string[2:4]
-    #             else:
-    #                 return time_string[0:2] + ':00' # If last two digits don't make sense, just save on the hour
-    #
-    #     elif len(time_string) == 1: # Number is enforced in the front-end
-    #         return '0' + time_string + ':00'
-    #
-    #     elif len(time_string) == 2:
-    #         if time_string in ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
-    #                            '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']:
-    #             return time_string[0:2] + ':' + time_string[2:4]
-    #
-    #     elif len(time_string) == 3:
-    #         if int(time_string[1:]) in range(60):
-    #             return '0' + time_string[0] + ':' + time_string[1:]
-    #         else:
-    #             return '0' + time_string[0] + ':00'
-    #
-    #     return '00:00'
 
     # bill_information = {
     # 'Apple Music': [7, 'Apple Music', 5.64, 'Monthly fee for Apple Music subscription.'],
@@ -203,7 +299,16 @@ def homepage(request):
     # }
 
     if request.method == 'GET':
-        pass
+        context = {}
+
+        if len(Filter.objects.all()) < 2:
+            Filter.objects.create()
+
+        filter_instance = Filter.objects.last()
+
+        context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
+        context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
+
         # PurchaseCategory.objects.filter(category='').delete()
         # instance = PurchaseCategory.objects.get(category='Gas')
         # print(instance)
@@ -444,98 +549,10 @@ def homepage(request):
     # This returns a blank form, (to clear for the next submission if request.method == 'POST')
     purchase_form = PurchaseForm()
 
-    context = {'purchase_form': purchase_form}
+    context['purchase_form'] = purchase_form
+    context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list()
 
     return render(request, 'homepage.html', context=context)
-
-
-def get_exchange_rate(foreign_currency, desired_currency):
-    return Decimal(cr.get_rate(foreign_currency, desired_currency))
-
-
-def convert_currency(foreign_value, foreign_currency, desired_currency):
-    # foreign_value = account_value # account_value is actually for another currency
-    conversion_rate = get_exchange_rate(foreign_currency, desired_currency)
-    return round(foreign_value * conversion_rate, 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
-
-
-@login_required
-def get_accounts_sum(request):
-    accounts_sum = 0
-
-    for account in Account.objects.all():
-        account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
-        account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
-
-        if account.currency != 'CAD':
-            foreign_value = account_value
-            account_value = convert_currency(account_value, account.currency, 'CAD')
-
-            # Different currency symbol formatting for American dollars
-            USD_suffix = ''
-            if account.currency == 'USD':
-                USD_suffix = ' USD'
-
-            print('Account \'{}\' converted from {}{}{} to ${} CAD.'.format(account.account, cc.get_symbol(account.currency), foreign_value, USD_suffix, account_value))
-
-        accounts_sum+=account_value
-
-    return JsonResponse('${:20,.2f}'.format(accounts_sum), safe=False)
-
-
-@login_required
-def reset_credit_card(request):
-    chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
-    credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
-    AccountUpdate.objects.create(account=Account.objects.get(id=3), value=0, exchange_rate=1)
-    AccountUpdate.objects.create(account=Account.objects.get(id=1), value=chequing_balance-credit_card_balance, exchange_rate=1)
-    return JsonResponse('${:20,.2f}'.format(chequing_balance-credit_card_balance), safe=False)
-
-
-@login_required
-def get_json_queryset(request):
-    filter_instance = Filter.objects.last()
-
-    start_date_filter = filter_instance.start_date_filter
-    end_date_filter = filter_instance.end_date_filter
-
-    if start_date_filter is None:
-        start_date_filter = '2019-01-01'
-
-    if end_date_filter is None:
-        end_date_filter = '2099-12-31'
-    else:
-        end_date_filter+=datetime.timedelta(days=1)
-
-    purchase_categories_list = [x.id for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
-                                               filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
-                                               filter_instance.category_filter_11, filter_instance.category_filter_12, filter_instance.category_filter_13, filter_instance.category_filter_14, filter_instance.category_filter_15,
-                                               filter_instance.category_filter_16, filter_instance.category_filter_17, filter_instance.category_filter_18, filter_instance.category_filter_19, filter_instance.category_filter_20,
-                                               filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
-                                               if x is not None]
-
-    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
-
-    purchases_list = list(queryset_data.values()) # List of dictionaries
-
-    # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show because it's a foreign key
-    purchase_category_dict = {}
-    for object in PurchaseCategory.objects.all().values('id', 'category'):
-        purchase_category_dict[object['id']] = object['category']
-    # Update the id for each purchase category
-    for dict in purchases_list:
-        dict['category_id'] = purchase_category_dict[dict['category_id']]
-        if dict['category_2_id'] is not None:
-            dict['category_2_id'] = purchase_category_dict[dict['category_2_id']]
-
-    # Get the total cost of all of the purchases
-    purchases_sum = 0
-    for purchase in list(queryset_data.values_list('amount', 'amount_2')): # Returns a Queryset of tuples
-        purchases_sum+=purchase[0]
-        if purchase[1] is not None:
-            purchases_sum+=purchase[1]
-
-    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum)}, safe=False)
 
 
 class PurchaseListView(generic.ListView):
@@ -545,28 +562,20 @@ class PurchaseListView(generic.ListView):
 
 
     def get_queryset(self):
-
-        filter_instance = Filter.objects.last()
-
         # If none created yet, create an instance
-        if filter_instance is None:
-            filter_instance = Filter.objects.create()
+        if len(Filter.objects.all()) < 2:
+            Filter.objects.create()
 
 
     def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(*args, **kwargs) # Simply using context = {} works, but being safe...
 
-        # To generate the filter buttons on Purchase Category and provide context for the green_filters class
-        purchase_categories_list = []
-        for purchase_category in PurchaseCategory.objects.all().order_by('category'):
-            purchase_categories_list.append(purchase_category.category)
-
         # To generate fields for me to update account balances
         context['account_form'] = AccountForm()
 
         # To fill the datepickers with the current date filters and label the active filters
-        filter_instance = Filter.objects.last()
+        filter_instance = Filter.objects.first()
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
@@ -577,24 +586,23 @@ class PurchaseListView(generic.ListView):
                                                                      filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                                      if x is not None]
 
-        context['purchase_category_filters'] = purchase_categories_list
-
-        purchase_categories_tuples_list = []
-        for index in range(0, len(purchase_categories_list), 2):
-            if index != len(purchase_categories_list) - 1:
-                purchase_categories_tuples_list.append((purchase_categories_list[index], purchase_categories_list[index+1]))
-            else:
-                purchase_categories_tuples_list.append((purchase_categories_list[index], ))
-
-        context['purchase_categories_tuples_list'] = purchase_categories_tuples_list
+        context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list()
 
         return context
 
 
 @login_required
+def preferences(request):
+    return HttpResponse()
+
+
+@login_required
 def filter_manager(request):
 
-    filter_instance = Filter.objects.last()
+    if request.method == 'GET' and request.GET['page'] == 'Purchases' or request.method == 'POST' and request.POST['page'] == 'Purchases': # GET must be first!
+        filter_instance = Filter.objects.first()
+    else:
+        filter_instance = Filter.objects.last()
 
     if request.method == 'POST' and request.POST['type'] != 'Date' or request.method == 'GET':
         # Generate a comprehensive list of PurchaseCategories
@@ -734,11 +742,6 @@ def filter_manager(request):
 
 
 @login_required
-def preferences(request):
-    return HttpResponse()
-
-
-@login_required
 def mode_manager(request):
     if request.method == 'GET':
         mode_instance = Mode.objects.last()
@@ -754,21 +757,3 @@ def mode_manager(request):
         mode_instance.save()
 
         return HttpResponse()
-
-
-@login_required
-def account_update(request):
-    if request.method == 'POST':
-        dict = { request.POST['id']: '${:20,.2f}'.format(Decimal(request.POST['value'])) }
-
-        if request.POST['id'][3:] == '3': # If the Account updated was my credit card, check if the balance was paid off rather than added to
-            credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
-            if Decimal(request.POST['value']) < credit_card_balance: # If the balance was paid off, the chequing account should be decremented
-                chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value
-                AccountUpdate.objects.create(account=Account.objects.get(pk=1), value=chequing_balance-(credit_card_balance - Decimal(request.POST['value'])), exchange_rate=1)
-                dict.update({'id_1': '${:20,.2f}'.format(Decimal(chequing_balance-(credit_card_balance - Decimal(request.POST['value']))))})
-
-        account = Account.objects.get(pk=request.POST['id'][3:])
-        AccountUpdate.objects.create(account=account, value=request.POST['value'], exchange_rate=get_exchange_rate(account.currency, 'CAD')) # id is prefixed with 'id_'
-
-        return JsonResponse(dict)
