@@ -224,7 +224,7 @@ def get_chart_data(request):
         labels = []
         for datetime_index in pd.date_range(start_date_filter, end_date_filter-datetime.timedelta(days=1), freq='D'): # freq='D' is default, returns a DateTime index
             labels.append(str(datetime_index.date()))
-        print('Chart labels: ' + str(labels))
+        # print('Chart labels: ' + str(labels))
 
         values = []
         for date in labels:
@@ -232,7 +232,7 @@ def get_chart_data(request):
             amount_2_sum = 0 if queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum']
             values.append(amount_sum + amount_2_sum)
 
-        print('Chart values: ' + str(values))
+        # print('Chart values: ' + str(values))
 
         # elif days_filter == 'Weeks':
         #
