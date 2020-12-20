@@ -105,7 +105,7 @@ testpath==0.4.2
 tornado==4.5.3
 tqdm==4.37.0
 traitlets==4.3.2
-Twisted==19.2.1
+Twisted==20.3.0
 txaio==18.8.1
 urllib3==1.26.2
 w3lib==1.21.0
