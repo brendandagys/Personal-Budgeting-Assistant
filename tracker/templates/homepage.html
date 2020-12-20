@@ -20,6 +20,8 @@
          <!-- JQuery -->
          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
+         <script src="{% static 'js/linear_regression.js' %}"></script>
+
          <title>Brendan's Finances Tracker</title>
     </head>
 
@@ -47,8 +49,6 @@
                 </div>
             </div>
         </div>
-
-
 
         <table style="width:100%;">
             <br>
@@ -103,7 +103,7 @@
             <div class="row">
                 <div class="chart col-sm-12">
                     <h3>Purchases</h3>
-                    <canvas id="myChart1" width="400" height="200"></canvas>
+                    <canvas id="spending_chart" width="400" height="200"></canvas>
                 </div>
             </div>
 
@@ -298,35 +298,13 @@
                               $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
                               // console.log(category_filter);
                         });
+                        chart();
                     },
                     error: function() {
                         console.log('There was an issue updating the filter: ' + $(this).attr('id'));
                     }
                 });
                 return false;
-            });
-
-
-            // When switching from a date to blank string, the 'change' event does not fire
-            $(document).on('focusout', '#datepicker, #datepicker_2', function(e) {
-                if ($(this).val() === '') {
-                    $.ajax({
-                        type: 'POST',
-                        url: 'filters/',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                                'page': 'Homepage',
-                                'type': 'Date',
-                                'id': $(this).attr('id'),
-                                'filter_value': $(this).val(), },
-                        context: this,
-                        success: function(response) {
-                            console.log('Date filter updated!');
-                        },
-                        error: function() {
-                            console.log('Error updating date filter.');
-                        },
-                  });
-                }
             });
 
 
@@ -355,6 +333,7 @@
                         context: this,
                         success: function(response) {
                             console.log('Date filter updated!');
+                            chart();
                         },
                         error: function() {
                             console.log('Error updating date filter.');
@@ -382,22 +361,26 @@
                 }
             });
 
-            function chart_1(filter='50') {
+            function chart() {
 
                 $.ajax({
                     type: 'GET',
-                    url: 'charts/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'category': 'All', 'filter': filter },
+                    url: 'chart/',
                     success: function(response) {
                             console.log(response);
-                        var ctx = document.getElementById('myChart1').getContext('2d');
+                        var ctx = document.getElementById('spending_chart').getContext('2d');
                         var myChart = new Chart(ctx, {
                             type: 'line',
+                            plugins: [ChartRegressions],
                             data: {
-                                labels: response['All']['labels'],
+                                labels: response['labels'],
                                 datasets: [{
                                     label: 'Dollars Spent',
-                                    data: response['All']['values'],
+                                    data: response['values'],
+                                    regressions: {
+                                        type: 'linear',
+                                        line: { color: 'red', width: 3},
+                                    },
                                     backgroundColor: [
                                         // 'rgba(255, 99, 132, 0.2)',
                                         'rgba(54, 162, 235, 0.2)',
@@ -414,8 +397,8 @@
                                         // 'rgba(153, 102, 255, 1)',
                                         // 'rgba(255, 159, 64, 1)'
                                     ],
-                                    borderWidth: 1
-                                }]
+                                    borderWidth: 1,
+                                }],
                             },
                             options: {
                                 scales: {
@@ -436,17 +419,7 @@
                 });
             }
 
-            chart_1();
-
-            $('button').fadeIn(3000);
-            // Pass the desired filter, taken from the last 3 characters of the button's id
-            $('button[id^="1"]').on('click', function(e) { chart_1(this.id.slice(2, 5)) } );
-
-            $('button[id^="1"]').on('click', function(e) {
-                $(this).siblings('button').removeClass('btn-success').addClass('btn-primary');
-                $(this).addClass('btn-success');
-            });
-
+            chart();
 
 
             $('button[id="all_mode"]').on('click', function(e) {

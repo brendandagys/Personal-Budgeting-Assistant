@@ -27,6 +27,9 @@ from forex_python.converter import CurrencyRates, CurrencyCodes
 cr = CurrencyRates()
 cc = CurrencyCodes()
 
+def current_date():
+    return datetime.date.today()
+
 # Get information about today's date
 date = datetime.date.today()
 year = date.year
@@ -163,129 +166,138 @@ def get_json_queryset(request):
 def get_chart_data(request):
 
     if request.method == 'GET':
-        category = request.GET['category']
 
-        # temp_dict = {'All': 'All', 'Coffee': 1, 'Food/Drinks': 2, 'Groceries': 3, 'Gas': 4, 'Services': 7}
-        # category = temp_dict[category]
-        try:
-            category = PurchaseCategory.objects.get(id=category)
-            category_name = category.category
-        except:
-            category_name = 'All'
+        filter_instance = Filter.objects.last() # First is for Purchases page
 
-        if request.GET['filter'] == 'Wee': # I slice 2 - 5 in the JavaScript, so only three characters are sent
-            days_filter = 'Weeks'
+        start_date_filter = filter_instance.start_date_filter
+        end_date_filter = filter_instance.end_date_filter
+
+        print('Start date filter: ' + str(start_date_filter))
+        print('End date filter: ' + str(end_date_filter))
+
+        if start_date_filter is None or start_date_filter < Purchase.objects.all().order_by('date').first().date:
+            start_date_filter = Purchase.objects.all().order_by('date').first().date # Date of first purchase recorded
+
+        if end_date_filter is not None:
+            end_date_filter+=datetime.timedelta(days=1)
         else:
-            days_filter = int(request.GET['filter']) - 1 # Comes through as '025' or '050' or '100' | gives one extra, so subtract
+            end_date_filter = current_date() + datetime.timedelta(days=1)
 
-        # To send to the front-end
-        json = dict()
+        print('Days on chart: ' + str((end_date_filter-start_date_filter).days))
 
-        # List comprehension wouldn't work unless these were created first
+        # Extract the current filter values
+        category_filter_1 = filter_instance.category_filter_1; category_filter_2 = filter_instance.category_filter_2
+        category_filter_3 = filter_instance.category_filter_3; category_filter_4 = filter_instance.category_filter_4
+        category_filter_5 = filter_instance.category_filter_5; category_filter_6 = filter_instance.category_filter_6
+        category_filter_7 = filter_instance.category_filter_7; category_filter_8 = filter_instance.category_filter_8
+        category_filter_9 = filter_instance.category_filter_9; category_filter_10 = filter_instance.category_filter_10
+        category_filter_11 = filter_instance.category_filter_11; category_filter_12 = filter_instance.category_filter_12
+        category_filter_13 = filter_instance.category_filter_13; category_filter_14 = filter_instance.category_filter_14
+        category_filter_15 = filter_instance.category_filter_15; category_filter_16 = filter_instance.category_filter_16
+        category_filter_17 = filter_instance.category_filter_17; category_filter_18 = filter_instance.category_filter_18
+        category_filter_19 = filter_instance.category_filter_19; category_filter_20 = filter_instance.category_filter_20
+        category_filter_21 = filter_instance.category_filter_21; category_filter_22 = filter_instance.category_filter_22
+        category_filter_23 = filter_instance.category_filter_23; category_filter_24 = filter_instance.category_filter_24
+        category_filter_25 = filter_instance.category_filter_25
+
+        # Make a list of the currently applied filters
+        current_filter_list = [x.category if x is not None else x for x in [category_filter_1, category_filter_2, category_filter_3, category_filter_4, category_filter_5, category_filter_6, category_filter_7, category_filter_8, category_filter_9, category_filter_10,
+                       category_filter_11, category_filter_12, category_filter_13, category_filter_14, category_filter_15, category_filter_16, category_filter_17, category_filter_18, category_filter_19, category_filter_20,
+                       category_filter_21, category_filter_22, category_filter_23, category_filter_24, category_filter_25]]
+        current_filter_list_unique = sorted(list(set([x for x in current_filter_list if x])))
+        current_filter_list_unique_ids = [PurchaseCategory.objects.get(category=x).id for x in current_filter_list_unique] # To filter the Queryset below, we need to give a list of IDs to the category fields, as it's a foreign key
+        print('Filters for chart: ' + str(current_filter_list_unique))
+
+
+        queryset = Purchase.objects.filter(Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lt=end_date_filter).values('date', 'amount').order_by('date')
+
         labels = []
+        for datetime_index in pd.date_range(start_date_filter, end_date_filter-datetime.timedelta(days=1), freq='D'): # freq='D' is default, returns a DateTime index
+            labels.append(str(datetime_index.date()))
+        print('Chart labels: ' + str(labels))
+
         values = []
+        for date in labels:
+            amount_sum = 0 if queryset.filter(date=date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(date=date).aggregate(Sum('amount'))['amount__sum']
+            amount_2_sum = 0 if queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum']
+            values.append(amount_sum + amount_2_sum)
 
-        if days_filter != 'Weeks':
+        print('Chart values: ' + str(values))
 
-            # if category == 'All': # Don't add category filter to the query
-            #     queryset = Purchase.objects.filter(date__gte=date - datetime.timedelta(days=days_filter)).values('date', 'amount').order_by('date')
-            # else:
-            #     queryset = Purchase.objects.filter(Q(date__gte=date - datetime.timedelta(days=days_filter)) & (Q(category=category) | Q(category_2=category))).values('date', 'amount').order_by('date')
+        # elif days_filter == 'Weeks':
+        #
+        #     week_1_begin  = date + relativedelta(weeks=-11, weekday=SU(-1))
+        #     week_1_end    = date + relativedelta(weeks=-11, weekday=SA(1))
+        #     week_2_begin  = date + relativedelta(weeks=-10, weekday=SU(-1))
+        #     week_2_end    = date + relativedelta(weeks=-10, weekday=SA(1))
+        #     week_3_begin  = date + relativedelta(weeks=-9, weekday=SU(-1))
+        #     week_3_end    = date + relativedelta(weeks=-9, weekday=SA(1))
+        #     week_4_begin  = date + relativedelta(weeks=-8, weekday=SU(-1))
+        #     week_4_end    = date + relativedelta(weeks=-8, weekday=SA(1))
+        #     week_5_begin  = date + relativedelta(weeks=-7, weekday=SU(-1))
+        #     week_5_end    = date + relativedelta(weeks=-7, weekday=SA(1))
+        #     week_6_begin  = date + relativedelta(weeks=-6, weekday=SU(-1))
+        #     week_6_end    = date + relativedelta(weeks=-6, weekday=SA(1))
+        #     week_7_begin  = date + relativedelta(weeks=-5, weekday=SU(-1))
+        #     week_7_end    = date + relativedelta(weeks=-5, weekday=SA(1))
+        #     week_8_begin  = date + relativedelta(weeks=-4, weekday=SU(-1))
+        #     week_8_end    = date + relativedelta(weeks=-4, weekday=SA(1))
+        #     week_9_begin  = date + relativedelta(weeks=-3, weekday=SU(-1))
+        #     week_9_end    = date + relativedelta(weeks=-3, weekday=SA(1))
+        #     week_10_begin = date + relativedelta(weeks=-2, weekday=SU(-1))
+        #     week_10_end   = date + relativedelta(weeks=-2, weekday=SA(1))
+        #     week_11_begin = date + relativedelta(weeks=-1, weekday=SU(-1))
+        #     week_11_end   = date + relativedelta(weeks=-1, weekday=SA(1))
+        #     week_12_begin = date + relativedelta(weekday=SU(-1))
+        #     week_12_end   = date + relativedelta(weekday=SA(1))
+        #
+        #     if category == 'All': # Don't add category filter to the query
+        #         queryset_week_1  = Purchase.objects.filter(date__gte = week_1_begin, date__lte = week_1_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_2  = Purchase.objects.filter(date__gte = week_2_begin, date__lte = week_2_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_3  = Purchase.objects.filter(date__gte = week_3_begin, date__lte = week_3_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_4  = Purchase.objects.filter(date__gte = week_4_begin, date__lte = week_4_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_5  = Purchase.objects.filter(date__gte = week_5_begin, date__lte = week_5_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_6  = Purchase.objects.filter(date__gte = week_6_begin, date__lte = week_6_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_7  = Purchase.objects.filter(date__gte = week_7_begin, date__lte = week_7_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_8  = Purchase.objects.filter(date__gte = week_8_begin, date__lte = week_8_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_9  = Purchase.objects.filter(date__gte = week_9_begin, date__lte = week_9_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_10 = Purchase.objects.filter(date__gte = week_10_begin, date__lte = week_10_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_11 = Purchase.objects.filter(date__gte = week_11_begin, date__lte = week_11_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_12 = Purchase.objects.filter(date__gte = week_12_begin, date__lte = week_12_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
+        #     else:
+        #         queryset_week_1  = Purchase.objects.filter(Q(date__gte = week_1_begin) & Q(date__lte = week_1_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_2  = Purchase.objects.filter(Q(date__gte = week_2_begin) & Q(date__lte = week_2_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_3  = Purchase.objects.filter(Q(date__gte = week_3_begin) & Q(date__lte = week_3_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_4  = Purchase.objects.filter(Q(date__gte = week_4_begin) & Q(date__lte = week_4_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_5  = Purchase.objects.filter(Q(date__gte = week_5_begin) & Q(date__lte = week_5_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_6  = Purchase.objects.filter(Q(date__gte = week_6_begin) & Q(date__lte = week_6_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_7  = Purchase.objects.filter(Q(date__gte = week_7_begin) & Q(date__lte = week_7_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_8  = Purchase.objects.filter(Q(date__gte = week_8_begin) & Q(date__lte = week_8_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_9  = Purchase.objects.filter(Q(date__gte = week_9_begin) & Q(date__lte = week_9_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_10  = Purchase.objects.filter(Q(date__gte = week_10_begin) & Q(date__lte = week_10_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_11  = Purchase.objects.filter(Q(date__gte = week_11_begin) & Q(date__lte = week_11_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #         queryset_week_12  = Purchase.objects.filter(Q(date__gte = week_12_begin) & Q(date__lte = week_12_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
+        #
+        #     labels = [' - '.join([str(week_1_begin)[5:10], str(week_1_end)[5:10]]),
+        #               ' - '.join([str(week_2_begin)[5:10], str(week_2_end)[5:10]]),
+        #               ' - '.join([str(week_3_begin)[5:10], str(week_3_end)[5:10]]),
+        #               ' - '.join([str(week_4_begin)[5:10], str(week_4_end)[5:10]]),
+        #               ' - '.join([str(week_5_begin)[5:10], str(week_5_end)[5:10]]),
+        #               ' - '.join([str(week_6_begin)[5:10], str(week_6_end)[5:10]]),
+        #               ' - '.join([str(week_7_begin)[5:10], str(week_7_end)[5:10]]),
+        #               ' - '.join([str(week_8_begin)[5:10], str(week_8_end)[5:10]]),
+        #               ' - '.join([str(week_9_begin)[5:10], str(week_9_end)[5:10]]),
+        #               ' - '.join([str(week_10_begin)[5:10], str(week_10_end)[5:10]]),
+        #               ' - '.join([str(week_11_begin)[5:10], str(week_11_end)[5:10]]),
+        #               ' - '.join([str(week_12_begin)[5:10], str(week_12_end)[5:10]]) ]
+        #
+        #     for set2 in [queryset_week_1, queryset_week_2, queryset_week_3, queryset_week_4, queryset_week_5, queryset_week_6, queryset_week_7, queryset_week_8, queryset_week_9, queryset_week_10, queryset_week_11, queryset_week_12]:
+        #         if set2['amount__sum'] is None:
+        #             values.append(0)
+        #         else:
+        #             values.append(set2['amount__sum'])
 
-            # Range from 100 to 0
-            for x in range(days_filter, -1, -1):
-                labels.append(str(date-datetime.timedelta(days=x)))
-
-            for x in labels:
-                if category == 'All':
-                    queryset = Purchase.objects.filter(date=x).exclude(category=6).values('amount').aggregate(Sum('amount'))
-                else:
-                    queryset = Purchase.objects.filter(Q(date=x) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount')) # Get all purchase amounts on that date
-
-                if queryset['amount__sum'] is None:
-                    values.append(0)
-                else:
-                    values.append(queryset['amount__sum'])
-
-            # print(values)
-
-        elif days_filter == 'Weeks':
-
-            week_1_begin  = date + relativedelta(weeks=-11, weekday=SU(-1))
-            week_1_end    = date + relativedelta(weeks=-11, weekday=SA(1))
-            week_2_begin  = date + relativedelta(weeks=-10, weekday=SU(-1))
-            week_2_end    = date + relativedelta(weeks=-10, weekday=SA(1))
-            week_3_begin  = date + relativedelta(weeks=-9, weekday=SU(-1))
-            week_3_end    = date + relativedelta(weeks=-9, weekday=SA(1))
-            week_4_begin  = date + relativedelta(weeks=-8, weekday=SU(-1))
-            week_4_end    = date + relativedelta(weeks=-8, weekday=SA(1))
-            week_5_begin  = date + relativedelta(weeks=-7, weekday=SU(-1))
-            week_5_end    = date + relativedelta(weeks=-7, weekday=SA(1))
-            week_6_begin  = date + relativedelta(weeks=-6, weekday=SU(-1))
-            week_6_end    = date + relativedelta(weeks=-6, weekday=SA(1))
-            week_7_begin  = date + relativedelta(weeks=-5, weekday=SU(-1))
-            week_7_end    = date + relativedelta(weeks=-5, weekday=SA(1))
-            week_8_begin  = date + relativedelta(weeks=-4, weekday=SU(-1))
-            week_8_end    = date + relativedelta(weeks=-4, weekday=SA(1))
-            week_9_begin  = date + relativedelta(weeks=-3, weekday=SU(-1))
-            week_9_end    = date + relativedelta(weeks=-3, weekday=SA(1))
-            week_10_begin = date + relativedelta(weeks=-2, weekday=SU(-1))
-            week_10_end   = date + relativedelta(weeks=-2, weekday=SA(1))
-            week_11_begin = date + relativedelta(weeks=-1, weekday=SU(-1))
-            week_11_end   = date + relativedelta(weeks=-1, weekday=SA(1))
-            week_12_begin = date + relativedelta(weekday=SU(-1))
-            week_12_end   = date + relativedelta(weekday=SA(1))
-
-            if category == 'All': # Don't add category filter to the query
-                queryset_week_1  = Purchase.objects.filter(date__gte = week_1_begin, date__lte = week_1_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_2  = Purchase.objects.filter(date__gte = week_2_begin, date__lte = week_2_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_3  = Purchase.objects.filter(date__gte = week_3_begin, date__lte = week_3_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_4  = Purchase.objects.filter(date__gte = week_4_begin, date__lte = week_4_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_5  = Purchase.objects.filter(date__gte = week_5_begin, date__lte = week_5_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_6  = Purchase.objects.filter(date__gte = week_6_begin, date__lte = week_6_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_7  = Purchase.objects.filter(date__gte = week_7_begin, date__lte = week_7_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_8  = Purchase.objects.filter(date__gte = week_8_begin, date__lte = week_8_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_9  = Purchase.objects.filter(date__gte = week_9_begin, date__lte = week_9_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_10 = Purchase.objects.filter(date__gte = week_10_begin, date__lte = week_10_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_11 = Purchase.objects.filter(date__gte = week_11_begin, date__lte = week_11_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-                queryset_week_12 = Purchase.objects.filter(date__gte = week_12_begin, date__lte = week_12_end).exclude(Q(category='Bills') | Q(category_2='Bills')).values('amount').aggregate(Sum('amount'))
-            else:
-                queryset_week_1  = Purchase.objects.filter(Q(date__gte = week_1_begin) & Q(date__lte = week_1_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_2  = Purchase.objects.filter(Q(date__gte = week_2_begin) & Q(date__lte = week_2_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_3  = Purchase.objects.filter(Q(date__gte = week_3_begin) & Q(date__lte = week_3_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_4  = Purchase.objects.filter(Q(date__gte = week_4_begin) & Q(date__lte = week_4_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_5  = Purchase.objects.filter(Q(date__gte = week_5_begin) & Q(date__lte = week_5_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_6  = Purchase.objects.filter(Q(date__gte = week_6_begin) & Q(date__lte = week_6_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_7  = Purchase.objects.filter(Q(date__gte = week_7_begin) & Q(date__lte = week_7_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_8  = Purchase.objects.filter(Q(date__gte = week_8_begin) & Q(date__lte = week_8_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_9  = Purchase.objects.filter(Q(date__gte = week_9_begin) & Q(date__lte = week_9_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_10  = Purchase.objects.filter(Q(date__gte = week_10_begin) & Q(date__lte = week_10_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_11  = Purchase.objects.filter(Q(date__gte = week_11_begin) & Q(date__lte = week_11_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-                queryset_week_12  = Purchase.objects.filter(Q(date__gte = week_12_begin) & Q(date__lte = week_12_end) & (Q(category=category) | Q(category_2=category))).values('amount').aggregate(Sum('amount'))
-
-            labels = [' - '.join([str(week_1_begin)[5:10], str(week_1_end)[5:10]]),
-                      ' - '.join([str(week_2_begin)[5:10], str(week_2_end)[5:10]]),
-                      ' - '.join([str(week_3_begin)[5:10], str(week_3_end)[5:10]]),
-                      ' - '.join([str(week_4_begin)[5:10], str(week_4_end)[5:10]]),
-                      ' - '.join([str(week_5_begin)[5:10], str(week_5_end)[5:10]]),
-                      ' - '.join([str(week_6_begin)[5:10], str(week_6_end)[5:10]]),
-                      ' - '.join([str(week_7_begin)[5:10], str(week_7_end)[5:10]]),
-                      ' - '.join([str(week_8_begin)[5:10], str(week_8_end)[5:10]]),
-                      ' - '.join([str(week_9_begin)[5:10], str(week_9_end)[5:10]]),
-                      ' - '.join([str(week_10_begin)[5:10], str(week_10_end)[5:10]]),
-                      ' - '.join([str(week_11_begin)[5:10], str(week_11_end)[5:10]]),
-                      ' - '.join([str(week_12_begin)[5:10], str(week_12_end)[5:10]]) ]
-
-            for set in [queryset_week_1, queryset_week_2, queryset_week_3, queryset_week_4, queryset_week_5, queryset_week_6, queryset_week_7, queryset_week_8, queryset_week_9, queryset_week_10, queryset_week_11, queryset_week_12]:
-                if set['amount__sum'] is None:
-                    values.append(0)
-                else:
-                    values.append(set['amount__sum'])
-
-        json[category_name] = {'labels': labels, 'values': values}
-        # print(json)
-
-        return JsonResponse(json)
+        return JsonResponse({'labels': labels, 'values': values})
 
 
 @login_required

@@ -12,6 +12,6 @@ urlpatterns = [
     path('activity/account_update/', views.account_update),
     path('activity/reset_credit_card/', views.reset_credit_card),
     path('preferences/', views.preferences, name='preferences'),
-    path('charts/', views.get_chart_data),
+    path('chart/', views.get_chart_data),
     path('mode/', views.mode_manager),
 ]
