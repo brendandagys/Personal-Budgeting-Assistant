@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.views import generic
 from .forms import PurchaseForm, AccountForm
-from .models import Purchase, Filter, Bill, Alert, Mode, PurchaseCategory, Account, AccountUpdate
+from .models import Purchase, Filter, Recurring, Alert, Mode, PurchaseCategory, Account, AccountUpdate
 
 from django.db.models import Sum
 
