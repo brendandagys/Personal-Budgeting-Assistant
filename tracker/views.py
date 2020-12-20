@@ -42,8 +42,14 @@ weekday = date.weekday()
 def get_purchase_categories_tuples_list():
     # To generate the filter buttons on Purchase Category and provide context for the green_filters class
     purchase_categories_list = []
-    for purchase_category in PurchaseCategory.objects.all().order_by('category'):
-        purchase_categories_list.append(purchase_category.category)
+    # Only include the ones that have actually been used thus far
+    category_values_used = list(Purchase.objects.all().values_list('category', flat=True).distinct())
+    category_2_values_used = list(Purchase.objects.all().values_list('category_2', flat=True).distinct())
+    category_2_values_used = [x for x in category_2_values_used if x] # Remove None
+    purchase_categories_used = list(set(category_values_used + category_2_values_used))
+
+    [purchase_categories_list.append(PurchaseCategory.objects.get(id=x).category) for x in purchase_categories_used]
+    purchase_categories_list.sort()
 
     purchase_categories_tuples_list = []
     for index in range(0, len(purchase_categories_list), 2):
