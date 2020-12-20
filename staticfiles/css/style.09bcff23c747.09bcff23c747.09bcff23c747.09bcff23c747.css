@@ -1,0 +1,57 @@
+.center {
+    margin: auto;
+    /* justify-content: center; */
+}
+
+input[type="submit"] {
+    display: block;
+    margin: auto;
+}
+
+label[for^="id_"] {
+    color: #FF1493;
+    display: block;
+    margin: 5px 15px;
+    text-align: center;
+}
+
+.lighter_background {
+    background-color: #FAFAFA;
+}
+
+input[id^="id_"] {
+    color: #3498DB;
+}
+
+textarea[id^="id_"] {
+    color: #3498DB;
+}
+
+select[id^="id_"] {
+    color: #3498DB;
+}
+
+.red_text {
+    color: blue;
+    font-size: 1.5rem;
+}
+
+.login_button {
+    margin: auto;
+    position: relative;
+    top: 3rem;
+    transform: scale(2,2);
+}
+
+#password {
+    color: blue;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+
+#username, #password {
+    max-width: 15rem;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
