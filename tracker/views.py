@@ -119,7 +119,11 @@ def get_accounts_sum(request):
 
         accounts_sum+=account_value
 
-    return JsonResponse('${:20,.2f}'.format(accounts_sum), safe=False)
+
+    USD_rate = cc.get_symbol('USD') + str(round(get_exchange_rate('CAD', 'USD'), 3))
+    EUR_rate = cc.get_symbol('EUR') + str(round(get_exchange_rate('CAD', 'EUR'), 3))
+
+    return JsonResponse({ 'accounts_sum': '${:20,.2f}'.format(accounts_sum), 'exchange_rates': { 'USD': USD_rate, 'EUR': EUR_rate } }, safe=False)
 
 
 @login_required

@@ -56,6 +56,14 @@
             <div style="margin-top: 15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-xs btn-success">Reset Credit Card</button></div>
             <span style="text-align:center;"><h3 id="accounts_sum"></h3></span>
 
+            <table style="width:100%; margin-top:25px; margin-bottom:-15px; font-size:1.1rem;">
+                <tr><td colspan="2" style="text-align:center;"><u>Current Exchange Rates</u></td></tr>
+                <tr style="color: slategrey;">
+                    <td id="USD_rate" style="text-align:right; width:50%; padding-right: 12px;"></td>
+                    <td id="EUR_rate" style="text-align:left; width:50%; padding-left: 25px;"></td>
+                </tr>
+            </table>
+
             <hr />
 
             <table style="width:100%;">
@@ -110,9 +118,6 @@
                 <h1 id="purchase_list_header" class="purchase_header">Purchases (<span id="purchases_count"></span>)</h1>
 
                 <div id="purchase_list_div"></div>
-
-                <!-- <h4 class="no_purchases">There are no purchases recorded.</h1> -->
-
 
             </div>
 
@@ -187,7 +192,9 @@
                 success: function(response) {
                     console.log('Retrieved accounts sum!');
                     console.log(response);
-                    $('#accounts_sum').html(response);
+                    $('#accounts_sum').html(response['accounts_sum']);
+                    $('#USD_rate').html(response['exchange_rates']['USD'])
+                    $('#EUR_rate').html(response['exchange_rates']['EUR'])
                 }
             });
         }
