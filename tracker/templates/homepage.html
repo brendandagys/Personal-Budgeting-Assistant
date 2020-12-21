@@ -308,6 +308,30 @@
             });
 
 
+            // When switching from a date to blank string, the 'change' event does not fire
+            $(document).on('focusout', '#datepicker, #datepicker_2', function(e) {
+                if ($(this).val() === '') {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'filters/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                                'page': 'Homepage',
+                                'type': 'Date',
+                                'id': $(this).attr('id'),
+                                'filter_value': $(this).val(), },
+                        context: this,
+                        success: function(response) {
+                            console.log('Date filter updated!');
+                            chart();
+                        },
+                        error: function() {
+                            console.log('Error updating date filter.');
+                        },
+                  });
+                }
+            });
+
+
             $(document).on('change', '#datepicker, #datepicker_2', function(e) {
                 console.log('Start date: ' + $('#datepicker').val());
                 console.log('End date: ' + $('#datepicker_2').val());
