@@ -232,6 +232,7 @@ def get_chart_data(request):
             amount_2_sum = 0 if queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum']
             values.append(amount_sum + amount_2_sum)
 
+
         # print('Chart values: ' + str(values))
 
         # elif days_filter == 'Weeks':
