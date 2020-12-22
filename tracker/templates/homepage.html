@@ -36,7 +36,7 @@
 
                 <div class="col-sm-12">
 
-                    <form id="purchase_form" action="" method="post">
+                    <form id="purchase_form" action="" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <table class="center">
                             {{ purchase_form }}

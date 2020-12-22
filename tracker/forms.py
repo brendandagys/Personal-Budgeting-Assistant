@@ -61,7 +61,7 @@ class PurchaseForm(ModelForm):
 
     class Meta:
         model = Purchase
-        fields = ['date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency']
+        fields = ['date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency', 'receipt']
 
 
 class AccountForm(ModelForm):

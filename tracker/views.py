@@ -392,8 +392,9 @@ def homepage(request):
 
     elif request.method == 'POST':
 
-        purchase_form = PurchaseForm(request.POST)
+        purchase_form = PurchaseForm(request.POST, request.FILES)
         # print(purchase_form.errors)
+        # print(request.FILES)
         purchase_instance = Purchase()
 
         if purchase_form.is_valid():
@@ -407,6 +408,7 @@ def homepage(request):
             purchase_instance.description = purchase_form.cleaned_data['description'].strip()
             purchase_instance.currency = purchase_form.cleaned_data['currency']
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
+            purchase_instance.receipt = request.FILES['receipt']
 
             purchase_instance.save()
 

@@ -47,6 +47,7 @@ class Purchase(models.Model):
     description = models.TextField(blank=True, verbose_name='Details')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
     exchange_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD') # Default 1 unnecessary as we always run get_exchange_rate()
+    receipt=models.FileField(blank=True, null=True, upload_to='media/', verbose_name='Receipt')
 
     class Meta:
         verbose_name_plural = 'Purchases'
