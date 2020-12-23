@@ -408,7 +408,7 @@ def homepage(request):
             purchase_instance.description = purchase_form.cleaned_data['description'].strip()
             purchase_instance.currency = purchase_form.cleaned_data['currency']
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
-            purchase_instance.receipt = request.FILES['receipt']
+            purchase_instance.receipt = None if len(request.FILES) == 0 else request.FILES['receipt']
 
             purchase_instance.save()
 
