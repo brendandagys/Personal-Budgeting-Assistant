@@ -126,24 +126,29 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-DEFAULT_FILE_STORAGE = 'spending_app.storage_backends.MediaStorage'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = 'brendanspending'
-AWS_S3_OBJECT_PARAMETERS = { 'CacheControl': 'max-age=86400', }
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
-AWS_LOCATION = 'static'
-STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
-# AWS_DEFAULT_ACL = 'public-read' # Default is None, where it inherits the bucket's permission
-# AWS_QUERYSTRING_AUTH = False # Default is True. False removes query parameter authentication from generated URLs (useful if your S3 buckets are public)
-# AWS_S3_FILE_OVERWRITE = False # Set in storage_backends.py
+if config('USE_S3', default=False):
+    # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'spending_app.storage_backends.MediaStorage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = 'brendanspending'
+    AWS_S3_OBJECT_PARAMETERS = { 'CacheControl': 'max-age=86400', }
+    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+    AWS_LOCATION = 'static'
+    STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+    # AWS_DEFAULT_ACL = 'public-read' # Default is None, where it inherits the bucket's permission
+    # AWS_QUERYSTRING_AUTH = False # Default is True. False removes query parameter authentication from generated URLs (useful if your S3 buckets are public)
+    # AWS_S3_FILE_OVERWRITE = False # Set in storage_backends.py
 
-# STATIC_URL = '/static/'
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles'),]
+    
+else:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles'),]
 
 
 django_heroku.settings(locals(), staticfiles=False) # second argument was necessary to make staticfiltes copy over to S3
