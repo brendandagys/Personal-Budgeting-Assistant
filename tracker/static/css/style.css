@@ -259,7 +259,8 @@ a {
 }
 
 .green_filters {
-    color: #35b234;
+    color: red;
+    /* color: #35b234; */
     font-weight: bold;
 }
 
