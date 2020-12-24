@@ -129,9 +129,9 @@ select[id^="id_"] {
     text-align: center;
 }
 
-#purchase_form {
+/* #purchase_form {
     margin-top: 2.5rem;
-}
+} */
 
 .bottom_div {
     background-color: white;
