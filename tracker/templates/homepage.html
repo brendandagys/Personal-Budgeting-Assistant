@@ -32,10 +32,10 @@
             <div class="row">
 
                 <div class="navigation_link col-sm-12">
-                    <a class="homepage_link" href="{% url 'activity' %}">Purchases/Account Balances</a>
+                    <a class="homepage_link" style="z-index:900;" href="{% url 'activity' %}">Purchases/Account Balances</a>
                 </div>
 
-                <div class="col-sm-12">
+                <div class="col-sm-12" style="height:510px;">
 
                     <form id="purchase_form" action="" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -59,11 +59,11 @@
                 </td>
             </tr>
 
-            <tr>
+            <!-- <tr>
                 <td colspan="2" style="width:100%; text-align:center;">
                     <p class="filter_headers">Categories</p>
                 </td>
-            </tr>
+            </tr> -->
 
             {% for filter_tuple in purchase_categories_tuples_list %}
                 <tr>
@@ -114,8 +114,8 @@
         <hr>
 
         <div class="modes col-sm-12">
-          <button id="all_mode" type="button" class="modes btn btn-secondary">Send Alerts After Every Purchase</button>
-          <button id="threshold_mode" type="button" class="modes btn btn-secondary">Send Alerts When Threshold Reached</button>
+          <button id="all_mode" type="button" class="modes btn btn-secondary" style="margin-bottom: 5px;">Send Alerts After Every Purchase</button>
+          <button id="threshold_mode" type="button" class="modes btn btn-secondary" style="margin-bottom: 5px;">Send Alerts When Threshold Reached</button>
         </div>
 
     </body>

@@ -15,6 +15,7 @@ class PurchaseForm(ModelForm):
 
         for field in iter(self.fields):
             self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
+            self.fields[field].label = ''
 
         self.fields['date'].widget.attrs.update({'placeholder': 'Date...', 'inputmode': 'numeric'})
         self.fields['time'].widget.attrs.update({'placeholder': 'Time...', 'inputmode': 'numeric'})

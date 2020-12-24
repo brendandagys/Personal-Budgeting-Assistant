@@ -154,9 +154,9 @@ def get_json_queryset(request):
 
     # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show because it's a foreign key
     purchase_category_dict = {}
-    for object in PurchaseCategory.objects.all().values('id', 'category'):
+    for object in PurchaseCategory.objects.all().values('id', 'category'): # Queryset of dicts
         purchase_category_dict[object['id']] = object['category']
-    # Update the id for each purchase category
+    # Update the id for each purchase category with the category name
     for dict in purchases_list:
         dict['category_id'] = purchase_category_dict[dict['category_id']]
         if dict['category_2_id'] is not None:
