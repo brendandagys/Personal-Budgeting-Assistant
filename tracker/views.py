@@ -164,10 +164,11 @@ def get_json_queryset(request):
 
     # Get the total cost of all of the purchases
     purchases_sum = 0
-    for purchase in list(queryset_data.values_list('amount', 'amount_2')): # Returns a Queryset of tuples
-        purchases_sum+=purchase[0]
-        if purchase[1] is not None:
-            purchases_sum+=purchase[1]
+    for purchase in list(queryset_data.values_list('category', 'category_2', 'amount', 'amount_2')): # Returns a Queryset of tuples
+        if purchase[0] in purchase_categories_list:
+            purchases_sum+=purchase[2]
+        if purchase[1] in purchase_categories_list and purchase[3] is not None:
+            purchases_sum+=purchase[3]
 
     return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum)}, safe=False)
 
@@ -405,7 +406,7 @@ def homepage(request):
             purchase_instance.amount = purchase_form.cleaned_data['amount']
             purchase_instance.category_2 = purchase_form.cleaned_data['category_2']
             purchase_instance.amount_2 = purchase_form.cleaned_data['amount_2']
-            purchase_instance.description = purchase_form.cleaned_data['description'].strip()
+            purchase_instance.description = purchase_form.cleaned_data['description'].strip() if purchase_form.cleaned_data['description'].strip()[-1] == '.' else purchase_form.cleaned_data['description'].strip() + '.' # Add a period if not present
             purchase_instance.currency = purchase_form.cleaned_data['currency']
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
             purchase_instance.receipt = None if len(request.FILES) == 0 else request.FILES['receipt']

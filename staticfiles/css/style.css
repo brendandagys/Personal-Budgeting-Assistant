@@ -9,10 +9,11 @@ input[type="submit"] {
 }
 
 label[for^="id_"] {
-    color: #35b234;
+    color: #292b2c;
     display: block;
     margin: 5px 15px;
     text-align: center;
+    font-size: 0.8rem;
     /* font-family: Arial; */
 }
 
@@ -98,7 +99,7 @@ select[id^="id_"] {
 
 .homepage_link {
     color: grey;
-    font-size: 2rem;
+    font-size: 1.5rem;
 }
 
 .navigation_link {
@@ -241,14 +242,6 @@ a {
     /* background-color: #FAFAFA; */
 }
 
-/* .filter_div_1 {
-    width: 200px;
-}
-
-.filter_div_2 {
-    width: 200px;
-} */
-
 .modes {
   text-align: center;
   padding-bottom: 14px;
@@ -259,7 +252,7 @@ a {
 }
 
 .green_filters {
-    color: red;
+    color: #35b234;
     font-weight: bold;
 }
 

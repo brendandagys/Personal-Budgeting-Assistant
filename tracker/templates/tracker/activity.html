@@ -12,7 +12,8 @@
         <link href="{% static 'css/style.css' %}" rel="stylesheet">
 
         <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"> -->
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
@@ -28,9 +29,9 @@
 
                 <div class="navigation_link col-sm-12">
                     <div>
-                        <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Go Home</a>
-                        <a id="admin_link" style="position:fixed; top:5px; right:20px; z-index:900;" class="btn-link btn-sm" href="{% url 'admin:index' %}">Admin</a>
-                        <a id="activity_link" style="position:fixed; top:37px; right:5px;" class="btn-primary btn-sm" href="{% url 'preferences' %}">Preferences</a>
+                        <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Home</a>
+                        <a id="admin_link" style="position:fixed; top:21px; right:28px; z-index:900;" class="btn-link btn-sm" href="{% url 'admin:index' %}">Admin</a>
+                        <a id="activity_link" style="position:fixed; top:58px; right:10px;" class="btn-primary btn-sm" href="{% url 'preferences' %}">Preferences</a>
                     </div>
                 </div>
 
@@ -53,7 +54,8 @@
                 </form>
             </div>
 
-            <div style="margin-top: 15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-xs btn-success">Reset Credit Card</button></div>
+            <div style="margin-top: 15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-sm btn-success">Reset Credit Card</button></div>
+            <br />
             <span style="text-align:center;"><h3 id="accounts_sum"></h3></span>
 
             <table style="width:100%; margin-top:25px; margin-bottom:-15px; font-size:1.1rem;">
@@ -100,12 +102,12 @@
 
                 <div align="center" class="col-sm-2">
                       <p><b><small>From</small></b></p>
-                      <input style="text-align:center; width:112.5px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker">
+                      <input style="text-align:center; width:115px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker">
                 </div>
 
                 <div align="center" class="col-sm-2">
                       <p><b><small>To</small></b></p>
-                      <input style="text-align:center; width:112.5px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker_2">
+                      <input style="text-align:center; width:115px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker_2">
                 </div>
 
                 <div class="col-sm-4"></div>
@@ -122,10 +124,8 @@
             </div>
 
         </div>
-    </div>
 
-</body>
-
+    </body>
 </html>
 
 <script type="text/javascript">
@@ -257,7 +257,7 @@
                                 }
 
                                 purchase_list = purchase_list.concat('<li class="purchase_list_items">');
-                                purchase_list = purchase_list.concat(`<h5><b>${date}, ${time}</b>: <span class="blue_text">$${amount} ${amount_2}</span></h5>`);
+                                purchase_list = purchase_list.concat(`<h5 style="margin-top:8px;"><b>${date}, ${time}</b>: <span style="font-size:1.4rem;" class="blue_text">$${amount} ${amount_2}</span></h5>`);
                                 purchase_list = purchase_list.concat(`<h5><u>${category}</u>${category_spacer}<u>${category_2}</u> | <b>${item}</b>${description_spacer}<span class="purchase_description"><i>${description}</i></span></h5></li>`);
                             });
 

@@ -12,7 +12,8 @@
          <link href="{% static 'css/style.css' %}" rel="stylesheet">
 
          <!-- Latest compiled and minified CSS -->
-         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+         <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"> -->
 
         <!-- Chart.js -->
          <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
@@ -84,12 +85,12 @@
 
             <div align="center" class="col-sm-2">
                   <p><b><small>From</small></b></p>
-                  <input style="text-align:center; width:112.5px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker">
+                  <input style="text-align:center; width:115px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker">
             </div>
 
             <div align="center" class="col-sm-2">
                   <p><b><small>To</small></b></p>
-                  <input style="text-align:center; width:112.5px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker_2">
+                  <input style="text-align:center; width:115px;" class="form-control" type="text" pattern="\d*" placeholder="Date..." type="text" id="datepicker_2">
             </div>
 
             <div class="col-sm-4"></div>
@@ -178,8 +179,8 @@
 
             // Hide 2 fields and add an anchor link button
             $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"],#id_currency,label[for="id_currency"]').hide();
-            $('#id_amount').after('<tr id="custom_row"><td><a id="custom_anchor_link" style="font-size:1rem; line-height:2.55;">Add 2nd category</a></td></tr>')
-            $('#id_description').after('<tr id="custom_row_2"><td><a id="custom_anchor_link_2" style="font-size:1rem;">Change currency</a></td></tr>')
+            $('#id_amount').after('<tr id="custom_row"><td style="padding-top:5px;"><a id="custom_anchor_link" class="text-info" style="font-size:1rem;">Add 2nd category</a></td></tr>')
+            $('#id_description').after('<tr id="custom_row_2"><td style="padding-top:4px;"><a id="custom_anchor_link_2" class="text-info" style="margin-top:20px; font-size:1rem;">Change currency</a></td></tr>')
 
 
             // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
@@ -308,7 +309,7 @@
             });
 
 
-            // When switching from a date to blank string, the 'change' event does not fire
+            // When switching from a date to blank string, this ensures that the 'change' event fires
             $(document).on('focusout', '#datepicker, #datepicker_2', function(e) {
                 if ($(this).val() === '') {
                     $.ajax({
