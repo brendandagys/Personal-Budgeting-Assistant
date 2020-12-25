@@ -270,17 +270,3 @@ a {
 .white_background {
     background-color: white !important;
 }
-
-.modal {
-    /* display: none; */
-    position: fixed;
-    text-align: center;
-    margin: 0 5%;
-    z-index: 999;
-    height: 50%;
-    width: 90%;
-    border-radius: 15px;
-    top: 25%;
-    opacity: 0.92;
-    background-color: dodgerblue;
-}
