@@ -163,10 +163,6 @@ select[id^="id_"] {
     font-size: 1.2rem;
 }
 
-.list_container {
-    padding-left: 0;
-}
-
 .main_container {
     padding: 0 !important;
     position: relative;

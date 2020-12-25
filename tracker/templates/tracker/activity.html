@@ -23,14 +23,21 @@
 
     <body class="white_background">
 
+        <div id="modal" style="position:fixed; text-align:center; margin:0 5%; z-index:999; height:20%; width:90%; border-radius:15px; top:40%; background:rgba(30,144,255,0.93);">
+            <!-- <div id="modal_content" style="height:10%; margin-top:10%;"> -->
+                <button id="view_receipt_button" style="margin-top:55px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
+                <button id="delete_purchase_button" style="margin-top:5px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button>
+            <!-- </div> -->
+        </div>
+
         <div class="container-fluid">
 
             <div class="floating_bar row">
 
                 <div class="navigation_link col-sm-12">
                         <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Home</a>
-                        <a id="admin_link" style="position:fixed; top:10px; right:28px; z-index:900;" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
-                        <a id="activity_link" style="position:fixed; top:47px; right:23px; width:70px; z-index:900;" class="btn btn-outline-primary btn-sm" href="{% url 'preferences' %}">Settings</a>
+                        <a id="admin_link" style="position:fixed; top:10px; right:20px; z-index:900;" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
+                        <a id="activity_link" style="position:fixed; top:47.5px; right:15px; width:70px; z-index:900;" class="btn btn-outline-primary btn-sm" href="{% url 'preferences' %}">Settings</a>
                 </div>
 
                 <div class="col-sm-12">
@@ -225,7 +232,7 @@
                     $('#purchase_list_div').html('');
                     $('#purchase_list_div').html(
                         function() {
-                            let purchase_list = '<ul class="list_container">';
+                            let purchase_list = '<ul class="list_container" style="padding-left:0;">';
                             $.each(response['data'], function(index, value) {
                                 let date = value.date;
                                 let time = value.time;
@@ -254,9 +261,11 @@
                                     description_spacer = ' | ';
                                 }
 
-                                purchase_list = purchase_list.concat('<li class="purchase_list_items">');
+                                // purchase_list = purchase_list.concat('<div style="position:relative;"><li class="purchase_list_items" style="display:inline-block; width:95%;">');
+                                purchase_list = purchase_list.concat('<li class="purchase_list_items" style="display:inline-block; width:100%;">');
                                 purchase_list = purchase_list.concat(`<h5 style="margin-top:8px;"><b>${date}, ${time}</b>: <span style="font-size:1.4rem;" class="blue_text">$${amount} ${amount_2}</span></h5>`);
                                 purchase_list = purchase_list.concat(`<h5><u>${category}</u>${category_spacer}<u>${category_2}</u> | <b>${item}</b>${description_spacer}<span class="purchase_description"><i>${description}</i></span></h5></li>`);
+                                // purchase_list = purchase_list.concat('<li style="display:inline-block; height:22px; position:absolute; top:50%; margin-top:-11px; margin-left:8px;">x</li></div>');
                             });
 
                             return purchase_list.concat('</ul>');
