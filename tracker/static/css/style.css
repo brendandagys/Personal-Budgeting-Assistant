@@ -103,7 +103,7 @@ select[id^="id_"] {
 }
 
 .navigation_link {
-    top: 1rem;
+    top: 0.4rem;
     /* margin-bottom: 3rem; */
     text-align: center;
 }
@@ -152,15 +152,11 @@ select[id^="id_"] {
 .total_spent {
     color: dimgrey;
     font-size: 1.75rem;
-    /* border-style: dotted; */
     padding: 5px;
     /* width: 130px; */
-    /* margin: auto; */
-    margin-top: 10px;
-    margin-left: 9px;
+    margin-top: 5px;
+    /* margin-left: 9px; */
     text-align: center;
-    /* margin-left: 35%;
-    margin-right: 35%; */
 }
 
 .purchase_description {
@@ -174,7 +170,7 @@ select[id^="id_"] {
 .main_container {
     padding: 0 !important;
     position: relative;
-    top: 10rem;
+    top: 6.5rem;
 }
 
 .purchase_list_items {
@@ -245,6 +241,8 @@ a {
 .modes {
   text-align: center;
   padding-bottom: 14px;
+  margin-bottom: 5px;
+  width: 300px;
 }
 
 .center_text {
@@ -264,13 +262,10 @@ a {
     position: fixed;
     margin: auto !important;
     width: 100%;
-    height: 7.5rem;
+    height: 90px;
     right: 0.01%;
     text-align: center;
-    /* left: 35.5rem; */
     z-index: 1000;
-    /* border-radius: 10px; */
-    /* border-style: double; */
     border-bottom: 2px solid slategrey;
     /* background: rgba(250,250,250,1); */
     background-color: #FAFAFA;
