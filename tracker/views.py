@@ -165,7 +165,7 @@ def get_json_queryset(request):
         # Convert the stored path (media/image.png) to the full URL, and add to the object dict
         # if dict['receipt'] is not None: # May not have a receipt file
         try:
-            dict['url'] = request.build_absolute_uri(Purchase.objects.get(id=dict['id']).receipt.url)
+            dict['url'] = request.build_absolute_uri(Purchase.objects.get(id=dict['id']).receipt.url).replace('static/', '')
         # else:
         except Exception:
             dict['url'] = ''
