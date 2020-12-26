@@ -319,6 +319,13 @@ def get_chart_data(request):
 
 
 @login_required
+def delete_purchase(request):
+    Purchase.objects.get(id=request.POST['id']).delete()
+    print('\nDeleted Purchase: ' + str(request.POST['id']) + '\n')
+    return HttpResponse()
+
+
+@login_required
 def homepage(request):
 
     # bill_information = {
