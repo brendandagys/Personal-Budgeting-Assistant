@@ -163,9 +163,11 @@ def get_json_queryset(request):
             dict['category_2_id'] = purchase_category_dict[dict['category_2_id']]
 
         # Convert the stored path (media/image.png) to the full URL, and add to the object dict
-        if dict['receipt'] is not None: # May not have a receipt file
+        # if dict['receipt'] is not None: # May not have a receipt file
+        try:
             dict['url'] = request.build_absolute_uri(Purchase.objects.get(id=dict['id']).receipt.url)
-        else:
+        # else:
+        except Exception:
             dict['url'] = ''
 
     # Get the total cost of all of the purchases
