@@ -156,11 +156,17 @@ def get_json_queryset(request):
     purchase_category_dict = {}
     for object in PurchaseCategory.objects.all().values('id', 'category'): # Queryset of dicts
         purchase_category_dict[object['id']] = object['category']
-    # Update the id for each purchase category with the category name
+    # Update the id for each PurchaseCategory with the category name
     for dict in purchases_list:
         dict['category_id'] = purchase_category_dict[dict['category_id']]
         if dict['category_2_id'] is not None:
             dict['category_2_id'] = purchase_category_dict[dict['category_2_id']]
+
+        # Convert the stored path (media/image.png) to the full URL, and add to the object dict
+        if dict['receipt'] is not None: # May not have a receipt file
+            dict['url'] = request.build_absolute_uri(Purchase.objects.get(id=dict['id']).receipt.url)
+        else:
+            dict['url'] = ''
 
     # Get the total cost of all of the purchases
     purchases_sum = 0

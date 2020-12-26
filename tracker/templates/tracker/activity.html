@@ -22,12 +22,11 @@
     </head>
 
     <body class="white_background">
-
-        <div id="modal" style="position:fixed; text-align:center; margin:0 5%; z-index:999; height:20%; width:90%; border-radius:15px; top:40%; background:rgba(30,144,255,0.93);">
-            <!-- <div id="modal_content" style="height:10%; margin-top:10%;"> -->
-                <button id="view_receipt_button" style="margin-top:55px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
-                <button id="delete_purchase_button" style="margin-top:5px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button>
-            <!-- </div> -->
+        <div class="purchase_modal_background">
+            <div id="purchase_modal" class="purchase_modal">
+                    <button id="view_receipt_button" style="margin-top:40px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
+                    <button id="delete_purchase_button" style="margin-top:5px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button>
+            </div>
         </div>
 
         <div class="container-fluid">
@@ -118,11 +117,11 @@
                 </span>
             </div>
 
-        <hr>
+            <hr>
 
             <div class="purchase_list_div col-sm-12">
 
-                <h1 id="purchase_list_header" class="purchase_header">Purchases (<span id="purchases_count"></span>)</h1>
+                <h2 id="purchase_list_header" class="purchase_header">Purchases (<span id="purchases_count"></span>)</h2>
 
                 <div id="purchase_list_div"></div>
 
@@ -154,6 +153,42 @@
         // Set the date filters
         $('#datepicker').val('{{start_date}}');
         $('#datepicker_2').val('{{end_date}}');
+
+
+
+
+
+
+
+
+        var modal_active = 'No';
+
+        update_modal = function(clicked_purchase) {
+            $('#purchase_modal').css('visibility', 'visible');
+            modal_active = 'Yes';
+            $('#view_receipt_button').attr('data-url', clicked_purchase.data('url'));
+            $('#delete_purchase_button').attr('data-id', clicked_purchase.data('id'));
+            console.log('Ran')
+        };
+
+        // To handle clicking outside of the modal
+        $(document).on('click', ':not(#purchase_modal)', function(e) {
+            // e.stopImmediatePropagation(); // Stops bubbling up. Had a console.log() and was printing the style value 4 - 6 times
+
+            if (modal_active === 'No' && ($(this).closest('li').hasClass('purchase_list_items'))) {
+                update_modal($(this));
+            }
+            else if (modal_active === 'Yes' && $(this).find('#purchase_modal').css('visibility') !== 'visible') {
+                // $('#purchase_modal').css('visibility', 'hidden');
+                modal_active = 'No';
+            };
+        });
+
+
+
+
+
+
 
 
         // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
@@ -198,8 +233,8 @@
                     console.log('Retrieved accounts sum!');
                     console.log(response);
                     $('#accounts_sum').html(response['accounts_sum']);
-                    $('#USD_rate').html(response['exchange_rates']['USD'])
-                    $('#EUR_rate').html(response['exchange_rates']['EUR'])
+                    $('#USD_rate').html(response['exchange_rates']['USD']);
+                    $('#EUR_rate').html(response['exchange_rates']['EUR']);
                 }
             });
         }
@@ -226,7 +261,8 @@
                     }
                     else if ($('#purchase_list_header').text() !== 'No purchases to list!') {
                         $('#purchase_list_header').text('No purchases to list!');
-                        $('#purchase_list_header').after('<div id="no_purchases_spacing"><br><hr></div>');
+                        // $('#purchase_list_header').before('<br>');
+                        // $('#purchase_list_header').after('<div style="margin-bottom: 20px;" id="no_purchases_spacing"></div>');
                     }
 
                     $('#purchase_list_div').html('');
@@ -234,6 +270,7 @@
                         function() {
                             let purchase_list = '<ul class="list_container" style="padding-left:0;">';
                             $.each(response['data'], function(index, value) {
+                                let id = value.id;
                                 let date = value.date;
                                 let time = value.time;
                                 let amount = value.amount;
@@ -242,6 +279,8 @@
                                 let category_2 = value.category_2_id;
                                 let item = value.item;
                                 let description = value.description;
+                                let receipt = value.url;
+
                                 let category_spacer = ' ';
                                 let description_spacer = '';
 
@@ -262,7 +301,7 @@
                                 }
 
                                 // purchase_list = purchase_list.concat('<div style="position:relative;"><li class="purchase_list_items" style="display:inline-block; width:95%;">');
-                                purchase_list = purchase_list.concat('<li class="purchase_list_items" style="display:inline-block; width:100%;">');
+                                purchase_list = purchase_list.concat(`<li data-id="${id}" data-url="${receipt}" class="purchase_list_items" style="display:inline-block; width:100%;">`);
                                 purchase_list = purchase_list.concat(`<h5 style="margin-top:8px;"><b>${date}, ${time}</b>: <span style="font-size:1.4rem;" class="blue_text">$${amount} ${amount_2}</span></h5>`);
                                 purchase_list = purchase_list.concat(`<h5><u>${category}</u>${category_spacer}<u>${category_2}</u> | <b>${item}</b>${description_spacer}<span class="purchase_description"><i>${description}</i></span></h5></li>`);
                                 // purchase_list = purchase_list.concat('<li style="display:inline-block; height:22px; position:absolute; top:50%; margin-top:-11px; margin-left:8px;">x</li></div>');
@@ -414,7 +453,7 @@
                     },
                 });
             }
-        })
+        });
 
     });
 
