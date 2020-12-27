@@ -1,4 +1,4 @@
-from django.forms import ModelForm, DateField, DecimalField, NumberInput, BooleanField #, Textarea, CharField, EmailField, ChoiceField # All added for ModelForms
+from django.forms import ModelForm, DateField, DecimalField, NumberInput, BooleanField, IntegerField #, Textarea, CharField, EmailField, ChoiceField # All added for ModelForms
 
 import datetime
 from django.utils import timezone
@@ -6,7 +6,7 @@ from django.utils import timezone
 def current_date():
     return datetime.date.today()
 
-from .models import Purchase, Account, AccountUpdate
+from .models import Purchase, Account, AccountUpdate, PurchaseCategory
 
 
 class PurchaseForm(ModelForm):
@@ -82,4 +82,22 @@ class AccountForm(ModelForm):
 
     class Meta:
         model = Account
+        exclude = []
+
+
+class ThresholdForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ThresholdForm, self).__init__(*args, **kwargs)
+        self.fields = {}
+
+        for purchase_category in PurchaseCategory.objects.all(): # Ordered by id in models.py
+            threshold = 'Not set' if purchase_category.threshold is None else '${:20,.1f}'.format(purchase_category.threshold)
+            self.fields[str(purchase_category.id) + '_threshold'] = DecimalField(label=purchase_category.category, max_digits=7, decimal_places=1, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:75px',
+                                                                                                                                                                                        'inputmode': 'decimal', 'placeholder': threshold}))
+            window = 'Not set' if purchase_category.threshold_rolling_days == 1 else purchase_category.threshold_rolling_days
+            self.fields[str(purchase_category.id) + '_window'] = IntegerField(label='', min_value=0, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:45px',
+                                                                                                                                               'inputmode': 'numeric', 'placeholder': window}))
+
+    class Meta:
+        model = PurchaseCategory
         exclude = []

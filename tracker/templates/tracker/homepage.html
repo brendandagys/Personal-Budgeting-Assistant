@@ -6,7 +6,7 @@
 
          <meta charset="utf-8">
          <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-         <meta name="description" content="A spending tracker for finances.">
+         <meta name="description" content="Finances Tracker web application.">
          <meta name="author" content="Brendan Dagys">
 
          <link href="{% static 'css/style.css' %}" rel="stylesheet">
@@ -23,7 +23,7 @@
 
          <script src="{% static 'js/linear_regression.js' %}"></script>
 
-         <title>Brendan's Finances Tracker</title>
+         <title>Purchase Form and Charts</title>
     </head>
 
     <body>
@@ -35,9 +35,11 @@
                     <a class="homepage_link" style="z-index:999 !important;" href="{% url 'activity' %}">Purchases/Account Balances</a>
                 </div>
 
-                <br><br><br>
+                <br><br>
 
-                <div class="col-sm-12" style="height:560px;">
+                <a id="custom_anchor_link_4" style="margin:auto;" class="text-primary small">Quick entry...</a>
+
+                <div id="form_div" class="col-sm-12" style="height:500px;">
 
                     <form id="purchase_form" action="" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -46,7 +48,7 @@
                             <!-- {{ purchase_form.errors}} -->
                         </table> </br>
 
-                        <input id="submit_button" class="btn btn-success" type="submit" value="Submit" name="purchase_form_submit">
+                        <input id="submit_button" style="margin-top:-5px;" class="btn btn-success" type="submit" value="Submit" name="purchase_form_submit">
                     </form>
 
                 </div>
@@ -262,16 +264,23 @@
             });
 
 
-            // After click, hide the links and re-show the hidden fields
+            increase_form_height = function(additional_px) { // Increase the height of the form by the number of pixels passed in
+                current_form_height = $('#form_div').height();
+                $('#form_div').css('height', current_form_height + additional_px + 'px');
+            }
+
+            // Hide the links and re-show the hidden fields for category_2 and amount_2
             $('#custom_anchor_link').on('click', function(e) {
                 $('#custom_anchor_link').hide();
                 $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').show();
+                increase_form_height(48);
             });
-
+            // Assume default secondary currency is EUR
             $('#custom_anchor_link_2').on('click', function(e) {
                 $('#custom_anchor_link_2').hide();
                 $('#id_currency').val('EUR'); // REMOVE WHEN FUNCTIONALITY IS ADDED TO CHANGE DEFAULT CURRENCY
                 $('#id_currency,label[for="id_currency"]').show();
+                increase_form_height(14);
             });
             // Disable incrementing of the credit card balance for this purchase
             $('#custom_anchor_link_3').on('click', function(e) {

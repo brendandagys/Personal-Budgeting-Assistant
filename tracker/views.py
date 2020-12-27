@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 from django.views import generic
-from .forms import PurchaseForm, AccountForm
+from .forms import PurchaseForm, AccountForm, ThresholdForm
 from .models import Purchase, Filter, Recurring, Alert, Mode, PurchaseCategory, Account, AccountUpdate
 
 from django.db.models import Sum
@@ -599,7 +599,7 @@ def homepage(request):
     context['purchase_form'] = purchase_form
     context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list()
 
-    return render(request, 'homepage.html', context=context)
+    return render(request, 'tracker/homepage.html', context=context)
 
 
 class PurchaseListView(generic.ListView):
@@ -639,8 +639,12 @@ class PurchaseListView(generic.ListView):
 
 
 @login_required
-def preferences(request):
-    return HttpResponse()
+def settings(request):
+    if request.method == 'GET':
+        context = {}
+        context['threshold_form'] = ThresholdForm()
+
+        return render(request, 'tracker/settings.html', context=context)
 
 
 @login_required

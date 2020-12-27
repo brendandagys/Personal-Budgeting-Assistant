@@ -12,7 +12,7 @@ urlpatterns = [
     re_path('.*filters/', views.filter_manager),
     path('activity/account_update/', views.account_update),
     path('activity/reset_credit_card/', views.reset_credit_card),
-    path('preferences/', views.preferences, name='preferences'),
+    path('settings/', views.settings, name='settings'),
     path('chart/', views.get_chart_data),
     path('mode/', views.mode_manager),
 ]

@@ -6,7 +6,7 @@
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <meta name="description" content="A finances tracker.">
+        <meta name="description" content="Finances Tracker web application.">
         <meta name="author" content="Brendan Dagys">
 
         <link href="{% static 'css/style.css' %}" rel="stylesheet">
@@ -17,7 +17,7 @@
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-        <title>Finances Activity</title>
+        <title>Account Balances + Purchase List</title>
 
     </head>
 
@@ -36,7 +36,7 @@
                 <div class="navigation_link col-sm-12">
                         <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Home</a>
                         <a id="admin_link" style="position:fixed; top:10px; right:20px; z-index:900;" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
-                        <a id="activity_link" style="position:fixed; top:47.5px; right:15px; width:70px; z-index:900;" class="btn btn-outline-primary btn-sm" href="{% url 'preferences' %}">Settings</a>
+                        <a id="activity_link" style="position:fixed; top:47.5px; right:15px; width:70px; z-index:900;" class="btn btn-outline-primary btn-sm" href="{% url 'settings' %}">Settings</a>
                 </div>
 
                 <div class="col-sm-12">
@@ -50,7 +50,7 @@
         <div class="main_container container-fluid">
 
             <div class="container-fluid">
-                <form id="account_form" action="" method="POST">
+                <form id="account_form" action="" method="post">
                     {% csrf_token %}
                     <table class="center">
                         {{ account_form }}
@@ -58,15 +58,15 @@
                 </form>
             </div>
 
-            <div style="margin-top: 15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-sm btn-success">Reset Credit Card</button></div>
+            <div style="margin-top:15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-sm btn-success">Reset Credit Card</button></div>
             <br />
             <span style="text-align:center;"><h3 id="accounts_sum"></h3></span>
 
             <table style="width:100%; margin-top:17px; margin-bottom:-15px; font-size:0.8rem;">
                 <tr><td colspan="2" style="text-align:center;"><u>Current Exchange Rates</u></td></tr>
                 <tr style="color: slategrey;">
-                    <td id="USD_rate" style="text-align:right; width:50%; padding-right: 12px;"></td>
-                    <td id="EUR_rate" style="text-align:left; width:50%; padding-left: 25px;"></td>
+                    <td id="USD_rate" style="text-align:right; width:50%; padding-right:12px;"></td>
+                    <td id="EUR_rate" style="text-align:left; width:50%; padding-left:25px;"></td>
                 </tr>
             </table>
 
