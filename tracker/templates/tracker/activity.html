@@ -121,7 +121,7 @@
 
             <div class="purchase_list_div col-sm-12">
 
-                <h2 id="purchase_list_header" class="purchase_header">Purchases (<span id="purchases_count"></span>)</h2>
+                <h2 id="purchase_list_header" class="purchase_header">Purchases <span id="purchases_count"></span></h2>
 
                 <div id="purchase_list_div"></div>
 
@@ -270,8 +270,8 @@
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent
                     if (response['data'].length > 0) {
-                        $('#purchase_list_header').html('Purchases (<span id="purchases_count"></span>)');
-                        $('#purchases_count').html(response['data'].length);
+                        $('#purchase_list_header').html('Purchases <span id="purchases_count"></span>');
+                        $('#purchases_count').html('(' + response['data'].length + ')');
                         $('#no_purchases_spacing').hide();
                     }
                     else if ($('#purchase_list_header').text() !== 'No purchases to list!') {
