@@ -37,7 +37,7 @@
 
                 <br><br><br>
 
-                <div class="col-sm-12" style="height:465px;">
+                <div class="col-sm-12" style="height:560px;">
 
                     <form id="purchase_form" action="" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -117,8 +117,9 @@
 
     <script>
 
-        $('label[for="id_amount"]').attr('style', 'position:relative; bottom:12px;'); // Was appearing too low...
-        $('label[for="id_description"]').attr('style', 'position:relative; bottom:9px;'); // Was appearing too low...
+        // $('label[for="id_amount"]').attr('style', 'position:relative; bottom:12px;'); // Was appearing too low...
+        // $('label[for="id_description"]').attr('style', 'position:relative; bottom:9px;'); // Was appearing too low...
+        $('#id_disable_credit_card').hide();
 
         $(document).ready(function() {
             // Initial indication of the applied filters
@@ -174,8 +175,9 @@
 
             // Hide 2 fields and add an anchor link button
             $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"],#id_currency,label[for="id_currency"]').hide();
-            $('#id_amount').after('<tr id="custom_row"><td style="padding-top:5px;"><a id="custom_anchor_link" class="text-info" style="font-size:1rem;">Add 2nd category</a></td></tr>')
+            $('#id_amount').after('<tr id="custom_row"><td style="padding-top:5px;"><a id="custom_anchor_link" class="text-info" style="font-size:1rem;">Add 2<sup>nd</sup> category</a></td></tr>')
             $('#id_description').after('<tr id="custom_row_2"><td style="padding-top:4px;"><a id="custom_anchor_link_2" class="text-info" style="margin-top:20px; font-size:1rem;">Change currency</a></td></tr>')
+            $('#id_description').after('<tr id="custom_row_3"><td style="padding-top:4px;"><a id="custom_anchor_link_3" class="text-info" style="margin-top:20px; font-size:1rem;">Incrementing default credit card...</a></td></tr>')
 
 
             // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
@@ -270,6 +272,17 @@
                 $('#custom_anchor_link_2').hide();
                 $('#id_currency').val('EUR'); // REMOVE WHEN FUNCTIONALITY IS ADDED TO CHANGE DEFAULT CURRENCY
                 $('#id_currency,label[for="id_currency"]').show();
+            });
+            // Disable incrementing of the credit card balance for this purchase
+            $('#custom_anchor_link_3').on('click', function(e) {
+                if ($('#custom_anchor_link_3').text() === 'Incrementing default credit card...') {
+                    $('#custom_anchor_link_3').text('NOT incrementing credit card...');
+                    $('#id_disable_credit_card').prop('checked', true);
+                }
+                else {
+                    $('#custom_anchor_link_3').text('Incrementing default credit card...');
+                    $('#id_disable_credit_card').prop('checked', false);
+                }
             });
 
 

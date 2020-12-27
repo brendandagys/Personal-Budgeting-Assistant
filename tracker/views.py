@@ -428,15 +428,21 @@ def homepage(request):
 
             purchase_instance.save()
 
+
             # Deal with the 2nd amount, which may be None
             amount_2 = 0
             if purchase_instance.amount_2 is not None:
                 amount_2 = purchase_instance.amount_2
 
-            # Get the latest credit card balance
-            credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value
-
-            AccountUpdate.objects.create(account=Account.objects.get(id=3), value=credit_card_balance + purchase_instance.amount + amount_2, exchange_rate=purchase_instance.exchange_rate)
+            # Increment the credit card balance only if indicated...
+            if purchase_form.cleaned_data['disable_credit_card']: # Comes through as True or False
+                # Get the latest debit account balance and create new AccountUpdate object with the balance decremented by the current purchase
+                debit_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value
+                AccountUpdate.objects.create(account=Account.objects.get(id=1), value=debit_balance - purchase_instance.amount - amount_2, exchange_rate=purchase_instance.exchange_rate)
+            else:
+                # Get the latest credit card balance and create new AccountUpdate object with the balance incremented by the current purchase
+                credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value
+                AccountUpdate.objects.create(account=Account.objects.get(id=3), value=credit_card_balance + purchase_instance.amount + amount_2, exchange_rate=purchase_instance.exchange_rate)
 
             return redirect('homepage')
 #

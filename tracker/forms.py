@@ -1,4 +1,4 @@
-from django.forms import ModelForm, DateField, DecimalField, NumberInput #, Textarea, CharField, EmailField, ChoiceField # All added for ModelForms
+from django.forms import ModelForm, DateField, DecimalField, NumberInput, BooleanField #, Textarea, CharField, EmailField, ChoiceField # All added for ModelForms
 
 import datetime
 from django.utils import timezone
@@ -13,6 +13,8 @@ class PurchaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(PurchaseForm, self).__init__(*args, **kwargs)
 
+        self.fields['disable_credit_card'] = BooleanField(required=False) # To indicate to not increment the credit card balance
+
         for field in iter(self.fields):
             self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
             self.fields[field].label = ''
@@ -21,7 +23,7 @@ class PurchaseForm(ModelForm):
         self.fields['time'].widget.attrs.update({'placeholder': 'Time...', 'inputmode': 'numeric'})
         self.fields['item'].widget.attrs.update({'placeholder': 'Item(s)...'})
         self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...', 'inputmode': 'decimal'})
-        self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional...', 'inputmode': 'decimal'})
+        self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional amount...', 'inputmode': 'decimal'})
         self.fields['description'].widget.attrs.update({'rows': 3, 'placeholder': 'Specifics...'})
         self.fields['currency'].widget.attrs.update({'placeholder': 'Currency...'})
 
@@ -31,6 +33,7 @@ class PurchaseForm(ModelForm):
             category_choices.append((choice[0], choice[1].split(',')[0])) # (1, 'Coffee, None, 30, 2020-12-12 18:39:00')
         self.fields['category'].choices = category_choices
         self.fields['category_2'].choices = category_choices
+
 
     def clean_time(self): # Will be a string of 0 - 4 numbers, no colon
         time_string = self.cleaned_data['time']
