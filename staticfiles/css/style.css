@@ -224,8 +224,8 @@ select[id^="id_"] {
     padding: 5px;
 }
 
-a {
-    font-size: 1.25rem;
+.category_sizing {
+    font-size: 1rem;
 }
 
 .purchase_list_div {

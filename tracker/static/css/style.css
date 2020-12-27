@@ -121,7 +121,7 @@ select[id^="id_"] {
 }
 
 .no_filter {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
 }
 
 .no_purchases {
@@ -224,8 +224,8 @@ select[id^="id_"] {
     padding: 5px;
 }
 
-a {
-    font-size: 1.25rem;
+.category_sizing {
+    font-size: 1rem;
 }
 
 .purchase_list_div {

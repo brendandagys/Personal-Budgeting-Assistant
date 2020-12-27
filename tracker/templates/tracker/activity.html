@@ -87,7 +87,7 @@
                 </tr> -->
 
                 {% for filter_tuple in purchase_categories_tuples_list %}
-                    <tr>
+                    <tr class="category_sizing">
                         <td style="width:50%; text-align:right; padding-right:10px;">
                             <a id="{{filter_tuple.0}}" class="filter_identifier" href="">{{filter_tuple.0}}</a>
                         </td>
@@ -162,14 +162,18 @@
             $('#view_receipt_button').attr('data-url', $(this).data('url'));
             $('#delete_purchase_button').attr('data-id', $(this).data('id'));
         });
+        // After deletion or click outside of the modal, it must be re-hidden, and the data-id and data-url attributes reset to ''
+        hide_and_reset_modal = function() {
+            $('#purchase_modal_background').css('visibility', 'hidden');
+            $('#purchase_modal').css('visibility', 'hidden');
+            // Unnecessary, but cleaner...
+            $('#view_receipt_button').attr('data-url', '');
+            $('#delete_purchase_button').attr('data-id', '');
+        }
         // Hide the modal and modal background if anything other than the modal or nav header is clicked
         $(document).on('click', function(e) {
             if (e.target.id === 'purchase_modal_background') {
-                $('#purchase_modal_background').css('visibility', 'hidden');
-                $('#purchase_modal').css('visibility', 'hidden');
-                // Unnecessary, but cleaner...
-                $('#view_receipt_button').attr('data-url', '');
-                $('#delete_purchase_button').attr('data-id', '');
+                hide_and_reset_modal();
             }
         });
 
@@ -190,8 +194,10 @@
               context: this, // To allow access in the callback functions
               success: function (response) {
                   console.log('Deleted Purchase: ' + $(this).data('id'));
-                  
+
                   get_queryset();
+                  hide_and_reset_modal()
+
               },
               error: function (response) {
                   console.log('There was an issue deleting Purchase: ' + $(this).data('id'));
