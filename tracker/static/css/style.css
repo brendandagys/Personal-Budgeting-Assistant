@@ -13,8 +13,8 @@ label[for^="id_"] {
     display: block;
     margin: 5px 15px;
     text-align: center;
-    font-size: 0.8rem;
-    /* font-family: Arial; */
+    font-size: 0.6rem;
+    font-family: Arial;
 }
 
 .lighter_background {
@@ -159,9 +159,9 @@ select[id^="id_"] {
     text-align: center;
 }
 
-.purchase_description {
+/* .purchase_description {
     font-size: 1.2rem;
-}
+} */
 
 .main_container {
     padding: 0 !important;
