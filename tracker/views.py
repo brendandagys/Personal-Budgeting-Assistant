@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.views import generic
 from .forms import PurchaseForm, AccountForm
-from django.forms import modelformset_factory, NumberInput, TextInput # Could have imported last two from .forms, if imported there
+from django.forms import modelformset_factory, NumberInput, TextInput, CheckboxInput, Select # Could have imported from .forms, if imported there
 from .models import Purchase, Filter, Recurring, Alert, Mode, PurchaseCategory, Account, AccountUpdate
 
 from django.db.models import Sum
@@ -422,7 +422,7 @@ def homepage(request):
             purchase_instance.amount = purchase_form.cleaned_data['amount']
             purchase_instance.category_2 = purchase_form.cleaned_data['category_2']
             purchase_instance.amount_2 = purchase_form.cleaned_data['amount_2']
-            purchase_instance.description = purchase_form.cleaned_data['description'].strip() if purchase_form.cleaned_data['description'].strip()[-1] == '.' else purchase_form.cleaned_data['description'].strip() + '.' # Add a period if not present
+            purchase_instance.description = purchase_form.cleaned_data['description'].strip() if len(purchase_form.cleaned_data['description'].strip()) > 0 and purchase_form.cleaned_data['description'].strip()[-1] == '.' else purchase_form.cleaned_data['description'].strip() + '.' # Add a period if not present
             purchase_instance.currency = purchase_form.cleaned_data['currency']
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
             purchase_instance.receipt = None if len(request.FILES) == 0 else request.FILES['receipt']
@@ -644,12 +644,18 @@ def settings(request):
     if request.method == 'GET':
         context = {}
 
-        ThresholdFormSet = modelformset_factory(PurchaseCategory, extra=0, # Was adding 1 extra blank form (?)
+        ThresholdFormSet = modelformset_factory(PurchaseCategory,
                                                 fields=('category', 'threshold', 'threshold_rolling_days'),
-                                                widgets={'category': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px'}),
-                                                         'threshold': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:95px', 'inputmode': 'decimal'}),
-                                                         'threshold_rolling_days': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:53px', 'inputmode': 'numeric'})})
+                                                widgets={'category': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px;'}),
+                                                         'threshold': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:95px;', 'inputmode': 'decimal'}),
+                                                         'threshold_rolling_days': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:53px;', 'inputmode': 'numeric'})})
 
+        AccountFormSet = modelformset_factory(Account,
+                                              exclude=(),
+                                              widgets={'account': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:200px;'}),
+                                                       'credit': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'}),
+                                                       'currency': Select(attrs={'class': 'form-control form-control-sm', 'style': 'width:67px; margin:auto;'}),
+                                                       'active': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'})})
 
         # category_list = list(PurchaseCategory.objects.all().values_list('category', flat=True)) # Already ordered in models.py
         # context['category_list'] = category_list
@@ -663,6 +669,7 @@ def settings(request):
         #     formset_string+=str(form).replace('Threshold:', category)
 
         context['threshold_formset'] = ThresholdFormSet()
+        context['account_formset'] = AccountFormSet()
 
         return render(request, 'tracker/settings.html', context=context)
 

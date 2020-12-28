@@ -25,10 +25,10 @@
             <br>
             <h6 style="text-align:center;">Purchase Category Settings</h6>
             <p style="font-size:0.5rem; text-align:center;">Change the name of a Purchase Category, set the threshold for alerts, or change the rolling window in which alerts trigger.</p>
-            <form id="account_form" method="post">
+            <form id="threshold_formset" method="post">
                 {{ threshold_formset.management_form }}
                 <table style="table-layout:fixed; margin:auto; max-width:345px;">
-                    <tr>
+                    <tr style="font-size:0.7rem;">
                         <th>Category</th>
                         <th>Threshold</th>
                         <th>Days</th>
@@ -42,6 +42,30 @@
                     {% endfor %}
                 </table>
             </form>
+
+            <br>
+            <h6 style="text-align:center;">Account Settings</h6>
+            <p style="font-size:0.5rem; text-align:center;">Change the name of an Account, specify if it's a credit account, set the currency, and indicate if it's active.</p>
+            <form id="account_formset" method="post">
+                {{ account_formset.management_form }}
+                <table style="table-layout:fixed; margin:auto; max-width:345px;">
+                    <tr style="font-size:0.7rem;">
+                        <th>Account</th>
+                        <th style="text-align:center;">Credit</th>
+                        <th style="text-align:center;">Currency</th>
+                        <th style="text-align:center;">Active</th>
+                    </tr>
+                    {% for form in account_formset %}
+                        <tr>
+                            <td style="width:65%">{{ form.account }}</td>
+                            <td style="width:10%">{{ form.credit }}</td>
+                            <td style="width:15%">{{ form.currency }}</td>
+                            <td style="width:10%">{{ form.active }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </form>
+
         </div>
     </body>
 

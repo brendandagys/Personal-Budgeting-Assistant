@@ -159,9 +159,16 @@
         $(document).on('click', '.purchase_list_items', function(e) {
             $('#purchase_modal_background').css('visibility', 'visible');
             $('#purchase_modal').css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0});
-            $('#view_receipt_button').attr('data-url', $(this).data('url'));
+            if ($(this).data('url') !== '') {
+                $('#view_receipt_button').attr('data-url', $(this).data('url'));
+                $('#view_receipt_button').prop('disabled', false);
+            }
+            else {
+                $('#view_receipt_button').prop('disabled', true);
+            }
             $('#delete_purchase_button').attr('data-id', $(this).data('id'));
         });
+
         // After deletion or click outside of the modal, it must be re-hidden, and the data-id and data-url attributes reset to ''
         hide_and_reset_modal = function() {
             $('#purchase_modal_background').css('visibility', 'hidden');
@@ -170,6 +177,7 @@
             $('#view_receipt_button').attr('data-url', '');
             $('#delete_purchase_button').attr('data-id', '');
         }
+
         // Hide the modal and modal background if anything other than the modal or nav header is clicked
         $(document).on('click', function(e) {
             if (e.target.id === 'purchase_modal_background') {
@@ -196,7 +204,7 @@
                   console.log('Deleted Purchase: ' + $(this).data('id'));
 
                   get_queryset();
-                  hide_and_reset_modal()
+                  hide_and_reset_modal();
 
               },
               error: function (response) {
