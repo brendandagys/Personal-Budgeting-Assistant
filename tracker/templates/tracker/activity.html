@@ -325,9 +325,16 @@
 
                                 // purchase_list = purchase_list.concat('<div style="position:relative;"><li class="purchase_list_items" style="display:inline-block; width:95%;">');
                                 purchase_list = purchase_list.concat(`<li data-id="${id}" data-url="${receipt}" class="purchase_list_items" style="display:inline-block; width:100%;">`);
-                                purchase_list = purchase_list.concat(`<h6 style="margin-top:8px;"><b>${date}, ${time}</b>: <span style="font-size:1.4rem;" class="blue_text">$${amount} ${amount_2}</span></h6>`);
+                                purchase_list = purchase_list.concat(`<h6 style="margin-top:8px;"><b>${date}, ${time}</b>: <span style="font-size:1.4rem;" class="blue_text">$${amount} ${amount_2}</span>`);
+                                if (receipt !== '') {
+                                    purchase_list = purchase_list.concat('<img style="width:17px; height:17px; margin:0 5px 5px;" src="{% static 'images/camera_glyph.png' %}"></h6>');
+                                }
+                                else {
+                                    purchase_list = purchase_list.concat('</h6>');
+                                }
                                 purchase_list = purchase_list.concat(`<h6><u>${category}</u>${category_spacer}<u>${category_2}</u> | <b>${item}</b>${description_spacer}<span class="purchase_description"><i>${description}</i></span></h6></li>`);
                                 // purchase_list = purchase_list.concat('<li style="display:inline-block; height:22px; position:absolute; top:50%; margin-top:-11px; margin-left:8px;">x</li></div>');
+                                // purchase_list = purchase_list.concat('<img style="display:inline-block; width:20px; height:20px;" id="image" src="{% static 'images/camera_glyph.png' %}">')
                             });
 
                             return purchase_list.concat('</ul>');
