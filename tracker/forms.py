@@ -6,7 +6,7 @@ from django.utils import timezone
 def current_date():
     return datetime.date.today()
 
-from .models import Purchase, Account, AccountUpdate
+from .models import Purchase, Account, AccountUpdate, Recurring
 
 
 class PurchaseForm(ModelForm):
@@ -85,19 +85,15 @@ class AccountForm(ModelForm):
         exclude = []
 
 
-# class ThresholdForm(ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super(ThresholdForm, self).__init__(*args, **kwargs)
-#         self.fields = {}
-#
-#         for purchase_category in PurchaseCategory.objects.all(): # Ordered by id in models.py
-#             threshold = 'Not set' if purchase_category.threshold is None else '${:20,.1f}'.format(purchase_category.threshold)
-#             self.fields[str(purchase_category.id) + '_threshold'] = DecimalField(label=purchase_category.category, max_digits=7, decimal_places=1, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:75px',
-#                                                                                                                                                                                         'inputmode': 'decimal', 'placeholder': threshold}))
-#             window = 'Not set' if purchase_category.threshold_rolling_days == 1 else purchase_category.threshold_rolling_days
-#             self.fields[str(purchase_category.id) + '_window'] = IntegerField(label='', min_value=0, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:45px',
-#                                                                                                                                                'inputmode': 'numeric', 'placeholder': window}))
-#
-#     class Meta:
-#         model = PurchaseCategory
-#         exclude = []
+class RecurringForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(RecurringForm, self).__init__(*args, **kwargs)
+
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm', 'style': 'width:13rem'})
+
+        self.fields['description'].widget.attrs.update({'rows': 2})
+
+    class Meta:
+        model = Recurring
+        exclude = []

@@ -19,6 +19,11 @@ CURRENCIES = [
     ('EUR', 'EUR'),
 ]
 
+RECURRING_TYPES = [
+    ('Credit', 'Credit'),
+    ('Debit', 'Debit'),
+]
+
 class PurchaseCategory(models.Model):
     category = models.CharField(max_length=30, verbose_name='Category')
     threshold = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Threshold')
@@ -47,7 +52,7 @@ class Purchase(models.Model):
     description = models.TextField(blank=True, verbose_name='Details')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
     exchange_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD') # Default 1 unnecessary as we always run get_exchange_rate()
-    receipt=models.FileField(blank=True, null=True, upload_to='media/', verbose_name='Receipt')
+    receipt=models.FileField(blank=True, null=True, upload_to='media/', verbose_name='Receipt') # Eventually, switch to ImageField?
 
     class Meta:
         verbose_name_plural = 'Purchases'
@@ -129,7 +134,8 @@ class AccountUpdate(models.Model):
 
 class Recurring(models.Model):
     name = models.CharField(max_length=40, verbose_name='Name')
-    type = models.CharField(max_length=20, verbose_name='Type')
+    description = models.TextField(blank=True, verbose_name='Details')
+    type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
     active = models.BooleanField(default=True, verbose_name='Active')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')

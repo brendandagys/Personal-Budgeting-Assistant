@@ -28,7 +28,7 @@
             <form id="threshold_formset" method="post">
                 {{ threshold_formset.management_form }}
                 <table style="table-layout:fixed; margin:auto; max-width:345px;">
-                    <tr style="font-size:0.7rem;">
+                    <tr style="font-size:0.7rem; text-align:center;">
                         <th>Category</th>
                         <th>Threshold</th>
                         <th>Days</th>
@@ -49,11 +49,11 @@
             <form id="account_formset" method="post">
                 {{ account_formset.management_form }}
                 <table style="table-layout:fixed; margin:auto; max-width:345px;">
-                    <tr style="font-size:0.7rem;">
+                    <tr style="font-size:0.7rem; text-align:center;">
                         <th>Account</th>
-                        <th style="text-align:center;">Credit</th>
-                        <th style="text-align:center;">Currency</th>
-                        <th style="text-align:center;">Active</th>
+                        <th>Credit</th>
+                        <th>Currency</th>
+                        <th>Active</th>
                     </tr>
                     {% for form in account_formset %}
                         <tr>
@@ -64,6 +64,40 @@
                         </tr>
                     {% endfor %}
                 </table>
+            </form>
+
+            <br>
+            <h6 style="text-align:center;">Recurring Payments</h6>
+            <p style="font-size:0.5rem; text-align:center;">Add and update bills or other recurring payments/income.</p>
+            <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
+                <tr style="font-size:0.7rem; text-align:center;">
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Account</th>
+                    <th>Active</th>
+                    <th>Amount</th>
+                    <th>Freq.</th>
+                </tr>
+                {% for recurring in recurring_list %}
+                    <tr style="font-size:0.5rem; text-align:center;">
+                        <td style="vertical-align:middle;">{{ recurring.name }}</td>
+                        <td style="vertical-align:middle;">{{ recurring.type }}</td>
+                        <td style="vertical-align:middle;">{{ recurring.account }}</td>
+                        <td style="vertical-align:middle;">{{ recurring.active }}</td>
+                        <td style="vertical-align:middle;">{{ recurring.amount }}</td>
+                        <td style="vertical-align:middle;">{{ recurring.frequency }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <br>
+            <form id="recurring_form" action="" method="post">
+                {% csrf_token %}
+                <table class="center">
+                    {{ recurring_form }}
+                </table> </br>
+
+                <input id="submit_button" style="margin-top:-5px;" class="btn btn-sm btn-primary" type="submit" value="Add Recurrence" name="recurring_form_submit">
             </form>
 
         </div>

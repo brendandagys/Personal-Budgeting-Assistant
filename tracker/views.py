@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 from django.views import generic
-from .forms import PurchaseForm, AccountForm
+from .forms import PurchaseForm, AccountForm, RecurringForm
 from django.forms import modelformset_factory, NumberInput, TextInput, CheckboxInput, Select # Could have imported from .forms, if imported there
 from .models import Purchase, Filter, Recurring, Alert, Mode, PurchaseCategory, Account, AccountUpdate
 
@@ -657,19 +657,11 @@ def settings(request):
                                                        'currency': Select(attrs={'class': 'form-control form-control-sm', 'style': 'width:67px; margin:auto;'}),
                                                        'active': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'})})
 
-        # category_list = list(PurchaseCategory.objects.all().values_list('category', flat=True)) # Already ordered in models.py
-        # context['category_list'] = category_list
-
-        # formset_string = ''
-        # for index, form in enumerate(ThresholdFormSet()):
-        #     # print('\n' + str(form) + '\n')
-        #     category = PurchaseCategory.objects.get(id=id_list[index]).category
-        #     # print(index); print(category)
-        #     # category = PurchaseCategory.objects.get(id=int(re.search(r'.*id_form-(\d{1,3})-', str(form)).group(1)) + 1).category # Was previously using this to extract what I thought was the id
-        #     formset_string+=str(form).replace('Threshold:', category)
-
         context['threshold_formset'] = ThresholdFormSet()
         context['account_formset'] = AccountFormSet()
+
+        context['recurring_list'] = Recurring.objects.all()
+        context['recurring_form'] = RecurringForm()
 
         return render(request, 'tracker/settings.html', context=context)
 
