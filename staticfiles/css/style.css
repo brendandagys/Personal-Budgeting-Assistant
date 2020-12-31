@@ -293,3 +293,8 @@ select[id^="id_"] {
     top: 40%;
     background: rgba(30,144,255,0.93);
 }
+
+.disabled {
+  pointer-events: none;
+  /* opacity: 0.2; */
+}

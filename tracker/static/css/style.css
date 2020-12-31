@@ -245,8 +245,12 @@ select[id^="id_"] {
     text-align: center;
 }
 
+.filter_identifier {
+    text-decoration: none !important;
+}
+
 .green_filters {
-    color: #35b234;
+    color: #35b234 !important;
     font-weight: bold;
 }
 

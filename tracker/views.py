@@ -233,11 +233,12 @@ def get_chart_data(request):
 
         labels = []
         for datetime_index in pd.date_range(start_date_filter, end_date_filter-datetime.timedelta(days=1), freq='D'): # freq='D' is default, returns a DateTime index
-            labels.append(str(datetime_index.date()))
+            labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
         # print('Chart labels: ' + str(labels))
 
         values = []
         for date in labels:
+            date = date[:-6] # Remove the prefix we just added so we can filter with the date
             amount_sum = 0 if queryset.filter(date=date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(date=date).aggregate(Sum('amount'))['amount__sum']
             amount_2_sum = 0 if queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(date=date).aggregate(Sum('amount_2'))['amount_2__sum']
             values.append(amount_sum + amount_2_sum)
