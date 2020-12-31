@@ -25,20 +25,19 @@
 
     <body class="white_background">
         <div id="purchase_modal_background" class="purchase_modal_background">
-            <div id="purchase_modal" class="purchase_modal">
-                    <button id="view_receipt_button" style="margin-top:40px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
-                    <button id="delete_purchase_button" style="margin-top:5px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button>
+            <div id="purchase_modal" class="purchase_modal" style="width:338px; height:162px; position:relative; margin:auto;">
+                    <button id="view_receipt_button" style="position:absolute; right:68px; top:42px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
+                    <button id="delete_purchase_button" style="position:absolute; right:68px; top:84px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button>
             </div>
         </div>
 
         <div class="container-fluid">
-
             <div class="floating_bar row">
 
                 <div class="navigation_link col-sm-12">
-                        <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Home</a>
-                        <a id="admin_link" style="position:fixed; top:10px; right:20px; z-index:900;" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
-                        <a id="activity_link" style="position:fixed; top:47.5px; right:15px; width:70px; z-index:900;" class="btn btn-outline-primary btn-sm" href="{% url 'settings' %}">Settings</a>
+                    <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Home</a>
+                    <a id="admin_link" style="position:fixed; top:10px; right:20px; z-index:900;" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
+                    <a id="activity_link" style="position:fixed; top:47.5px; right:15px; width:70px; z-index:900;" class="btn btn-outline-primary btn-sm" href="{% url 'settings' %}">Settings</a>
                 </div>
 
                 <div class="col-sm-12">
@@ -46,7 +45,6 @@
                 </div>
 
             </div>
-
         </div>
 
         <div class="main_container container-fluid">
@@ -65,7 +63,9 @@
             <span style="text-align:center;"><h3 id="accounts_sum"></h3></span>
 
             <table style="width:100%; margin-top:17px; margin-bottom:-15px; font-size:0.8rem;">
-                <tr><td colspan="2" style="text-align:center;"><u>Current Exchange Rates</u></td></tr>
+                <tr>
+                    <td colspan="2" style="text-align:center;"><u>Current Exchange Rates</u></td>
+                </tr>
                 <tr style="color: slategrey;">
                     <td id="USD_rate" style="text-align:right; width:50%; padding-right:12px;"></td>
                     <td id="EUR_rate" style="text-align:left; width:50%; padding-left:25px;"></td>
