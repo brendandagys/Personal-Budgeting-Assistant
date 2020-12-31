@@ -19,11 +19,6 @@ CURRENCIES = [
     ('EUR', 'EUR'),
 ]
 
-RECURRING_TYPES = [
-    ('Credit', 'Credit'),
-    ('Debit', 'Debit'),
-]
-
 class PurchaseCategory(models.Model):
     category = models.CharField(max_length=30, verbose_name='Category')
     threshold = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Threshold')
@@ -133,13 +128,60 @@ class AccountUpdate(models.Model):
 
 
 class Recurring(models.Model):
+    RECURRING_TYPES = [
+        ('Credit', 'Credit'),
+        ('Debit', 'Debit'),
+    ]
+
+    FREQUENCY_TYPES = [
+        ('Date', 'Date'),
+        ('Interval', 'Interval'),
+        ('Xth Weekday', 'Xth Weekday'),
+    ]
+
+    INTERVAL_TYPES = [
+        ('Days', 'Days'),
+        ('Weeks', 'Weeks'),
+        ('Months', 'Months'),
+    ]
+
+    XTH_TYPES = [
+        ('Sunday', 'Sunday'),
+        ('Monday', 'Monday'),
+        ('Tuesday', 'Tuesday'),
+        ('Wednesday', 'Wednesday'),
+        ('Thursday', 'Thursday'),
+        ('Friday', 'Friday'),
+        ('Saturday', 'Saturday'),
+        ('Weekday', 'Weekday'),
+        ('Weekend', 'Weekend'),
+    ]
+
+    XTH_MODES = [
+        ('General', 'General'),
+        ('Specific', 'Specific'),
+    ]
+
     name = models.CharField(max_length=40, verbose_name='Name')
     description = models.TextField(blank=True, verbose_name='Details')
     type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
     active = models.BooleanField(default=True, verbose_name='Active')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    frequency = models.CharField(max_length=100, verbose_name='Frequency')
+
+    start_date = models.DateField(default=current_date, verbose_name='Start Date')
+
+    days = models.CharField(blank=True, max_length=100, verbose_name='Days')
+    weekdays = models.CharField(blank=True, max_length=100, verbose_name='Weekdays')
+
+    number = models.PositiveIntegerField(blank=True, null=True, default=30, verbose_name='Number')
+
+    interval_type = models.CharField(blank=True, choices=INTERVAL_TYPES, max_length=15, verbose_name='Interval Type')
+
+    xth_type = models.CharField(blank=True, choices=XTH_TYPES, max_length=15, verbose_name='Xth Type')
+    xth_mode = models.CharField(blank=True, choices=XTH_MODES, max_length=15, verbose_name='Xth Mode')
+    xth_after_specific_date = models.DateField(blank=True, null=True, verbose_name='Xth After Specific Date')
+    xth_after_months = models.PositiveIntegerField(blank=True, null=True, verbose_name='Xth After Months')
 
     class Meta:
         verbose_name_plural = 'Recurrings'
@@ -147,7 +189,7 @@ class Recurring(models.Model):
         ordering = ['-amount']
 
     def __str__(self):
-        return ', '.join([self.name, self.type, str(self.active), self.frequency])
+        return ', '.join([self.name, self.type, self.account.account, str(self.active), str(self.amount)])
 
 
 class Alert(models.Model):

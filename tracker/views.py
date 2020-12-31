@@ -438,11 +438,11 @@ def homepage(request):
 
             # Increment the credit card balance only if indicated...
             if purchase_form.cleaned_data['disable_credit_card']: # Comes through as True or False
-                # Get the latest debit account balance and create new AccountUpdate object with the balance decremented by the current purchase
+                # Get the latest debit account balance and create new AccountUpdate object with the balance decremented by the current purchase value
                 debit_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value
                 AccountUpdate.objects.create(account=Account.objects.get(id=1), value=debit_balance - purchase_instance.amount - amount_2, exchange_rate=purchase_instance.exchange_rate)
             else:
-                # Get the latest credit card balance and create new AccountUpdate object with the balance incremented by the current purchase
+                # Get the latest credit card balance and create new AccountUpdate object with the balance incremented by the current purchase value
                 credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value
                 AccountUpdate.objects.create(account=Account.objects.get(id=3), value=credit_card_balance + purchase_instance.amount + amount_2, exchange_rate=purchase_instance.exchange_rate)
 

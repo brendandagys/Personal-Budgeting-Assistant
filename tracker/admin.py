@@ -59,7 +59,7 @@ class AccountUpdateAdmin(ImportExportModelAdmin):
 @admin.register(Recurring)
 class RecurringAdmin(ImportExportModelAdmin):
     resource_class = RecurringResource
-    list_display = ('name', 'type', 'active', 'amount', 'frequency')
+    list_display = ('name', 'type', 'account', 'active', 'amount')
 
 @admin.register(Alert)
 class AlertAdmin(ImportExportModelAdmin):
