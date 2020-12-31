@@ -4,6 +4,8 @@
     <head>
          {% load static %}
 
+         <link rel="shortcut icon" href="{% static 'images/money_bulb.png' %}">
+
          <meta charset="utf-8">
          <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
          <meta name="description" content="Finances Tracker web application.">
@@ -23,7 +25,7 @@
 
          <script src="{% static 'js/linear_regression.js' %}"></script>
 
-         <title>Purchase Form and Charts</title>
+         <title>Purchase Form and Trends</title>
     </head>
 
     <body>
@@ -97,16 +99,11 @@
         <br>
 
         <div class="bottom_div">
-
-            <div class="row">
-                <div class="chart col-sm-12">
+            <div style="width:375px; margin:0; text-align:center;">
                     <h3>Purchases</h3>
-                    <canvas id="spending_chart" width="400" height="200"></canvas>
-                </div>
+                    <canvas id="spending_chart" width="375" height="250"></canvas>
             </div>
-
         </div>
-
 
         <hr>
 

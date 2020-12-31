@@ -2,6 +2,9 @@
 <html lang="en">
     <head>
         {% load static %}
+
+        <link rel="shortcut icon" href="{% static 'images/money_bulb.png' %}">
+
         <link href="{% static 'css/style.css' %}" rel="stylesheet">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
@@ -18,7 +21,7 @@
 
                     <div id="login" class="login_div">
 
-                        <p>Please log in to the Spending Tracker using your credentials below:</p>
+                        <p>Please log in using your credentials below:</p>
                         </br>
 
                         <form class="form-horizontal" name="LoginForm" action="{% url 'login' %}" method="post">
