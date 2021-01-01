@@ -138,6 +138,8 @@
         // $('label[for="id_description"]').attr('style', 'position:relative; bottom:9px;'); // Was appearing too low...
         $('#id_disable_credit_card').hide();
 
+        $('#id_receipt').attr('accept', 'image/*');
+
         $(document).ready(function() {
             // Initial indication of the applied filters
             $.ajax({
