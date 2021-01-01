@@ -139,8 +139,6 @@ def get_json_queryset(request):
 
     if end_date_filter is None:
         end_date_filter = '2099-12-31'
-    else:
-        end_date_filter+=datetime.timedelta(days=1)
 
     purchase_categories_list = [x.id for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
                                                filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
@@ -149,7 +147,7 @@ def get_json_queryset(request):
                                                filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                if x is not None]
 
-    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lt=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
 
     purchases_list = list(queryset_data.values()) # List of dictionaries
 
@@ -198,10 +196,8 @@ def get_chart_data(request):
         if start_date_filter is None or start_date_filter < Purchase.objects.all().order_by('date').first().date:
             start_date_filter = Purchase.objects.all().order_by('date').first().date # Date of first purchase recorded
 
-        if end_date_filter is not None:
-            end_date_filter+=datetime.timedelta(days=1)
-        else:
-            end_date_filter = current_date() + datetime.timedelta(days=1)
+        if end_date_filter is None:
+            end_date_filter = current_date()
 
         print('Days on chart: ' + str((end_date_filter-start_date_filter).days))
 
@@ -229,15 +225,13 @@ def get_chart_data(request):
         print('Filters for chart: ' + str(current_filter_list_unique))
 
 
-        queryset = Purchase.objects.filter(Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lt=end_date_filter).values('date', 'amount').order_by('date')
+        queryset = Purchase.objects.filter(Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'amount').order_by('date')
 
-        end_date_filter-=datetime.timedelta(days=1)
 
         # DAILY CHART
         labels = []
         for datetime_index in pd.date_range(start_date_filter, end_date_filter, freq='D'): # freq='D' is default; returns a DateTime index
             labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
-        # print('Chart labels: ' + str(labels))
 
         values = []
         for date in labels:
@@ -256,43 +250,67 @@ def get_chart_data(request):
         values_weekly = []
 
         for date in dates_list: # If the last date is greater than end_date_filter, change it to end_date_filter, add the label, and end loop
-            end_date = str((datetime.datetime.strptime(date, '%Y-%m-%d')+datetime.timedelta(days=6)).date())
-            if end_date > str(end_date_filter):
-                end_date = str(end_date_filter)
-                labels_weekly.append(date + ' - ' + end_date)
+            end_date = str((datetime.datetime.strptime(date, '%Y-%m-%d').date()+datetime.timedelta(days=6)))
+            if date == str(end_date_filter): # Prevent showing a range like '01-01 - 01-01'. Instead, just show one date
+                labels_weekly.append(date)
                 break
+            if end_date >= str(end_date_filter):
+                labels_weekly.append(date + ' - ' + str(end_date_filter))
+                break
+
             labels_weekly.append(date + ' - ' + end_date)
 
         for date_range in labels_weekly:
-            start_date, end_date = date_range.split(' - ')
-            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount'))['amount__sum']
-            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
+            if ' - ' in date_range:
+                start_date, end_date = date_range.split(' - ')
+            else:
+                start_date, end_date = (date_range, date_range)
+            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum']
+            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
             values_weekly.append(amount_sum + amount_2_sum)
+
+        labels_weekly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_weekly] # Removing the year component, as the label is too long
 
 
         # MONTHLY CHART
-        dates_list = pd.date_range(start=start_date_filter, end=end_date_filter, freq='MS').strftime('%Y-%m-%d').tolist() # This will be a DateTimeIndex. Last two methods format the dates and turn into a list
-        if dates_list[-1] != str(end_date_filter):
-            dates_list.append(str(end_date_filter)) # Ensure we get all data up to the end_date_filter, even if the interval leaves a remainder
-
-        print(dates_list)
+        dates_list = [start_date_filter]
+        start_date_monthly = start_date_filter
+        while start_date_monthly < end_date_filter: # Using pd.date_range() with freq = 'M', '1M', 'MS' all did not work!
+            start_date_monthly+=relativedelta(months=+1)
+            if start_date_monthly < end_date_filter:
+                dates_list.append(start_date_monthly)
+            else:
+                dates_list.append(end_date_filter)
+                break
 
         labels_monthly = []
         values_monthly = []
 
+        print(dates_list)
+        print(dates_list[-1])
+        print(end_date_filter)
+
         for date in dates_list: # If the last date is greater than end_date_filter, change it to end_date_filter, add the label, and end loop
-            end_date = str((datetime.datetime.strptime(date, '%Y-%m-%d')+relativedelta(months=+1)).date())
-            if end_date > str(end_date_filter):
-                end_date = str(end_date_filter)
-                labels_monthly.append(date + ' - ' + end_date)
+            end_date = date+relativedelta(months=+1)+relativedelta(days=-1)
+            if date == end_date_filter:
+                labels_monthly.append(str(date))
                 break
-            labels_monthly.append(date + ' - ' + end_date)
+            if end_date >= end_date_filter:
+                end_date = end_date_filter
+                labels_monthly.append(str(date) + ' - ' + str(end_date))
+                break
+            labels_monthly.append(str(date) + ' - ' + str(end_date))
 
         for date_range in labels_monthly:
-            start_date, end_date = date_range.split(' - ')
-            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount'))['amount__sum']
-            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lt=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
+            if ' - ' in date_range:
+                start_date, end_date = date_range.split(' - ')
+            else:
+                start_date, end_date = (date_range, date_range)
+            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum']
+            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
             values_monthly.append(amount_sum + amount_2_sum)
+
+        labels_monthly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_monthly] # Removing the year component, as the label is too long
 
 
         return JsonResponse({'labels': labels, 'values': values, 'labels_weekly': labels_weekly, 'values_weekly': values_weekly, 'labels_monthly': labels_monthly, 'values_monthly': values_monthly})
