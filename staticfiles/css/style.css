@@ -245,8 +245,12 @@ select[id^="id_"] {
     text-align: center;
 }
 
+.filter_identifier {
+    text-decoration: none !important;
+}
+
 .green_filters {
-    color: #35b234;
+    color: #35b234 !important;
     font-weight: bold;
 }
 
@@ -292,9 +296,4 @@ select[id^="id_"] {
     border-radius: 15px;
     top: 40%;
     background: rgba(30,144,255,0.93);
-}
-
-.disabled {
-  pointer-events: none;
-  /* opacity: 0.2; */
 }
