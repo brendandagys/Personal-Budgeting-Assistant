@@ -317,7 +317,7 @@ def get_net_worth_chart_data(request):
     values_daily = []
 
     queryset = AccountUpdate.objects.all() # Ordered by -timestamp
-    distinct_accounts_list = set(queryset.values_list('account', flat=True))
+    distinct_accounts_list = set(queryset.values_list('account', flat=True)) # List of ints
 
     latest_value_dict = {} # When an Account has no update on a certain date, the queryset will return None; we will then take the most-recent account value
     for account in distinct_accounts_list:
@@ -335,12 +335,21 @@ def get_net_worth_chart_data(request):
         accounts_sum = 0
 
         for account in distinct_accounts_list:
-            last_account_update_on_date = queryset_one_date.filter(account=account).order_by('-timestamp').first()
+            account_object = Account.objects.get(id=account)
+
+            last_account_update_on_date = queryset_one_date.filter(account=account_object).order_by('-timestamp').first()
             if last_account_update_on_date is None:
                 last_account_value_on_date = latest_value_dict[account]
             else:
                 last_account_value_on_date = last_account_update_on_date.value
-            latest_value_dict[account] = last_account_value_on_date
+                last_account_value_on_date*=-1 if account_object.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
+
+                if account_object.currency != 'CAD':
+                    foreign_value = last_account_value_on_date
+                    last_account_value_on_date = convert_currency(last_account_value_on_date, account_object.currency, 'CAD')
+
+                latest_value_dict[account] = last_account_value_on_date
+
             accounts_sum+=last_account_value_on_date
 
         values_daily.append(accounts_sum)
