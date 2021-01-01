@@ -181,7 +181,7 @@ def get_json_queryset(request):
 
 
 @login_required # Don't think this is necessary
-def get_chart_data(request):
+def get_purchases_chart_data(request):
 
     if request.method == 'GET':
 
@@ -229,16 +229,17 @@ def get_chart_data(request):
 
 
         # DAILY CHART
-        labels = []
-        for datetime_index in pd.date_range(start_date_filter, end_date_filter, freq='D'): # freq='D' is default; returns a DateTime index
-            labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
+        labels_daily = []
+        values_daily = []
 
-        values = []
-        for date in labels:
+        for datetime_index in pd.date_range(start_date_filter, end_date_filter, freq='D'): # freq='D' is default; returns a DateTime index
+            labels_daily.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
+
+        for date in labels_daily:
             date = date[:-6] # Remove the prefix we just added so we can filter with the date
             amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount'))['amount__sum']
             amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount_2'))['amount_2__sum']
-            values.append(amount_sum + amount_2_sum)
+            values_daily.append(amount_sum + amount_2_sum)
 
 
         # WEEKLY CHART
@@ -254,10 +255,9 @@ def get_chart_data(request):
             if date == str(end_date_filter): # Prevent showing a range like '01-01 - 01-01'. Instead, just show one date
                 labels_weekly.append(date)
                 break
-            if end_date >= str(end_date_filter):
+            if end_date >= str(end_date_filter): # Make sure that the very last date is no greater than end_date_filter
                 labels_weekly.append(date + ' - ' + str(end_date_filter))
                 break
-
             labels_weekly.append(date + ' - ' + end_date)
 
         for date_range in labels_weekly:
@@ -286,18 +286,13 @@ def get_chart_data(request):
         labels_monthly = []
         values_monthly = []
 
-        print(dates_list)
-        print(dates_list[-1])
-        print(end_date_filter)
-
         for date in dates_list: # If the last date is greater than end_date_filter, change it to end_date_filter, add the label, and end loop
             end_date = date+relativedelta(months=+1)+relativedelta(days=-1)
             if date == end_date_filter:
                 labels_monthly.append(str(date))
                 break
             if end_date >= end_date_filter:
-                end_date = end_date_filter
-                labels_monthly.append(str(date) + ' - ' + str(end_date))
+                labels_monthly.append(str(date) + ' - ' + str(end_date_filter))
                 break
             labels_monthly.append(str(date) + ' - ' + str(end_date))
 
@@ -313,7 +308,13 @@ def get_chart_data(request):
         labels_monthly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_monthly] # Removing the year component, as the label is too long
 
 
-        return JsonResponse({'labels': labels, 'values': values, 'labels_weekly': labels_weekly, 'values_weekly': values_weekly, 'labels_monthly': labels_monthly, 'values_monthly': values_monthly})
+        return JsonResponse({'labels_daily': labels_daily, 'values_daily': values_daily, 'labels_weekly': labels_weekly, 'values_weekly': values_weekly, 'labels_monthly': labels_monthly, 'values_monthly': values_monthly})
+
+
+@login_required
+def get_net_worth_chart_data(request):
+
+    return HttpResponse()
 
 
 @login_required

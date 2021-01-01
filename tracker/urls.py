@@ -8,11 +8,12 @@ urlpatterns = [
     path('activity/', login_required(views.PurchaseListView.as_view()), name='activity'),
     path('activity/get_accounts_sum/', views.get_accounts_sum),
     path('activity/get_purchases/', views.get_json_queryset),
+    path('activity/charts/', views.get_net_worth_chart_data),
     path('activity/delete_purchase/', views.delete_purchase),
     re_path('.*filters/', views.filter_manager),
     path('activity/account_update/', views.account_update),
     path('activity/reset_credit_card/', views.reset_credit_card),
     path('settings/', views.settings, name='settings'),
-    path('chart/', views.get_chart_data),
+    path('charts/', views.get_purchases_chart_data),
     path('mode/', views.mode_manager),
 ]

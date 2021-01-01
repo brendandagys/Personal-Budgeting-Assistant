@@ -17,6 +17,10 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"> -->
 
+        <!-- Chart.js -->
+         <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+         <script src="{% static 'js/linear_regression.js' %}"></script>
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
         <title>Account Balances + Purchase List</title>
@@ -71,6 +75,15 @@
                     <td id="EUR_rate" style="text-align:left; width:50%; padding-left:25px;"></td>
                 </tr>
             </table>
+
+            <hr>
+
+            <div>
+                <div style="margin:0; text-align:center;">
+                        <h3>Net Worth</h3>
+                        <canvas id="net_worth_chart" width="375" height="250"></canvas>
+                </div>
+            </div>
 
             <hr />
 
@@ -348,6 +361,67 @@
 
         // Populate the Purchase list upon initial page load
         get_queryset();
+
+
+        function charts() {
+
+            $.ajax({
+                type: 'GET',
+                url: 'charts/',
+                success: function(response) {
+                        console.log(response);
+                    var ctx = document.getElementById('net_worth_chart').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        plugins: [ChartRegressions],
+                        data: {
+                            labels: response['labels'],
+                            datasets: [{
+                                label: 'Dollars',
+                                data: response['values'],
+                                regressions: {
+                                    type: 'linear',
+                                    line: { color: 'red', width: 1},
+                                },
+                                backgroundColor: [
+                                    // 'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    // 'rgba(255, 206, 86, 0.2)',
+                                    // 'rgba(75, 192, 192, 0.2)',
+                                    // 'rgba(153, 102, 255, 0.2)',
+                                    // 'rgba(255, 159, 64, 0.2)'
+                                ],
+                                borderColor: [
+                                    // 'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    // 'rgba(255, 206, 86, 1)',
+                                    // 'rgba(75, 192, 192, 1)',
+                                    // 'rgba(153, 102, 255, 1)',
+                                    // 'rgba(255, 159, 64, 1)'
+                                ],
+                                borderWidth: 1,
+                            }],
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }],
+                                xAxes: [{
+                                    ticks: {
+                                        fontSize: 8
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        charts();
 
 
         $('#account_form').find(':input').on('change', function(e) {
