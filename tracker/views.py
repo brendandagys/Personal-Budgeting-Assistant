@@ -243,7 +243,7 @@ def get_purchases_chart_data(request):
 
 
         # WEEKLY CHART
-        dates_list = pd.date_range(start=start_date_filter, end=end_date_filter, freq='7D').strftime('%Y-%m-%d').tolist() # This will be a DateTimeIndex. Last two methods format the dates and turn into a list
+        dates_list = pd.date_range(start=start_date_filter, end=end_date_filter, freq='7D').strftime('%Y-%m-%d').tolist() # This will be a DateTimeIndex. Last two methods format the dates into strings and turn into a list
         if dates_list[-1] != str(end_date_filter):
             dates_list.append(str(end_date_filter)) # Ensure we get all data up to the end_date_filter, even if the interval leaves a remainder
 
@@ -251,7 +251,7 @@ def get_purchases_chart_data(request):
         values_weekly = []
 
         for date in dates_list: # If the last date is greater than end_date_filter, change it to end_date_filter, add the label, and end loop
-            end_date = str((datetime.datetime.strptime(date, '%Y-%m-%d').date()+datetime.timedelta(days=6)))
+            end_date = str(datetime.datetime.strptime(date, '%Y-%m-%d').date()+datetime.timedelta(days=6))
             if date == str(end_date_filter): # Prevent showing a range like '01-01 - 01-01'. Instead, just show one date
                 labels_weekly.append(date)
                 break
@@ -273,7 +273,7 @@ def get_purchases_chart_data(request):
 
 
         # MONTHLY CHART
-        dates_list = [start_date_filter]
+        dates_list = [start_date_filter] # List of datetime objects
         start_date_monthly = start_date_filter
         while start_date_monthly < end_date_filter: # Using pd.date_range() with freq = 'M', '1M', 'MS' all did not work!
             start_date_monthly+=relativedelta(months=+1)
@@ -313,8 +313,40 @@ def get_purchases_chart_data(request):
 
 @login_required
 def get_net_worth_chart_data(request):
+    labels_daily = []
+    values_daily = []
 
-    return HttpResponse()
+    queryset = AccountUpdate.objects.all() # Ordered by -timestamp
+    distinct_accounts_list = set(queryset.values_list('account', flat=True))
+
+    latest_value_dict = {} # When an Account has no update on a certain date, the queryset will return None; we will then take the most-recent account value
+    for account in distinct_accounts_list:
+        latest_value_dict[account] = 0
+
+    for datetime_index in pd.date_range(queryset.last().timestamp.date(), queryset.first().timestamp.date(), freq='D'): # freq='D' is default; returns a DateTime index
+        labels_daily.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
+
+    for date in labels_daily:
+        start_date = date[:-6] # Remove the prefix we just added so we can filter with the date
+        end_date = str(datetime.datetime.strptime(date[:-6], '%Y-%m-%d').date()+datetime.timedelta(days=1))
+
+        queryset_one_date = queryset.filter(timestamp__gte=start_date, timestamp__lt=end_date) # Has all AccountUpdates on one given date
+
+        accounts_sum = 0
+
+        for account in distinct_accounts_list:
+            last_account_update_on_date = queryset_one_date.filter(account=account).order_by('-timestamp').first()
+            if last_account_update_on_date is None:
+                last_account_value_on_date = latest_value_dict[account]
+            else:
+                last_account_value_on_date = last_account_update_on_date.value
+            latest_value_dict[account] = last_account_value_on_date
+            accounts_sum+=last_account_value_on_date
+
+        values_daily.append(accounts_sum)
+
+
+    return JsonResponse({'labels_daily': labels_daily, 'values_daily': values_daily})
 
 
 @login_required

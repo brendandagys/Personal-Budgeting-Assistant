@@ -375,10 +375,10 @@
                         type: 'line',
                         plugins: [ChartRegressions],
                         data: {
-                            labels: response['labels'],
+                            labels: response['labels_daily'],
                             datasets: [{
                                 label: 'Dollars',
-                                data: response['values'],
+                                data: response['values_daily'],
                                 regressions: {
                                     type: 'linear',
                                     line: { color: 'red', width: 1},
