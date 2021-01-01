@@ -71,8 +71,12 @@
                     <td colspan="2" style="text-align:center;"><u>Current Exchange Rates</u></td>
                 </tr>
                 <tr style="color: slategrey;">
-                    <td id="USD_rate" style="text-align:right; width:50%; padding-right:12px;"></td>
-                    <td id="EUR_rate" style="text-align:left; width:50%; padding-left:25px;"></td>
+                    <td id="CAD_USD_rate" style="text-align:right; width:50%; padding-right:12px;"></td>
+                    <td id="CAD_EUR_rate" style="text-align:left; width:50%; padding-left:25px;"></td>
+                </tr>
+                <tr style="color: slategrey;">
+                    <td id="USD_CAD_rate" style="text-align:right; width:50%; padding-right:12px;"></td>
+                    <td id="EUR_CAD_rate" style="text-align:left; width:50%; padding-left:25px;"></td>
                 </tr>
             </table>
 
@@ -271,8 +275,10 @@
                     console.log('Retrieved accounts sum!');
                     console.log(response);
                     $('#accounts_sum').html(response['accounts_sum']);
-                    $('#USD_rate').html(response['exchange_rates']['USD']);
-                    $('#EUR_rate').html(response['exchange_rates']['EUR']);
+                    $('#CAD_USD_rate').html(response['exchange_rates']['CAD_USD']);
+                    $('#CAD_EUR_rate').html(response['exchange_rates']['CAD_EUR']);
+                    $('#USD_CAD_rate').html(response['exchange_rates']['USD_CAD']);
+                    $('#EUR_CAD_rate').html(response['exchange_rates']['EUR_CAD']);
                 }
             });
         }
@@ -363,7 +369,7 @@
         get_queryset();
 
 
-        function charts() {
+        function net_worth_chart() {
 
             $.ajax({
                 type: 'GET',
@@ -421,7 +427,7 @@
             });
         }
 
-        charts();
+        net_worth_chart();
 
 
         $('#account_form').find(':input').on('change', function(e) {
@@ -441,6 +447,7 @@
                             $('#' + id).attr('placeholder', account_placeholder);
                         });
                         get_accounts_sum();
+                        net_worth_chart();
                     },
                     error: function () {
                         console.log('There was an issue updating the value for ' + $(this).attr('id'));
@@ -461,8 +468,7 @@
                         $('#id_3').attr('placeholder', '$                0.00');
                         $('#id_1').val('');
                         $('#id_1').attr('placeholder', response);
-                        get_accounts_sum();
-                        console.log('Credit card successfully reset!');
+                        console.log('Credit card successfully reset!'); // DO NOT NEED TO CALL get_accounts_sum() or net_worth_chart(), because decrement in CC accompanied by decrement in chequing balance
                     },
                     error: function() {
                         console.log('Error resetting credit card.!');
