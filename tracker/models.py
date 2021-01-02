@@ -38,8 +38,7 @@ class PurchaseCategory(models.Model):
 
 
 class Purchase(models.Model):
-    # null and blank arguments are False by default
-    # null doesn't allow null in the database, blank is not database-related; it prevents '' in forms
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='purchases')
     date = models.DateField(verbose_name='Date', default=current_date)
     time = models.CharField(blank=True, default=current_time, max_length=5, verbose_name='Time (24 hr.)')
     item = models.CharField(max_length=100, verbose_name='Item(s)')
@@ -63,6 +62,7 @@ class Purchase(models.Model):
 
 
 class Filter(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='filters')
     category_filter_1 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 1', related_name='filters_1')
     category_filter_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 2', related_name='filters_2')
     category_filter_3 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 3', related_name='filters_3')
@@ -102,6 +102,7 @@ class Filter(models.Model):
 
 
 class Account(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='accounts')
     account = models.CharField(max_length=40, verbose_name='Account')
     credit = models.BooleanField(default=False, verbose_name='Credit')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
@@ -167,6 +168,7 @@ class Recurring(models.Model):
         ('Specific', 'Specific'),
     ]
 
+    user = models.ForeignKey(User, default=User.objects.get(id=1), on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='recurrings')
     name = models.CharField(max_length=40, verbose_name='Name')
     description = models.TextField(blank=True, verbose_name='Details')
     type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')
