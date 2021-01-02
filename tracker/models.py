@@ -69,7 +69,7 @@ class Filter(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='filters')
-    page = models.CharField(choices=PAGES, default='Homepage', max_length=20, verbose_name='Page')
+    page = models.CharField(choices=PAGES, max_length=20, verbose_name='Page')
     category_filter_1 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 1', related_name='filters_1')
     category_filter_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 2', related_name='filters_2')
     category_filter_3 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 3', related_name='filters_3')
