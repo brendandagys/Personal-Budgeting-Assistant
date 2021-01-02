@@ -135,7 +135,7 @@ def get_json_queryset(request):
 
     user_object = request.user
 
-    filter_instance = Filter.objects.filter(user=user_object).first()
+    filter_instance = Filter.objects.get(user=user_object, type='Activity')
 
     start_date_filter = filter_instance.start_date_filter
     end_date_filter = filter_instance.end_date_filter
