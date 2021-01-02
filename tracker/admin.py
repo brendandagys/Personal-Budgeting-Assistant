@@ -31,6 +31,14 @@ class PurchaseResource(resources.ModelResource):
     class Meta:
         model = Purchase
 
+class PurchaseCategoryResource(resources.ModelResource):
+    class Meta:
+        model = PurchaseCategory
+
+class FilterResource(resources.ModelResource):
+    class Meta:
+        model = Filter
+
 class RecurringResource(resources.ModelResource):
     class Meta:
         model = Recurring
@@ -43,9 +51,10 @@ class AccountUpdateResource(resources.ModelResource):
     class Meta:
         model = AccountUpdate
 
-class PurchaseCategoryResource(resources.ModelResource):
+class AlertResource(resources.ModelResource):
     class Meta:
-        model = PurchaseCategory
+        model = Alert
+
 
 @admin.register(Purchase)
 class PurchaseAdmin(ImportExportModelAdmin):
@@ -60,10 +69,15 @@ class PurchaseCategoryAdmin(ImportExportModelAdmin):
     readonly_fields = ('category_created_datetime',)
 
 @admin.register(Filter)
-class FiltersAdmin(ImportExportModelAdmin):
-    resource_class = Filter
+class FilterAdmin(ImportExportModelAdmin):
+    resource_class = FilterResource
     list_display = ('id', 'category_filter_1', 'category_filter_2', 'category_filter_3', 'start_date_filter', 'end_date_filter', 'last_updated')
     readonly_fields = ('last_updated',)
+
+@admin.register(Recurring)
+class RecurringAdmin(ImportExportModelAdmin):
+    resource_class = RecurringResource
+    list_display = ('name', 'type', 'account', 'active', 'amount')
 
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):
@@ -78,13 +92,8 @@ class AccountUpdateAdmin(ImportExportModelAdmin):
     list_filter = ['account']
     readonly_fields = ('timestamp',)
 
-@admin.register(Recurring)
-class RecurringAdmin(ImportExportModelAdmin):
-    resource_class = RecurringResource
-    list_display = ('name', 'type', 'account', 'active', 'amount')
-
 @admin.register(Alert)
 class AlertAdmin(ImportExportModelAdmin):
-    resource_class = Alert
+    resource_class = AlertResource
     list_display = ('type', 'percent', 'date_sent')
     readonly_fields = ('date_sent',)
