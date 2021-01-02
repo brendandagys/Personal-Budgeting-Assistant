@@ -23,6 +23,7 @@ CURRENCIES = [
 
 
 class PurchaseCategory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='purchase_categories')
     category = models.CharField(max_length=30, verbose_name='Category')
     threshold = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Threshold')
     threshold_rolling_days = models.PositiveIntegerField(default=30, verbose_name='Threshold Rolling Days')
@@ -168,7 +169,7 @@ class Recurring(models.Model):
         ('Specific', 'Specific'),
     ]
 
-    user = models.ForeignKey(User, default=User.objects.get(id=1), on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='recurrings')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='recurrings')
     name = models.CharField(max_length=40, verbose_name='Name')
     description = models.TextField(blank=True, verbose_name='Details')
     type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')

@@ -39,6 +39,26 @@ month_name = calendar.month_name[date.month]
 day = date.day
 weekday = date.weekday()
 
+from django.contrib.auth.models import User
+for x in Purchase.objects.all():
+    x.user = User.objects.get(id=1)
+    x.save()
+
+for x in Account.objects.all():
+    x.user = User.objects.get(id=1)
+    x.save()
+
+for x in PurchaseCategory.objects.all():
+    x.user = User.objects.get(id=1)
+    x.save()
+
+for x in Filter.objects.all():
+    x.user = User.objects.get(id=1)
+    x.save()
+
+for x in Recurring.objects.all():
+    x.user = User.objects.get(id=1)
+    x.save()
 
 def get_purchase_categories_tuples_list():
     # To generate the filter buttons on Purchase Category and provide context for the green_filters class
