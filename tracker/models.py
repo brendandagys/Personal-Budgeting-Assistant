@@ -35,7 +35,7 @@ class PurchaseCategory(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return ', '.join([self.category, str(self.threshold), str(self.threshold_rolling_days) + ' days'])
+        return ', '.join([self.user.username, self.category, str(self.threshold), str(self.threshold_rolling_days) + ' days'])
 
 
 class Purchase(models.Model):
@@ -58,8 +58,8 @@ class Purchase(models.Model):
 
     def __str__(self):
         if self.category_2:
-            return ', '.join([str(self.date), self.time, str(self.category.category), str(self.category_2.category), self.item, str(self.amount)])
-        return ', '.join([str(self.date), self.time, str(self.category.category), self.item, str(self.amount)])
+            return ', '.join([self.user.username, str(self.date), self.time, str(self.category.category), str(self.category_2.category), self.item, str(self.amount)])
+        return ', '.join([self.user.username, str(self.date), self.time, str(self.category.category), self.item, str(self.amount)])
 
 
 class Filter(models.Model):
@@ -106,7 +106,7 @@ class Filter(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return ', '.join([str(self.category_filter_1), str(self.start_date_filter), str(self.end_date_filter)])
+        return ', '.join([self.user.username, str(self.category_filter_1), str(self.start_date_filter), str(self.end_date_filter)])
 
 
 class Account(models.Model):
@@ -204,7 +204,7 @@ class Recurring(models.Model):
         ordering = ['-amount']
 
     def __str__(self):
-        return ', '.join([self.name, self.type, self.account.account, str(self.active), str(self.amount)])
+        return ', '.join([self.user.username, self.name, self.type, self.account.account, str(self.active), str(self.amount)])
 
 
 class Alert(models.Model):
