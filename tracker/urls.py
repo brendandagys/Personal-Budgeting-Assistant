@@ -15,5 +15,4 @@ urlpatterns = [
     path('activity/reset_credit_card/', views.reset_credit_card),
     path('settings/', views.settings, name='settings'),
     path('charts/', views.get_purchases_chart_data),
-    # path('mode/', views.mode_manager),
 ]
