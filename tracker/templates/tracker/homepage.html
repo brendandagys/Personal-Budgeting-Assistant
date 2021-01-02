@@ -39,7 +39,7 @@
 
                 <br><br>
 
-                <a id="custom_anchor_link_4" style="margin:auto;" class="text-primary small">Quick entry...</a>
+                <a id="custom_anchor_link_3" style="margin:auto;" class="text-primary small">Quick entry...</a>
 
                 <div id="form_div" class="col-sm-12" style="height:500px;">
 
@@ -133,10 +133,7 @@
     </body>
 
     <script>
-
-        // $('label[for="id_amount"]').attr('style', 'position:relative; bottom:12px;'); // Was appearing too low...
-        // $('label[for="id_description"]').attr('style', 'position:relative; bottom:9px;'); // Was appearing too low...
-        $('#id_disable_credit_card').hide();
+        $('#id_account_to_use').hide();
 
         $('#id_receipt').attr('accept', 'image/*');
 
@@ -193,10 +190,29 @@
             });
 
             // Hide 2 fields and add an anchor link button
-            $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"],#id_currency,label[for="id_currency"]').hide();
-            $('#id_amount').after('<tr id="custom_row"><td style="padding-top:5px;"><a id="custom_anchor_link" class="text-info" style="font-size:1rem;">Add 2<sup>nd</sup> category</a></td></tr>')
-            $('#id_description').after('<tr id="custom_row_2"><td style="padding-top:4px;"><a id="custom_anchor_link_2" class="text-info" style="margin-top:20px; font-size:1rem;">Change currency</a></td></tr>')
-            $('#id_description').after('<tr id="custom_row_3"><td style="padding-top:4px;"><a id="custom_anchor_link_3" class="text-info" style="margin-top:20px; font-size:1rem;">Incrementing default credit card...</a></td></tr>')
+            $('#id_category_2,#id_amount_2').hide();
+            $('#id_amount').after('<tr><td style="padding-top:5px;"><a id="custom_anchor_link" class="text-info" style="font-size:1rem;">Add 2<sup>nd</sup> category</a></td></tr>');
+            $('#id_description').after('<tr><td style="padding-top:4px;"><a id="custom_anchor_link_2" class="text-info" style="margin-top:20px; font-size:1rem;">Not charging any account...</a></td></tr>');
+
+            // Set the inital account to use for the purchase
+            if ('{{account_to_use}}' !== 'None') {
+                $('#custom_anchor_link_2').text('Charging {{account_to_use}}...');
+                $('#id_account_to_use').val('{{account_to_use}}');
+                $('#id_currency').val('{{account_to_use_currency}}');
+                $('#id_currency').prop('disabled', true);
+            }
+            else if ('{{second_account_to_use}}' !== 'None') {
+                $('#custom_anchor_link_2').text('Charging {{second_account_to_use}}...');
+                $('#id_account_to_use').val('{{second_account_to_use}}');
+                $('#id_currency').val('{{second_account_to_use_currency}}');
+                $('#id_currency').prop('disabled', true);
+            }
+            else if ('{{third_account_to_use}}' !== 'None') {
+                $('#custom_anchor_link_2').text('Charging {{third_account_to_use}}...');
+                $('#id_account_to_use').val('{{third_account_to_use}}');
+                $('#id_currency').val('{{third_account_to_use_currency}}');
+                $('#id_currency').prop('disabled', true);
+            }
 
 
             // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
@@ -290,25 +306,89 @@
             $('#custom_anchor_link').on('click', function(e) {
                 $('#custom_anchor_link').hide();
                 $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').show();
-                increase_form_height(48);
+                increase_form_height(49);
             });
-            // Assume default secondary currency is EUR
+
+            // purchase_form.is_valid() will fail for disabled fields
+            $('#purchase_form').submit(function() {
+                $('#id_currency').prop('disabled', false);
+            });
+
+
+            // Determine which account + currency to use, if any
             $('#custom_anchor_link_2').on('click', function(e) {
-                $('#custom_anchor_link_2').hide();
-                $('#id_currency').val('EUR'); // REMOVE WHEN FUNCTIONALITY IS ADDED TO CHANGE DEFAULT CURRENCY
-                $('#id_currency,label[for="id_currency"]').show();
-                increase_form_height(14);
-            });
-            // Disable incrementing of the credit card balance for this purchase
-            $('#custom_anchor_link_3').on('click', function(e) {
-                if ($('#custom_anchor_link_3').text() === 'Incrementing default credit card...') {
-                    $('#custom_anchor_link_3').text('Incrementing default debit account...');
-                    $('#id_disable_credit_card').prop('checked', true);
+                let account = '';
+                let currency = '';
+                let disabled = false;
+
+                if ($(this).text().includes('{{account_to_use}}')) {
+                    if ('{{second_account_to_use}}' !== 'None') {
+                        account = '{{second_account_to_use}}';
+                        currency = '{{second_account_to_use_currency}}';
+                        disabled = true;
+                    }
+                    else if ('{{third_account_to_use}}' !== 'None') {
+                        account = '{{third_account_to_use}}'
+                        currency = '{{third_account_to_use_currency}}';
+                        disabled = true;
+                    }
+                    else {
+                        account = '';
+                        currency = 'CAD';
+                        disabled = false;
+                    }
                 }
+
+                else if ($(this).text().includes('{{second_account_to_use}}')) {
+                    if ('{{third_account_to_use}}' !== 'None') {
+                        account = '{{third_account_to_use}}';
+                        currency = '{{third_account_to_use_currency}}';
+                        disabled = true;
+                    }
+                    else {
+                        account = '';
+                        currency = 'CAD';
+                        disabled = false;
+                    }
+                }
+
+                else if ($(this).text().includes('{{third_account_to_use}}')) {
+                    account = '';
+                    currency = 'CAD';
+                    disabled = false;
+                }
+
+                else if ($(this).text() === 'Not charging any account...') {
+                    if ('{{account_to_use}}' !== 'None') {
+                        account = '{{account_to_use}}';
+                        currency = '{{account_to_use_currency}}';
+                        disabled = true;
+                    }
+                    else if ('{{second_account_to_use}}' !== 'None') {
+                        account = '{{second_account_to_use}}';
+                        currency = '{{second_account_to_use_currency}}';
+                        disabled = true;
+                    }
+                    else if ('{{third_account_to_use}}' !== 'None') {
+                        account = '{{third_account_to_use}}'
+                        currency = '{{third_account_to_use_currency}}';
+                        disabled = true;
+                    }
+                    else {
+                        account = '';
+                        currency = 'CAD';
+                        disabled = false;
+                    }
+                }
+
+                if (account !== '')
+                    $(this).text('Charging ' + account + '...');
                 else {
-                    $('#custom_anchor_link_3').text('Incrementing default credit card...');
-                    $('#id_disable_credit_card').prop('checked', false);
+                    $(this).text('Not charging any account...');
                 }
+                $('#id_account_to_use').val(account);
+                $('#id_currency').val(currency);
+                $('#id_currency').prop('disabled', disabled);
             });
 
 

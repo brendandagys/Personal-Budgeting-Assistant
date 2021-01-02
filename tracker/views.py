@@ -370,16 +370,15 @@ def delete_purchase(request):
 
 @login_required
 def homepage(request):
-
-    # bill_information = {
-    # 'Apple Music': [7, 'Apple Music', 5.64, 'Monthly fee for Apple Music subscription.'],
-    # 'Cell phone plan': [13, 'Cell phone plan', 41.81, 'Monthly fee for cell phone plan with Public Mobile.'],
-    # 'Car insurance': [15, 'Car insurance', 137.91, 'Monthly fee for car insurance with TD Meloche.'],
-    # 'Rent': [1, 'Rent', 750.00, 'Monthly rent for apartment.'],
-    # }
-
     if request.method == 'GET':
         context = {}
+
+        context['account_to_use'] = request.user.profile.account_to_use # None, if not set
+        context['account_to_use_currency'] = Account.objects.get(account=context['account_to_use']).currency if context['account_to_use'] else None
+        context['second_account_to_use'] = request.user.profile.second_account_to_use
+        context['second_account_to_use_currency'] = Account.objects.get(account=context['second_account_to_use']).currency if context['second_account_to_use'] else None
+        context['third_account_to_use'] = request.user.profile.third_account_to_use
+        context['third_account_to_use_currency'] = Account.objects.get(account=context['third_account_to_use']).currency if context['third_account_to_use'] else None
 
         if len(Filter.objects.all()) < 2:
             Filter.objects.create()
@@ -453,7 +452,7 @@ def homepage(request):
         # print(purchase_form.errors)
         # print(request.FILES)
         purchase_instance = Purchase()
-
+        
         if purchase_form.is_valid():
             purchase_instance.date = purchase_form.cleaned_data['date']
             purchase_instance.time = purchase_form.cleaned_data['time'] # Cleaning done in forms.py
@@ -470,20 +469,24 @@ def homepage(request):
             purchase_instance.save()
 
 
-            # Deal with the 2nd amount, which may be None
-            amount_2 = 0
-            if purchase_instance.amount_2 is not None:
-                amount_2 = purchase_instance.amount_2
+            # If an account to charge was available, and chosen in front-end, create the appropriate AccountUpdate object...
+            account_object_to_charge = Account.objects.get(account=purchase_form.cleaned_data['account_to_use']) if purchase_form.cleaned_data['account_to_use'] != '' else None
 
-            # Increment the credit card balance only if indicated...
-            if purchase_form.cleaned_data['disable_credit_card']: # Comes through as True or False
-                # Get the latest debit account balance and create new AccountUpdate object with the balance decremented by the current purchase value
-                debit_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value
-                AccountUpdate.objects.create(account=Account.objects.get(id=1), value=debit_balance - purchase_instance.amount - amount_2, exchange_rate=purchase_instance.exchange_rate)
-            else:
-                # Get the latest credit card balance and create new AccountUpdate object with the balance incremented by the current purchase value
-                credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value
-                AccountUpdate.objects.create(account=Account.objects.get(id=3), value=credit_card_balance + purchase_instance.amount + amount_2, exchange_rate=purchase_instance.exchange_rate)
+            if account_object_to_charge:
+                account_balance = AccountUpdate.objects.filter(account=account_object_to_charge).order_by('-timestamp').first().value
+
+                # Deal with the 2nd amount, which may be None
+                amount_2 = 0
+                if purchase_instance.amount_2 is not None:
+                    amount_2 = purchase_instance.amount_2
+
+                amount_to_charge = purchase_instance.amount + amount_2
+
+                if account_object_to_charge.credit: # True if a credit account
+                    amount_to_charge*=-1
+
+                AccountUpdate.objects.create(account=account_object_to_charge, value=account_balance - amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
+
 
             return redirect('homepage')
 #

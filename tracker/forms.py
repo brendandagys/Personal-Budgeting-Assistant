@@ -1,4 +1,4 @@
-from django.forms import ModelForm, DateField, DecimalField, NumberInput, BooleanField, IntegerField # All added for ModelForms
+from django.forms import ModelForm, DateField, DecimalField, NumberInput, CharField, IntegerField # All added for ModelForms
 
 import datetime
 from django.utils import timezone
@@ -13,7 +13,7 @@ class PurchaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(PurchaseForm, self).__init__(*args, **kwargs)
 
-        self.fields['disable_credit_card'] = BooleanField(required=False) # To indicate to not increment the credit card balance
+        self.fields['account_to_use'] = CharField(required=False) # To indicate to not increment the credit card balance
 
         for field in iter(self.fields):
             self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
