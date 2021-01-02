@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.views import generic
 from .forms import PurchaseForm, AccountForm, RecurringForm
 from django.forms import modelformset_factory, NumberInput, TextInput, CheckboxInput, Select # Could have imported from .forms, if imported there
-from .models import Purchase, Filter, Recurring, Alert, PurchaseCategory, Account, AccountUpdate
+from .models import Purchase, Filter, Recurring, Alert, PurchaseCategory, Account, AccountUpdate, Profile
 
 from django.db.models import Sum
 
@@ -858,7 +858,7 @@ def filter_manager(request):
 #
 #         if mode_instance is None:
 #             mode_instance = Mode.objects.create(mode='All')
-# 
+#
 #         return JsonResponse( {'mode': mode_instance.mode} )
 #
 #     elif request.method == 'POST':

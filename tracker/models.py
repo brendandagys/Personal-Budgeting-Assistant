@@ -211,10 +211,11 @@ class Alert(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    account_to_use = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account to Use', related_name='profiles_1')
-    credit_account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Credit Account', related_name='profiles_2')
-    debit_account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Debit Account', related_name='profiles_3')
-    secondary_debit_account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Secondary Debit Account', related_name='profiles_4')
+    account_to_use = models.ForeignKey(Account, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Account to Use', related_name='profiles_1')
+    second_account_to_use = models.ForeignKey(Account, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Second Account to Use', related_name='profiles_2')
+    third_account_to_use = models.ForeignKey(Account, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Third Account to Use', related_name='profiles_3')
+    credit_account = models.ForeignKey(Account, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Credit Account', related_name='profiles_4')
+    debit_account = models.ForeignKey(Account, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Debit Account', related_name='profiles_5')
     primary_currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Primary Currency')
     secondary_currency = models.CharField(choices=CURRENCIES, default='EUR', max_length=10, verbose_name='Secondary Currency')
 
