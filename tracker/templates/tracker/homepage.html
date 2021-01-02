@@ -402,32 +402,14 @@
             })
 
 
-            // var mode;
-            //
-            // $.ajax({
-            //     type: 'GET',
-            //     url: 'mode/',
-            //     data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
-            //     success: function(response) {
-            //       mode = response['mode'];
-            //       if (mode === 'All') {
-            //           $('button[id="all_mode"]').addClass('btn-success');
-            //       }
-            //       else if (mode === 'Threshold') {
-            //           $('button[id="threshold_mode"]').addClass('btn-success');
-            //       }
-            //       console.log('Retrieved mode: '.concat(mode));
-            //     }
-            // });
-
-
             function charts() {
 
                 $.ajax({
                     type: 'GET',
                     url: 'charts/',
                     success: function(response) {
-                            console.log(response);
+                        console.log(response);
+
                         var ctx = document.getElementById('spending_chart').getContext('2d');
                         var myChart = new Chart(ctx, {
                             type: 'line',
@@ -464,7 +446,10 @@
                                 scales: {
                                     yAxes: [{
                                         ticks: {
-                                            beginAtZero: false
+                                            beginAtZero: false,
+                                            callback: function(value) {
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                            }
                                         }
                                     }],
                                     xAxes: [{
@@ -513,7 +498,10 @@
                                 scales: {
                                     yAxes: [{
                                         ticks: {
-                                            beginAtZero: false
+                                            beginAtZero: false,
+                                            callback: function(value) {
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                            }
                                         }
                                     }],
                                     xAxes: [{
@@ -562,7 +550,10 @@
                                 scales: {
                                     yAxes: [{
                                         ticks: {
-                                            beginAtZero: false
+                                            beginAtZero: false,
+                                            callback: function(value) {
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                            }
                                         }
                                     }],
                                     xAxes: [{
