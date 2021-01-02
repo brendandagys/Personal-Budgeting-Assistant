@@ -132,7 +132,10 @@ def get_accounts_sum(request):
 
 @login_required
 def get_json_queryset(request):
-    filter_instance = Filter.objects.first()
+
+    user_object = request.user
+
+    filter_instance = Filter.objects.filter(user=user_object).first()
 
     start_date_filter = filter_instance.start_date_filter
     end_date_filter = filter_instance.end_date_filter
