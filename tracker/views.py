@@ -452,7 +452,7 @@ def homepage(request):
         # print(purchase_form.errors)
         # print(request.FILES)
         purchase_instance = Purchase()
-        
+
         if purchase_form.is_valid():
             purchase_instance.date = purchase_form.cleaned_data['date']
             purchase_instance.time = purchase_form.cleaned_data['time'] # Cleaning done in forms.py
