@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.views import generic
 from .forms import PurchaseForm, AccountForm, RecurringForm
 from django.forms import modelformset_factory, NumberInput, TextInput, CheckboxInput, Select # Could have imported from .forms, if imported there
-from .models import Purchase, Filter, Recurring, Alert, Mode, PurchaseCategory, Account, AccountUpdate
+from .models import Purchase, Filter, Recurring, Alert, PurchaseCategory, Account, AccountUpdate
 
 from django.db.models import Sum
 
@@ -851,19 +851,19 @@ def filter_manager(request):
                     return JsonResponse(current_filter_list_unique, safe=False) # safe=False necessary for non-dict objects to be serialized
 
 
-@login_required
-def mode_manager(request):
-    if request.method == 'GET':
-        mode_instance = Mode.objects.last()
-
-        if mode_instance is None:
-            mode_instance = Mode.objects.create(mode='All')
-
-        return JsonResponse( {'mode': mode_instance.mode} )
-
-    elif request.method == 'POST':
-        mode_instance = Mode.objects.last()
-        mode_instance.mode = request.POST['mode']
-        mode_instance.save()
-
-        return HttpResponse()
+# @login_required
+# def mode_manager(request):
+#     if request.method == 'GET':
+#         mode_instance = Mode.objects.last()
+#
+#         if mode_instance is None:
+#             mode_instance = Mode.objects.create(mode='All')
+# 
+#         return JsonResponse( {'mode': mode_instance.mode} )
+#
+#     elif request.method == 'POST':
+#         mode_instance = Mode.objects.last()
+#         mode_instance.mode = request.POST['mode']
+#         mode_instance.save()
+#
+#         return HttpResponse()

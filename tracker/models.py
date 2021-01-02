@@ -1,5 +1,7 @@
 from django.db import models
-import django_filters
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 import datetime
 from django.utils import timezone
@@ -18,6 +20,7 @@ CURRENCIES = [
     ('USD', 'USD'),
     ('EUR', 'EUR'),
 ]
+
 
 class PurchaseCategory(models.Model):
     category = models.CharField(max_length=30, verbose_name='Category')
@@ -40,9 +43,9 @@ class Purchase(models.Model):
     date = models.DateField(verbose_name='Date', default=current_date)
     time = models.CharField(blank=True, default=current_time, max_length=5, verbose_name='Time (24 hr.)')
     item = models.CharField(max_length=100, verbose_name='Item(s)')
-    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='category_1') # blank=False by default...
+    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='purchases_1') # blank=False by default...
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='category_2')
+    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='purchases_2')
     amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
     description = models.TextField(blank=True, verbose_name='Details')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
@@ -58,31 +61,31 @@ class Purchase(models.Model):
 
 
 class Filter(models.Model):
-    category_filter_1 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 1', related_name='category_filter_1')
-    category_filter_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 2', related_name='category_filter_2')
-    category_filter_3 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 3', related_name='category_filter_3')
-    category_filter_4 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 4', related_name='category_filter_4')
-    category_filter_5 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 5', related_name='category_filter_5')
-    category_filter_6 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 6', related_name='category_filter_6')
-    category_filter_7 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 7', related_name='category_filter_7')
-    category_filter_8 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 8', related_name='category_filter_8')
-    category_filter_9 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 9', related_name='category_filter_9')
-    category_filter_10 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 10', related_name='category_filter_10')
-    category_filter_11 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 11', related_name='category_filter_11')
-    category_filter_12 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 12', related_name='category_filter_12')
-    category_filter_13 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 13', related_name='category_filter_13')
-    category_filter_14 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 14', related_name='category_filter_14')
-    category_filter_15 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 15', related_name='category_filter_15')
-    category_filter_16 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 16', related_name='category_filter_16')
-    category_filter_17 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 17', related_name='category_filter_17')
-    category_filter_18 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 18', related_name='category_filter_18')
-    category_filter_19 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 19', related_name='category_filter_19')
-    category_filter_20 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 20', related_name='category_filter_20')
-    category_filter_21 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 21', related_name='category_filter_21')
-    category_filter_22 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 22', related_name='category_filter_22')
-    category_filter_23 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 23', related_name='category_filter_23')
-    category_filter_24 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 24', related_name='category_filter_24')
-    category_filter_25 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 25', related_name='category_filter_25')
+    category_filter_1 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 1', related_name='filters_1')
+    category_filter_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 2', related_name='filters_2')
+    category_filter_3 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 3', related_name='filters_3')
+    category_filter_4 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 4', related_name='filters_4')
+    category_filter_5 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 5', related_name='filters_5')
+    category_filter_6 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 6', related_name='filters_6')
+    category_filter_7 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 7', related_name='filters_7')
+    category_filter_8 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 8', related_name='filters_8')
+    category_filter_9 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 9', related_name='filters_9')
+    category_filter_10 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 10', related_name='filters_10')
+    category_filter_11 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 11', related_name='filters_11')
+    category_filter_12 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 12', related_name='filters_12')
+    category_filter_13 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 13', related_name='filters_13')
+    category_filter_14 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 14', related_name='filters_14')
+    category_filter_15 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 15', related_name='filters_15')
+    category_filter_16 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 16', related_name='filters_16')
+    category_filter_17 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 17', related_name='filters_17')
+    category_filter_18 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 18', related_name='filters_18')
+    category_filter_19 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 19', related_name='filters_19')
+    category_filter_20 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 20', related_name='filters_20')
+    category_filter_21 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 21', related_name='filters_21')
+    category_filter_22 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 22', related_name='filters_22')
+    category_filter_23 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 23', related_name='filters_23')
+    category_filter_24 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 24', related_name='filters_24')
+    category_filter_25 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 25', related_name='filters_25')
     start_date_filter = models.DateField(blank=True, null=True, verbose_name = 'Start Date')
     end_date_filter = models.DateField(blank=True, null=True, verbose_name = 'End Date')
     last_updated = models.DateTimeField(auto_now=True, verbose_name='Filter Last Updated')
@@ -113,7 +116,7 @@ class Account(models.Model):
 
 
 class AccountUpdate(models.Model):
-    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
+    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='account_updates')
     value = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Value')
     exchange_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD') # Default 1 unnecessary as we always run get_exchange_rate()
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Account Timestamp')
@@ -165,7 +168,7 @@ class Recurring(models.Model):
     name = models.CharField(max_length=40, verbose_name='Name')
     description = models.TextField(blank=True, verbose_name='Details')
     type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')
-    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account')
+    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='recurrings')
     active = models.BooleanField(default=True, verbose_name='Active')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
 
@@ -206,12 +209,34 @@ class Alert(models.Model):
         return ', '.join([self.type, str(self.percent), str(self.date_sent)])
 
 
-class Mode(models.Model):
-    mode = models.CharField(max_length=10, verbose_name = 'Mode')
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    account_to_use = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account to Use', related_name='profiles_1')
+    credit_account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Credit Account', related_name='profiles_2')
+    debit_account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Debit Account', related_name='profiles_3')
+    secondary_debit_account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Secondary Debit Account', related_name='profiles_4')
+    primary_currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Primary Currency')
+    secondary_currency = models.CharField(choices=CURRENCIES, default='EUR', max_length=10, verbose_name='Secondary Currency')
 
     class Meta:
-        verbose_name_plural = 'Modes'
-        verbose_name = 'Mode'
+        verbose_name = 'Profile'
+        verbose_name_plural = 'Profiles'
+        ordering = ['user']
 
     def __str__(self):
-        return self.mode
+        return self.user.username
+
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    instance.profile.save()
+
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Profile.objects.create(user=instance)
+#
+# @receiver(post_save, sender=User)
+# def save_user_profile(sender, instance, **kwargs):
+#     instance.profile.save()

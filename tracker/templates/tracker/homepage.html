@@ -123,12 +123,12 @@
             </div>
         </div>
 
-        <hr>
+        <br>
 
-        <div class="modes col-sm-12">
+        <!-- <div class="modes col-sm-12">
           <button id="all_mode" type="button" class="modes btn btn-secondary">Send Alerts After Every Purchase</button>
           <button id="threshold_mode" type="button" class="modes btn btn-secondary">Send Alerts When Threshold Reached</button>
-        </div>
+        </div> -->
 
     </body>
 
@@ -402,23 +402,23 @@
             })
 
 
-            var mode;
-
-            $.ajax({
-                type: 'GET',
-                url: 'mode/',
-                data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
-                success: function(response) {
-                  mode = response['mode'];
-                  if (mode === 'All') {
-                      $('button[id="all_mode"]').addClass('btn-success');
-                  }
-                  else if (mode === 'Threshold') {
-                      $('button[id="threshold_mode"]').addClass('btn-success');
-                  }
-                  console.log('Retrieved mode: '.concat(mode));
-                }
-            });
+            // var mode;
+            //
+            // $.ajax({
+            //     type: 'GET',
+            //     url: 'mode/',
+            //     data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+            //     success: function(response) {
+            //       mode = response['mode'];
+            //       if (mode === 'All') {
+            //           $('button[id="all_mode"]').addClass('btn-success');
+            //       }
+            //       else if (mode === 'Threshold') {
+            //           $('button[id="threshold_mode"]').addClass('btn-success');
+            //       }
+            //       console.log('Retrieved mode: '.concat(mode));
+            //     }
+            // });
 
 
             function charts() {
@@ -580,33 +580,33 @@
             charts();
 
 
-            $('button[id="all_mode"]').on('click', function(e) {
-                $.ajax({
-                    type: 'POST',
-                    url: 'mode/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'All'},
-                    success: function(response) {
-                      $(this).addClass('btn-success');
-                      $('button[id="all_mode"]').addClass('btn-success');
-                      $('button[id="threshold_mode"]').removeClass('btn-success');
-                      console.log('Updated mode to All!');
-                    }
-                });
-            });
+            // $('button[id="all_mode"]').on('click', function(e) {
+            //     $.ajax({
+            //         type: 'POST',
+            //         url: 'mode/',
+            //         data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'All'},
+            //         success: function(response) {
+            //           $(this).addClass('btn-success');
+            //           $('button[id="all_mode"]').addClass('btn-success');
+            //           $('button[id="threshold_mode"]').removeClass('btn-success');
+            //           console.log('Updated mode to All!');
+            //         }
+            //     });
+            // });
 
-            $('button[id="threshold_mode"]').on('click', function(e) {
-                $.ajax({
-                    type: 'POST',
-                    url: 'mode/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'Threshold'},
-                    success: function(response) {
-                      $(this).addClass('btn-success');
-                      $('button[id="threshold_mode"]').addClass('btn-success');
-                      $('button[id="all_mode"]').removeClass('btn-success');
-                      console.log('Updated mode to Threshold!');
-                    }
-                });
-            });
+            // $('button[id="threshold_mode"]').on('click', function(e) {
+            //     $.ajax({
+            //         type: 'POST',
+            //         url: 'mode/',
+            //         data: { csrfmiddlewaretoken: '{{ csrf_token }}', 'mode': 'Threshold'},
+            //         success: function(response) {
+            //           $(this).addClass('btn-success');
+            //           $('button[id="threshold_mode"]').addClass('btn-success');
+            //           $('button[id="all_mode"]').removeClass('btn-success');
+            //           console.log('Updated mode to Threshold!');
+            //         }
+            //     });
+            // });
 
         });
 

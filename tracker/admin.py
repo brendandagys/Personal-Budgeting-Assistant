@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Purchase, PurchaseCategory, Filter, Account, AccountUpdate, Recurring, Alert, Mode
+from .models import Purchase, PurchaseCategory, Filter, Account, AccountUpdate, Recurring, Alert
 
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -66,8 +66,3 @@ class AlertAdmin(ImportExportModelAdmin):
     resource_class = Alert
     list_display = ('type', 'percent', 'date_sent')
     readonly_fields = ('date_sent',)
-
-@admin.register(Mode)
-class ModeAdmin(ImportExportModelAdmin):
-    resource_class = Mode
-    list_display = ('mode',)
