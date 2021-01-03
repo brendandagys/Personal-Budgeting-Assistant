@@ -153,6 +153,10 @@
 
 <script type="text/javascript">
 
+    if ('{{debit_account}}' === 'Not set' || '{{credit_account}}' === 'Not set') {
+        $('#reset_credit_card').prop('disabled', true);
+    }
+
     $(document).ready(function() {
 
         // Initial indication of the applied filters
@@ -447,7 +451,7 @@
                     success: function (response) {
                         console.log($(this).attr('id') + ' updated to: ' + $(this).val());
                         $.each(response, function(id, account_placeholder) {
-                            $('#' + id).attr('placeholder', account_placeholder);
+                            $('#' + id.replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).attr('placeholder', account_placeholder);
                         });
                         get_accounts_sum();
                         net_worth_chart();
@@ -461,23 +465,21 @@
 
 
         $(document).on('click', '#reset_credit_card', function (e) {
-            if ($('#id_3').attr('placeholder').slice(1).trim() !== '0.00') { // I believe this really equals 0.00
-                $.ajax({
-                    type: 'POST',
-                    url: 'reset_credit_card/',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-                    success: function(response) {
-                        $('#id_3').val('');
-                        $('#id_3').attr('placeholder', '$                0.00');
-                        $('#id_1').val('');
-                        $('#id_1').attr('placeholder', response);
-                        console.log('Credit card successfully reset!'); // DO NOT NEED TO CALL get_accounts_sum() or net_worth_chart(), because decrement in CC accompanied by decrement in chequing balance
-                    },
-                    error: function() {
-                        console.log('Error resetting credit card.!');
-                    },
-                });
-            }
+            $.ajax({
+                type: 'POST',
+                url: 'reset_credit_card/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function(response) {
+                    $('#id_' + response['credit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).val('');
+                    $('#id_' + response['credit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).attr('placeholder', '$                0.00');
+                    $('#id_' + response['debit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).val('');
+                    $('#id_' + response['debit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).attr('placeholder', response['debit_account_balance']);
+                    console.log('Credit card successfully reset!'); // DO NOT NEED TO CALL get_accounts_sum() or net_worth_chart(), because decrement in CC accompanied by decrement in chequing balance
+                },
+                error: function() {
+                    console.log('Error resetting credit card.!');
+                },
+            });
         });
 
 

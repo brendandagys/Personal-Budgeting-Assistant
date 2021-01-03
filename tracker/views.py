@@ -40,17 +40,14 @@ day = date.day
 weekday = date.weekday()
 
 
-def get_purchase_categories_tuples_list():
+def get_purchase_categories_tuples_list(user_object):
     # To generate the filter buttons on Purchase Category and provide context for the green_filters class
     purchase_categories_list = []
-    # Only include the ones that have actually been used thus far
-    category_values_used = list(Purchase.objects.all().values_list('category', flat=True).distinct())
-    category_2_values_used = list(Purchase.objects.all().values_list('category_2', flat=True).distinct())
+    # Only include the ones that have actually been used thus far by the user
+    category_values_used = list(Purchase.objects.filter(user=user_object).values_list('category__category', flat=True).distinct())
+    category_2_values_used = list(Purchase.objects.filter(user=user_object).values_list('category_2__category', flat=True).distinct())
     category_2_values_used = [x for x in category_2_values_used if x] # Remove None
-    purchase_categories_used = list(set(category_values_used + category_2_values_used))
-
-    [purchase_categories_list.append(PurchaseCategory.objects.get(id=x).category) for x in purchase_categories_used]
-    purchase_categories_list.sort()
+    purchase_categories_list = sorted(list(set(category_values_used + category_2_values_used)))
 
     purchase_categories_tuples_list = []
     for index in range(0, len(purchase_categories_list), 2):
@@ -75,35 +72,43 @@ def convert_currency(foreign_value, foreign_currency, desired_currency):
 @login_required
 def account_update(request):
     if request.method == 'POST':
+        user_object = request.user
+
         dict = { request.POST['id']: '${:20,.2f}'.format(Decimal(request.POST['value'])) }
 
-        if request.POST['id'][3:] == '3': # If the Account updated was my credit card, check if the balance was paid off rather than added to
-            credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
-            if Decimal(request.POST['value']) < credit_card_balance: # If the balance was paid off, the chequing account should be decremented
-                chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value
-                AccountUpdate.objects.create(account=Account.objects.get(pk=1), value=chequing_balance-(credit_card_balance - Decimal(request.POST['value'])), exchange_rate=1)
-                dict.update({'id_1': '${:20,.2f}'.format(Decimal(chequing_balance-(credit_card_balance - Decimal(request.POST['value']))))})
+        if request.POST['id'][3:] == user_object.profile.credit_account.account: # If the Account updated was my credit card, check if the balance was paid off rather than added to
+            credit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.credit_account).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+            if Decimal(request.POST['value']) < credit_account_balance: # If the balance was paid off, the chequing account should be decremented
+                debit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.debit_account).order_by('-timestamp').first().value
+                AccountUpdate.objects.create(account=user_object.profile.debit_account, value=debit_account_balance-(credit_account_balance - Decimal(request.POST['value'])), exchange_rate=get_exchange_rate(user_object.profile.debit_account.currency, 'CAD'))
+                dict.update({'id_' + user_object.profile.debit_account.account: '${:20,.2f}'.format(Decimal(debit_account_balance-(credit_account_balance - Decimal(request.POST['value']))))})
 
-        account = Account.objects.get(pk=request.POST['id'][3:])
-        AccountUpdate.objects.create(account=account, value=request.POST['value'], exchange_rate=get_exchange_rate(account.currency, 'CAD')) # id is prefixed with 'id_'
+        AccountUpdate.objects.create(account=Account.objects.get(user=user_object, account=request.POST['id'][3:]), value=request.POST['value'], exchange_rate=get_exchange_rate(Account.objects.get(user=user_object, account=request.POST['id'][3:]).currency, 'CAD')) # id is prefixed with 'id_'
 
         return JsonResponse(dict)
 
 
 @login_required
-def reset_credit_card(request):
-    chequing_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=1)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
-    credit_card_balance = AccountUpdate.objects.filter(account=Account.objects.get(id=3)).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
-    AccountUpdate.objects.create(account=Account.objects.get(id=3), value=0, exchange_rate=1)
-    AccountUpdate.objects.create(account=Account.objects.get(id=1), value=chequing_balance-credit_card_balance, exchange_rate=1)
-    return JsonResponse('${:20,.2f}'.format(chequing_balance-credit_card_balance), safe=False)
+def reset_credit_card(request): # This function won't run unless both are defined, because the button is disabled if so
+    user_object = request.user
+
+    debit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.debit_account).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+    credit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.credit_account).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+    AccountUpdate.objects.create(account=user_object.profile.credit_account, value=0, exchange_rate=get_exchange_rate(user_object.profile.credit_account.currency, 'CAD'))
+    AccountUpdate.objects.create(account=user_object.profile.debit_account, value=debit_account_balance-credit_account_balance, exchange_rate=get_exchange_rate(user_object.profile.debit_account.currency, 'CAD'))
+
+    return JsonResponse({'debit_account': request.user.profile.debit_account.account,
+                         'credit_account': request.user.profile.credit_account.account,
+                         'debit_account_balance': '${:20,.2f}'.format(debit_account_balance-credit_account_balance)}, safe=False)
 
 
 @login_required
 def get_accounts_sum(request):
+    user_object = request.user
+
     accounts_sum = 0
 
-    for account in Account.objects.all():
+    for account in Account.objects.filter(user=user_object):
         account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
         account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
 
@@ -132,10 +137,9 @@ def get_accounts_sum(request):
 
 @login_required
 def get_json_queryset(request):
-
     user_object = request.user
 
-    filter_instance = Filter.objects.get(user=user_object, type='Activity')
+    filter_instance = Filter.objects.get(user=user_object, page='Activity')
 
     start_date_filter = filter_instance.start_date_filter
     end_date_filter = filter_instance.end_date_filter
@@ -190,6 +194,7 @@ def get_json_queryset(request):
 def get_purchases_chart_data(request):
 
     if request.method == 'GET':
+        user_object = request.user
 
         filter_instance = Filter.objects.last() # First is for Purchases page
 
@@ -319,6 +324,8 @@ def get_purchases_chart_data(request):
 
 @login_required
 def get_net_worth_chart_data(request):
+    user_object = request.user
+
     labels_daily = []
     values_daily = []
 
@@ -366,6 +373,8 @@ def get_net_worth_chart_data(request):
 
 @login_required
 def delete_purchase(request):
+    user_object = request.user
+
     Purchase.objects.get(id=request.POST['id']).delete()
     print('\nDeleted Purchase: ' + str(request.POST['id']) + '\n')
     return HttpResponse()
@@ -373,6 +382,8 @@ def delete_purchase(request):
 
 @login_required
 def homepage(request):
+    user_object = request.user
+
     if request.method == 'GET':
         context = {}
 
@@ -644,7 +655,7 @@ def homepage(request):
     purchase_form = PurchaseForm()
 
     context['purchase_form'] = purchase_form
-    context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list()
+    context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list(user_object)
 
     return render(request, 'tracker/homepage.html', context=context)
 
@@ -656,17 +667,29 @@ class PurchaseListView(generic.ListView):
 
 
     def get_queryset(self):
+        user_object = self.request.user
+
         # If none created yet, create an instance
         if len(Filter.objects.all()) < 2:
             Filter.objects.create()
 
 
     def get_context_data(self, *args, **kwargs):
+        user_object = self.request.user
+
         # Call the base implementation first to get a context
         context = super().get_context_data(*args, **kwargs) # Simply using context = {} works, but being safe...
 
         # To generate fields for me to update account balances
-        context['account_form'] = AccountForm()
+        context['account_form'] = AccountForm(user_object)
+
+        context['debit_account'] = 'Not set'
+        if user_object.profile.debit_account:
+            context['debit_account'] = user_object.profile.debit_account.account
+
+        context['credit_account'] = 'Not set'
+        if user_object.profile.credit_account:
+            context['credit_account'] = user_object.profile.credit_account.account
 
         # To fill the datepickers with the current date filters and label the active filters
         filter_instance = Filter.objects.first()
@@ -680,7 +703,7 @@ class PurchaseListView(generic.ListView):
                                                                      filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                                      if x is not None]
 
-        context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list()
+        context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list(user_object)
 
         return context
 
@@ -688,6 +711,8 @@ class PurchaseListView(generic.ListView):
 @login_required
 def settings(request):
     if request.method == 'GET':
+        user_object = request.user
+
         context = {}
 
         ThresholdFormSet = modelformset_factory(PurchaseCategory,
@@ -714,6 +739,7 @@ def settings(request):
 
 @login_required
 def filter_manager(request):
+    user_object = request.user
 
     if request.method == 'GET' and request.GET['page'] == 'Purchases' or request.method == 'POST' and request.POST['page'] == 'Purchases': # GET must be first!
         filter_instance = Filter.objects.first()
