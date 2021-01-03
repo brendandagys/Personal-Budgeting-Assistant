@@ -182,10 +182,13 @@ def get_json_queryset(request):
     # Get the total cost of all of the purchases
     purchases_sum = 0
     for purchase in list(queryset_data.values_list('category', 'category_2', 'amount', 'amount_2')): # Returns a Queryset of tuples
-        if purchase[0] in purchase_categories_list:
+        if purchase[0] in purchase_categories_list: # If first category matches, always add 'amount'
             purchases_sum+=purchase[2]
-        if purchase[1] in purchase_categories_list and purchase[3] is not None: # Will be None when no value is given
-            purchases_sum+=purchase[3]
+        if purchase[1] in purchase_categories_list: # If second category matches...
+            if purchase[3] is not None: # If there is a second value, always add it
+                purchases_sum+=purchase[3]
+            elif purchase[0] not in purchase_categories_list: # If no 'amount_2', first category DIDN'T match (we don't want to double-count), add 'amount' (in this case first three of tuple are populated)
+                purchases_sum+=purchase[2]
 
     return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum)}, safe=False)
 
@@ -477,7 +480,7 @@ def homepage(request):
             purchase_instance.description = purchase_form.cleaned_data['description'].strip() if len(purchase_form.cleaned_data['description'].strip()) == 0 or purchase_form.cleaned_data['description'].strip()[-1] == '.' else purchase_form.cleaned_data['description'].strip() + '.' # Add a period if not present
             purchase_instance.currency = purchase_form.cleaned_data['currency']
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
-            purchase_instance.receipt = None if len(request.FILES) == 0 else request.FILES['receipt']
+            purchase_instance.receipt = request.FILES['receipt'] if len(request.FILES) > 0 and request.FILES['receipt'].size < 50000001 else None # Make sure file was uploaded, and check size (also done in front-end)
 
             purchase_instance.save()
 

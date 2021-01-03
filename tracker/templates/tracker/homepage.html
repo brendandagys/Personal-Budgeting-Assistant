@@ -152,6 +152,15 @@
                 }
             });
 
+
+            $('#id_receipt').on('change', function() {
+                if (this.files.length > 0 && this.files[0].size/1000/1000 > 5) {
+                    alert('Image size limit is 5 MB! Your image is ' + (this.files[0].size/1000/1000).toFixed(2) + 'MB.');
+                    $(this).val('');
+                }
+            });
+
+
             // Set the date filters
             $('#datepicker').val('{{start_date}}');
             $('#datepicker_2').val('{{end_date}}');
