@@ -161,7 +161,7 @@ def get_json_queryset(request):
 
     purchases_list = list(queryset_data.values()) # List of dictionaries
 
-    # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show because it's a foreign key
+    # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show in the purchase item, because it's a foreign key
     purchase_category_dict = {}
     for object in PurchaseCategory.objects.filter(user=user_object).values('id', 'category'): # Queryset of dicts
         purchase_category_dict[object['id']] = object['category']
@@ -469,7 +469,7 @@ def homepage(request):
             purchase_instance.date = purchase_form.cleaned_data['date']
             purchase_instance.time = purchase_form.cleaned_data['time'] # Cleaning done in forms.py
             purchase_instance.item = purchase_form.cleaned_data['item'].strip()
-            purchase_instance.category = purchase_form.cleaned_data['category']
+            purchase_instance.category = purchase_form.cleaned_data['category'] # Pretty sure that passing an integer (which is coming from the front-end) representing the id means you don't have to retrieve an actual object
             purchase_instance.amount = purchase_form.cleaned_data['amount']
             purchase_instance.category_2 = purchase_form.cleaned_data['category_2']
             purchase_instance.amount_2 = purchase_form.cleaned_data['amount_2']

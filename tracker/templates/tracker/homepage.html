@@ -41,7 +41,7 @@
 
                 <a id="custom_anchor_link_3" style="margin:auto;" class="text-primary small">Quick entry...</a>
 
-                <div id="form_div" class="col-sm-12" style="height:500px;">
+                <div id="form_div" class="col-sm-12" style="height:460px;">
 
                     <form id="purchase_form" action="" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -199,19 +199,19 @@
                 $('#custom_anchor_link_2').text('Charging {{account_to_use}}...');
                 $('#id_account_to_use').val('{{account_to_use}}');
                 $('#id_currency').val('{{account_to_use_currency}}');
-                $('#id_currency').prop('disabled', true);
+                $('#id_currency').hide();
             }
             else if ('{{second_account_to_use}}' !== 'None') {
                 $('#custom_anchor_link_2').text('Charging {{second_account_to_use}}...');
                 $('#id_account_to_use').val('{{second_account_to_use}}');
                 $('#id_currency').val('{{second_account_to_use_currency}}');
-                $('#id_currency').prop('disabled', true);
+                $('#id_currency').hide();
             }
             else if ('{{third_account_to_use}}' !== 'None') {
                 $('#custom_anchor_link_2').text('Charging {{third_account_to_use}}...');
                 $('#id_account_to_use').val('{{third_account_to_use}}');
                 $('#id_currency').val('{{third_account_to_use_currency}}');
-                $('#id_currency').prop('disabled', true);
+                $('#id_currency').hide();
             }
 
 
@@ -274,19 +274,19 @@
                 $('#id_amount').val('');
                 $('#id_category_2').val('');
                 $('#id_amount_2').val('');
-                if ($('#id_category :selected').text() === 'Gas') {
+                if ($('#id_category :selected').text() === 'Gas') { // If not :selected, all options will come through
                     $('#id_description').text('');
                 }
                 else {
                     $('#id_description').val('');
                 }
-
                 if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
                     $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
                     $('#id_amount').val('2.10');
                     $('#id_description').focus().val('L, regular. '); // textarea elemented must be inserted into using .text()
                 }
                 else if ($('#id_category :selected').text() === 'Gas') {
+                    console.log('YES');
                     $('#id_item').val('Gas at Esso');
                     $('#id_description').text(' L, $/L.');
                     $('#id_description').focus();
@@ -305,13 +305,8 @@
             // Hide the links and re-show the hidden fields for category_2 and amount_2
             $('#custom_anchor_link').on('click', function(e) {
                 $('#custom_anchor_link').hide();
-                $('#id_category_2,#id_amount_2,label[for="id_category_2"],label[for="id_amount_2"]').show();
-                increase_form_height(49);
-            });
-
-            // purchase_form.is_valid() will fail for disabled fields
-            $('#purchase_form').submit(function() {
-                $('#id_currency').prop('disabled', false);
+                $('#id_category_2,#id_amount_2').show();
+                increase_form_height(50);
             });
 
 
@@ -319,23 +314,19 @@
             $('#custom_anchor_link_2').on('click', function(e) {
                 let account = '';
                 let currency = '';
-                let disabled = false;
 
                 if ($(this).text().includes('{{account_to_use}}')) {
                     if ('{{second_account_to_use}}' !== 'None') {
                         account = '{{second_account_to_use}}';
                         currency = '{{second_account_to_use_currency}}';
-                        disabled = true;
                     }
                     else if ('{{third_account_to_use}}' !== 'None') {
                         account = '{{third_account_to_use}}'
                         currency = '{{third_account_to_use_currency}}';
-                        disabled = true;
                     }
                     else {
                         account = '';
                         currency = 'CAD';
-                        disabled = false;
                     }
                 }
 
@@ -343,52 +334,51 @@
                     if ('{{third_account_to_use}}' !== 'None') {
                         account = '{{third_account_to_use}}';
                         currency = '{{third_account_to_use_currency}}';
-                        disabled = true;
                     }
                     else {
                         account = '';
                         currency = 'CAD';
-                        disabled = false;
                     }
                 }
 
                 else if ($(this).text().includes('{{third_account_to_use}}')) {
                     account = '';
                     currency = 'CAD';
-                    disabled = false;
                 }
 
                 else if ($(this).text() === 'Not charging any account...') {
                     if ('{{account_to_use}}' !== 'None') {
                         account = '{{account_to_use}}';
                         currency = '{{account_to_use_currency}}';
-                        disabled = true;
+                        increase_form_height(-37);
                     }
                     else if ('{{second_account_to_use}}' !== 'None') {
                         account = '{{second_account_to_use}}';
                         currency = '{{second_account_to_use_currency}}';
-                        disabled = true;
+                        increase_form_height(-37);
                     }
                     else if ('{{third_account_to_use}}' !== 'None') {
                         account = '{{third_account_to_use}}'
                         currency = '{{third_account_to_use_currency}}';
-                        disabled = true;
+                        increase_form_height(-37);
                     }
                     else {
                         account = '';
                         currency = 'CAD';
-                        disabled = false;
                     }
                 }
 
-                if (account !== '')
+                if (account !== '') {
                     $(this).text('Charging ' + account + '...');
+                    $('#id_currency').hide();
+                }
                 else {
                     $(this).text('Not charging any account...');
+                    $('#id_currency').show();
+                    increase_form_height(37);
                 }
-                $('#id_account_to_use').val(account);
+                $('#id_account_to_use').val(account); // Hidden field that POST uses
                 $('#id_currency').val(currency);
-                $('#id_currency').prop('disabled', disabled);
             });
 
 
