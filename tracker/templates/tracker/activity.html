@@ -413,6 +413,7 @@
                                 yAxes: [{
                                     ticks: {
                                         beginAtZero: false,
+                                        min: 0,
                                         callback: function(value) {
                                             return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
                                         }

@@ -196,19 +196,19 @@
 
             // Set the inital account to use for the purchase
             if ('{{account_to_use}}' !== 'None') {
-                $('#custom_anchor_link_2').text('Charging {{account_to_use}}...');
+                $('#custom_anchor_link_2').text('Charging ' + '{{account_to_use}}'.substring(0,35) + '...');
                 $('#id_account_to_use').val('{{account_to_use}}');
                 $('#id_currency').val('{{account_to_use_currency}}');
                 $('#id_currency').hide();
             }
             else if ('{{second_account_to_use}}' !== 'None') {
-                $('#custom_anchor_link_2').text('Charging {{second_account_to_use}}...');
+                $('#custom_anchor_link_2').text('Charging {{second_account_to_use}}'.substring(0,35) + '...');
                 $('#id_account_to_use').val('{{second_account_to_use}}');
                 $('#id_currency').val('{{second_account_to_use_currency}}');
                 $('#id_currency').hide();
             }
             else if ('{{third_account_to_use}}' !== 'None') {
-                $('#custom_anchor_link_2').text('Charging {{third_account_to_use}}...');
+                $('#custom_anchor_link_2').text('Charging {{third_account_to_use}}'.substring(0,35) + '...');
                 $('#id_account_to_use').val('{{third_account_to_use}}');
                 $('#id_currency').val('{{third_account_to_use_currency}}');
                 $('#id_currency').hide();
@@ -315,7 +315,7 @@
                 let account = '';
                 let currency = '';
 
-                if ($(this).text().includes('{{account_to_use}}')) {
+                if ($(this).text().includes('{{account_to_use}}'.substring(0,35))) {
                     if ('{{second_account_to_use}}' !== 'None') {
                         account = '{{second_account_to_use}}';
                         currency = '{{second_account_to_use_currency}}';
@@ -330,7 +330,7 @@
                     }
                 }
 
-                else if ($(this).text().includes('{{second_account_to_use}}')) {
+                else if ($(this).text().includes('{{second_account_to_use}}'.substring(0,35))) {
                     if ('{{third_account_to_use}}' !== 'None') {
                         account = '{{third_account_to_use}}';
                         currency = '{{third_account_to_use_currency}}';
@@ -341,19 +341,19 @@
                     }
                 }
 
-                else if ($(this).text().includes('{{third_account_to_use}}')) {
+                else if ($(this).text().includes('{{third_account_to_use}}'.substring(0,35))) {
                     account = '';
                     currency = 'CAD';
                 }
 
                 else if ($(this).text() === 'Not charging any account...') {
                     if ('{{account_to_use}}' !== 'None') {
-                        account = '{{account_to_use}}';
+                        account = '{{account_to_use}}'
                         currency = '{{account_to_use_currency}}';
                         increase_form_height(-37);
                     }
                     else if ('{{second_account_to_use}}' !== 'None') {
-                        account = '{{second_account_to_use}}';
+                        account = '{{second_account_to_use}}'
                         currency = '{{second_account_to_use_currency}}';
                         increase_form_height(-37);
                     }
@@ -369,7 +369,7 @@
                 }
 
                 if (account !== '') {
-                    $(this).text('Charging ' + account + '...');
+                    $(this).text('Charging ' + account.substring(0,35) + '...');
                     $('#id_currency').hide();
                 }
                 else {
@@ -517,6 +517,7 @@
                                     yAxes: [{
                                         ticks: {
                                             beginAtZero: false,
+                                            min: 0,
                                             callback: function(value) {
                                                 return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
                                             }
@@ -569,6 +570,7 @@
                                     yAxes: [{
                                         ticks: {
                                             beginAtZero: false,
+                                            min: 0,
                                             callback: function(value) {
                                                 return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
                                             }
@@ -621,6 +623,7 @@
                                     yAxes: [{
                                         ticks: {
                                             beginAtZero: false,
+                                            min: 0,
                                             callback: function(value) {
                                                 return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
                                             }

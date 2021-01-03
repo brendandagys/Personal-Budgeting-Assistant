@@ -59,7 +59,7 @@ class Purchase(models.Model):
     def __str__(self):
         if self.category_2:
             return ', '.join([self.user.username, str(self.date), self.time, str(self.category.category), str(self.category_2.category), self.item, str(self.amount)])
-        return ', '.join([str(self.date), self.time, str(self.category.category), self.item, str(self.amount)])
+        return ', '.join([self.user.username, str(self.date), self.time, str(self.category.category), self.item, str(self.amount)])
 
 @receiver(models.signals.post_delete, sender=Purchase)
 def remove_file_from_s3(sender, instance, using, **kwargs):
