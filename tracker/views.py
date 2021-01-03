@@ -139,13 +139,13 @@ def get_accounts_sum(request):
 def get_json_queryset(request):
     user_object = request.user
 
-    filter_instance = Filter.objects.get(user=user_object, page='Activity')
+    filter_instance = Filter.objects.get(user=user_object, page='Activity') # get_or_create() run in PurchaseListView get_context_data()
 
     start_date_filter = filter_instance.start_date_filter
     end_date_filter = filter_instance.end_date_filter
 
     if start_date_filter is None:
-        start_date_filter = '2019-01-01'
+        start_date_filter = '2015-01-01'
 
     if end_date_filter is None:
         end_date_filter = '2099-12-31'
@@ -157,13 +157,13 @@ def get_json_queryset(request):
                                                filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                if x is not None]
 
-    queryset_data = Purchase.objects.filter(Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+    queryset_data = Purchase.objects.filter(Q(user=user_object) & Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
 
     purchases_list = list(queryset_data.values()) # List of dictionaries
 
     # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show because it's a foreign key
     purchase_category_dict = {}
-    for object in PurchaseCategory.objects.all().values('id', 'category'): # Queryset of dicts
+    for object in PurchaseCategory.objects.filter(user=user_object).values('id', 'category'): # Queryset of dicts
         purchase_category_dict[object['id']] = object['category']
     # Update the id for each PurchaseCategory with the category name
     for dict in purchases_list:
@@ -196,7 +196,7 @@ def get_purchases_chart_data(request):
     if request.method == 'GET':
         user_object = request.user
 
-        filter_instance = Filter.objects.last() # First is for Purchases page
+        filter_instance = Filter.objects.get(user=user_object, page='Homepage')
 
         start_date_filter = filter_instance.start_date_filter
         end_date_filter = filter_instance.end_date_filter
@@ -204,8 +204,8 @@ def get_purchases_chart_data(request):
         print('Start date filter: ' + str(start_date_filter))
         print('End date filter: ' + str(end_date_filter))
 
-        if start_date_filter is None or start_date_filter < Purchase.objects.all().order_by('date').first().date:
-            start_date_filter = Purchase.objects.all().order_by('date').first().date # Date of first purchase recorded
+        if start_date_filter is None or start_date_filter < Purchase.objects.filter(user=user_object).order_by('date').first().date:
+            start_date_filter = Purchase.objects.filter(user=user_object).order_by('date').first().date # Date of first purchase recorded
 
         if end_date_filter is None:
             end_date_filter = current_date()
@@ -232,11 +232,11 @@ def get_purchases_chart_data(request):
                        category_filter_11, category_filter_12, category_filter_13, category_filter_14, category_filter_15, category_filter_16, category_filter_17, category_filter_18, category_filter_19, category_filter_20,
                        category_filter_21, category_filter_22, category_filter_23, category_filter_24, category_filter_25]]
         current_filter_list_unique = sorted(list(set([x for x in current_filter_list if x])))
-        current_filter_list_unique_ids = [PurchaseCategory.objects.get(category=x).id for x in current_filter_list_unique] # To filter the Queryset below, we need to give a list of IDs to the category fields, as it's a foreign key
+        current_filter_list_unique_ids = [PurchaseCategory.objects.get(user=user_object, category=x).id for x in current_filter_list_unique] # To filter the Queryset below, we need to give a list of IDs to the category fields, as it's a foreign key
         print('Filters for chart: ' + str(current_filter_list_unique))
 
 
-        queryset = Purchase.objects.filter(Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'amount').order_by('date')
+        queryset = Purchase.objects.filter(Q(user=user_object) & Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'amount').order_by('date')
 
 
         # DAILY CHART
@@ -329,7 +329,7 @@ def get_net_worth_chart_data(request):
     labels_daily = []
     values_daily = []
 
-    queryset = AccountUpdate.objects.all() # Ordered by -timestamp
+    queryset = AccountUpdate.objects.filter(account__user=user_object) # Ordered by -timestamp
     distinct_accounts_list = set(queryset.values_list('account', flat=True)) # List of ints
 
     latest_value_dict = {} # When an Account has no update on a certain date, the queryset will return None; we will then take the most-recent account value
@@ -388,16 +388,14 @@ def homepage(request):
         context = {}
 
         context['account_to_use'] = request.user.profile.account_to_use # None, if not set
-        context['account_to_use_currency'] = Account.objects.get(account=context['account_to_use']).currency if context['account_to_use'] else None
+        context['account_to_use_currency'] = context['account_to_use'].currency if context['account_to_use'] else None
         context['second_account_to_use'] = request.user.profile.second_account_to_use
-        context['second_account_to_use_currency'] = Account.objects.get(account=context['second_account_to_use']).currency if context['second_account_to_use'] else None
+        context['second_account_to_use_currency'] = context['second_account_to_use'].currency if context['second_account_to_use'] else None
         context['third_account_to_use'] = request.user.profile.third_account_to_use
-        context['third_account_to_use_currency'] = Account.objects.get(account=context['third_account_to_use']).currency if context['third_account_to_use'] else None
+        context['third_account_to_use_currency'] = context['third_account_to_use'].currency if context['third_account_to_use'] else None
 
-        if len(Filter.objects.all()) < 2:
-            Filter.objects.create()
-
-        filter_instance = Filter.objects.last()
+        # Create a filter object if this user hasn't loaded any pages yet
+        filter_instance = Filter.objects.get_or_create(user=user_object, page='Homepage')[0] # Returns a tuple (object, True/False depending on whether or not just created)
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
@@ -484,7 +482,7 @@ def homepage(request):
 
 
             # If an account to charge was available, and chosen in front-end, create the appropriate AccountUpdate object...
-            account_object_to_charge = Account.objects.get(account=purchase_form.cleaned_data['account_to_use']) if purchase_form.cleaned_data['account_to_use'] != '' else None
+            account_object_to_charge = Account.objects.get(user=user_object, account=purchase_form.cleaned_data['account_to_use']) if purchase_form.cleaned_data['account_to_use'] != '' else None
 
             if account_object_to_charge:
                 account_balance = AccountUpdate.objects.filter(account=account_object_to_charge).order_by('-timestamp').first().value
@@ -499,7 +497,7 @@ def homepage(request):
                 if account_object_to_charge.credit: # True if a credit account
                     amount_to_charge*=-1
 
-                AccountUpdate.objects.create(account=account_object_to_charge, value=account_balance - amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
+                AccountUpdate.objects.create(account=account_object_to_charge, value=account_balance-amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
 
 
             return redirect('homepage')
@@ -667,12 +665,7 @@ class PurchaseListView(generic.ListView):
 
 
     def get_queryset(self):
-        user_object = self.request.user
-
-        # If none created yet, create an instance
-        if len(Filter.objects.all()) < 2:
-            Filter.objects.create()
-
+        pass
 
     def get_context_data(self, *args, **kwargs):
         user_object = self.request.user
@@ -691,8 +684,8 @@ class PurchaseListView(generic.ListView):
         if user_object.profile.credit_account:
             context['credit_account'] = user_object.profile.credit_account.account
 
-        # To fill the datepickers with the current date filters and label the active filters
-        filter_instance = Filter.objects.first()
+        # To fill the datepickers with the current date filters and label the active filters. Create a filter object if this user hasn't loaded any pages yet
+        filter_instance = Filter.objects.get_or_create(user=user_object, page='Activity')[0] # Returns a tuple (object, True/False depending on whether or not just created)
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
@@ -731,7 +724,7 @@ def settings(request):
         context['threshold_formset'] = ThresholdFormSet()
         context['account_formset'] = AccountFormSet()
 
-        context['recurring_list'] = Recurring.objects.all()
+        context['recurring_list'] = Recurring.objects.filter(user=user_object)
         context['recurring_form'] = RecurringForm()
 
         return render(request, 'tracker/settings.html', context=context)
@@ -741,15 +734,15 @@ def settings(request):
 def filter_manager(request):
     user_object = request.user
 
-    if request.method == 'GET' and request.GET['page'] == 'Purchases' or request.method == 'POST' and request.POST['page'] == 'Purchases': # GET must be first!
-        filter_instance = Filter.objects.first()
+    if request.method == 'GET' and request.GET['page'] == 'Activity' or request.method == 'POST' and request.POST['page'] == 'Activity': # GET must be first!
+        filter_instance = Filter.objects.get(user=user_object, page='Activity')
     else:
-        filter_instance = Filter.objects.last()
+        filter_instance = Filter.objects.get(user=user_object, page='Homepage')
 
-    if request.method == 'POST' and request.POST['type'] != 'Date' or request.method == 'GET':
+    if request.method == 'POST' and request.POST['type'] != 'Date' or request.method == 'GET': # We need these for any GET request, and obviously not for POST requests for the date filters
         # Generate a comprehensive list of PurchaseCategories
         full_category_filter_list = []
-        for purchase_category in PurchaseCategory.objects.all():
+        for purchase_category in PurchaseCategory.objects.filter(user=user_object):
             full_category_filter_list.append(purchase_category.category)
         full_category_filter_list.sort()
         print('Full category filter list: ' + str(full_category_filter_list))
@@ -776,7 +769,7 @@ def filter_manager(request):
         current_filter_list_unique = sorted(list(set([x for x in current_filter_list if x])))
         print('Originally applied filters: ' + str(current_filter_list_unique))
 
-    if request.method == 'GET':
+    if request.method == 'GET': # DATE FILTER VALUES ARE SENT IN homepage() and PurchaseListView() ! No need here.
         if len(current_filter_list_unique) == len(full_category_filter_list):
             current_filter_list_unique.append('All Categories')
         return JsonResponse(current_filter_list_unique, safe=False)
@@ -787,7 +780,7 @@ def filter_manager(request):
         print('Clicked filter value: ' + str(filter_value))
 
         if request.POST['type'] == 'Date':
-            filter_value = request.POST['filter_value']
+            filter_value = request.POST['filter_value'] # Only present in date-related AJAX calls
 
             if filter_value == '':
                 filter_value = None
@@ -807,31 +800,31 @@ def filter_manager(request):
                 reset_filters()
 
                 try:
-                    filter_instance.category_filter_1 = None if filter_list[0] is None else PurchaseCategory.objects.get(category=filter_list[0])
-                    filter_instance.category_filter_2 = None if filter_list[1] is None else PurchaseCategory.objects.get(category=filter_list[1])
-                    filter_instance.category_filter_3 = None if filter_list[2] is None else PurchaseCategory.objects.get(category=filter_list[2])
-                    filter_instance.category_filter_4 = None if filter_list[3] is None else PurchaseCategory.objects.get(category=filter_list[3])
-                    filter_instance.category_filter_5 = None if filter_list[4] is None else PurchaseCategory.objects.get(category=filter_list[4])
-                    filter_instance.category_filter_6 = None if filter_list[5] is None else PurchaseCategory.objects.get(category=filter_list[5])
-                    filter_instance.category_filter_7 = None if filter_list[6] is None else PurchaseCategory.objects.get(category=filter_list[6])
-                    filter_instance.category_filter_8 = None if filter_list[7] is None else PurchaseCategory.objects.get(category=filter_list[7])
-                    filter_instance.category_filter_9 = None if filter_list[8] is None else PurchaseCategory.objects.get(category=filter_list[8])
-                    filter_instance.category_filter_10 = None if filter_list[9] is None else PurchaseCategory.objects.get(category=filter_list[9])
-                    filter_instance.category_filter_11 = None if filter_list[10] is None else PurchaseCategory.objects.get(category=filter_list[10])
-                    filter_instance.category_filter_12 = None if filter_list[11] is None else PurchaseCategory.objects.get(category=filter_list[11])
-                    filter_instance.category_filter_13 = None if filter_list[12] is None else PurchaseCategory.objects.get(category=filter_list[12])
-                    filter_instance.category_filter_14 = None if filter_list[13] is None else PurchaseCategory.objects.get(category=filter_list[13])
-                    filter_instance.category_filter_15 = None if filter_list[14] is None else PurchaseCategory.objects.get(category=filter_list[14])
-                    filter_instance.category_filter_16 = None if filter_list[15] is None else PurchaseCategory.objects.get(category=filter_list[15])
-                    filter_instance.category_filter_17 = None if filter_list[16] is None else PurchaseCategory.objects.get(category=filter_list[16])
-                    filter_instance.category_filter_18 = None if filter_list[17] is None else PurchaseCategory.objects.get(category=filter_list[17])
-                    filter_instance.category_filter_19 = None if filter_list[18] is None else PurchaseCategory.objects.get(category=filter_list[18])
-                    filter_instance.category_filter_20 = None if filter_list[19] is None else PurchaseCategory.objects.get(category=filter_list[19])
-                    filter_instance.category_filter_21 = None if filter_list[20] is None else PurchaseCategory.objects.get(category=filter_list[20])
-                    filter_instance.category_filter_22 = None if filter_list[21] is None else PurchaseCategory.objects.get(category=filter_list[21])
-                    filter_instance.category_filter_23 = None if filter_list[22] is None else PurchaseCategory.objects.get(category=filter_list[22])
-                    filter_instance.category_filter_24 = None if filter_list[23] is None else PurchaseCategory.objects.get(category=filter_list[23])
-                    filter_instance.category_filter_25 = None if filter_list[24] is None else PurchaseCategory.objects.get(category=filter_list[24])
+                    filter_instance.category_filter_1 = None if filter_list[0] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[0])
+                    filter_instance.category_filter_2 = None if filter_list[1] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[1])
+                    filter_instance.category_filter_3 = None if filter_list[2] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[2])
+                    filter_instance.category_filter_4 = None if filter_list[3] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[3])
+                    filter_instance.category_filter_5 = None if filter_list[4] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[4])
+                    filter_instance.category_filter_6 = None if filter_list[5] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[5])
+                    filter_instance.category_filter_7 = None if filter_list[6] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[6])
+                    filter_instance.category_filter_8 = None if filter_list[7] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[7])
+                    filter_instance.category_filter_9 = None if filter_list[8] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[8])
+                    filter_instance.category_filter_10 = None if filter_list[9] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[9])
+                    filter_instance.category_filter_11 = None if filter_list[10] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[10])
+                    filter_instance.category_filter_12 = None if filter_list[11] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[11])
+                    filter_instance.category_filter_13 = None if filter_list[12] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[12])
+                    filter_instance.category_filter_14 = None if filter_list[13] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[13])
+                    filter_instance.category_filter_15 = None if filter_list[14] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[14])
+                    filter_instance.category_filter_16 = None if filter_list[15] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[15])
+                    filter_instance.category_filter_17 = None if filter_list[16] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[16])
+                    filter_instance.category_filter_18 = None if filter_list[17] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[17])
+                    filter_instance.category_filter_19 = None if filter_list[18] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[18])
+                    filter_instance.category_filter_20 = None if filter_list[19] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[19])
+                    filter_instance.category_filter_21 = None if filter_list[20] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[20])
+                    filter_instance.category_filter_22 = None if filter_list[21] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[21])
+                    filter_instance.category_filter_23 = None if filter_list[22] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[22])
+                    filter_instance.category_filter_24 = None if filter_list[23] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[23])
+                    filter_instance.category_filter_25 = None if filter_list[24] is None else PurchaseCategory.objects.get(user=user_object, category=filter_list[24])
                 except: # If list passed in is not long enough...
                     pass
 
@@ -854,11 +847,12 @@ def filter_manager(request):
             # Clear filter values if necessary
             if filter_value == 'All Categories':
                 reset_filters()
-                if len(current_filter_list_unique) == len(full_category_filter_list):
+                if len(current_filter_list_unique) == len(full_category_filter_list) or len(current_filter_list_unique) == 25: # For when you've just clicked 'All Categories'
                     return JsonResponse([], safe=False) # safe=False necessary for non-dict objects to be serialized
                 else:
                     set_filters(full_category_filter_list)
-                    full_category_filter_list.append('All Categories')
+                    if len(full_category_filter_list) < 26:
+                        full_category_filter_list.append('All Categories')
                     return JsonResponse(full_category_filter_list, safe=False) # safe=False necessary for non-dict objets to be serialized
 
             else:

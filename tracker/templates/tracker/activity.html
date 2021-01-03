@@ -164,7 +164,7 @@
             type: 'GET',
             url: 'filters/',
             data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                    'page': 'Purchases',                     },
+                    'page': 'Activity',                     },
             success: function(response) {
                 $.each(response, function(index, category_filter) {
                       $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
@@ -309,8 +309,6 @@
                     }
                     else if ($('#purchase_list_header').text() !== 'No purchases to list!') {
                         $('#purchase_list_header').text('No purchases to list!');
-                        // $('#purchase_list_header').before('<br>');
-                        // $('#purchase_list_header').after('<div style="margin-bottom: 20px;" id="no_purchases_spacing"></div>');
                     }
 
                     $('#purchase_list_div').html('');
@@ -358,8 +356,6 @@
                                     purchase_list = purchase_list.concat('</h6>');
                                 }
                                 purchase_list = purchase_list.concat(`<h6><u>${category}</u>${category_spacer}<u>${category_2}</u> | <b>${item}</b>${description_spacer}<span class="purchase_description"><i>${description}</i></span></h6></li>`);
-                                // purchase_list = purchase_list.concat('<li style="display:inline-block; height:22px; position:absolute; top:50%; margin-top:-11px; margin-left:8px;">x</li></div>');
-                                // purchase_list = purchase_list.concat('<img style="display:inline-block; width:20px; height:20px;" id="image" src="{% static 'images/camera_glyph.png' %}">')
                             });
 
                             return purchase_list.concat('</ul>');
@@ -492,7 +488,7 @@
                 type: 'POST',
                 url: 'filters/',
                 data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                        'page': 'Purchases',
+                        'page': 'Activity',
                         'type': 'Category',
                         'id': $(this).attr('id'),
                 },
@@ -521,7 +517,7 @@
                     type: 'POST',
                     url: 'filters/',
                     data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                            'page': 'Purchases',
+                            'page': 'Activity',
                             'type': 'Date',
                             'id': $(this).attr('id'),
                             'filter_value': $(this).val(), },
@@ -556,7 +552,7 @@
                     type: 'POST',
                     url: 'filters/',
                     data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                            'page': 'Purchases',
+                            'page': 'Activity',
                             'type': 'Date',
                             'id': $(this).attr('id'),
                             'filter_value': $(this).val(), },
