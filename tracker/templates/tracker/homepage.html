@@ -100,7 +100,7 @@
 
         <div class="bottom_div">
             <div style="margin:0; text-align:center;">
-                    <h3>Purchases Trend</h3>
+                    <h5>Purchases Trend</h5>
                     <canvas id="spending_chart" width="375" height="250"></canvas>
             </div>
         </div>
@@ -109,7 +109,7 @@
 
         <div class="bottom_div">
             <div style="margin:0; text-align:center;">
-                    <h3>Weekly Trend</h3>
+                    <h5>Weekly Trend</h5>
                     <canvas id="spending_chart_weekly" width="375" height="250"></canvas>
             </div>
         </div>
@@ -118,7 +118,16 @@
 
         <div class="bottom_div">
             <div style="margin:0; text-align:center;">
-                    <h3>Monthly Trend</h3>
+                    <h5>Bi-Weekly Trend</h5>
+                    <canvas id="spending_chart_biweekly" width="375" height="250"></canvas>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="bottom_div">
+            <div style="margin:0; text-align:center;">
+                    <h5>Monthly Trend</h5>
                     <canvas id="spending_chart_monthly" width="375" height="250"></canvas>
             </div>
         </div>
@@ -557,17 +566,70 @@
                                     },
                                     backgroundColor: [
                                         // 'rgba(255, 99, 132, 0.2)',
-                                        'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(54, 162, 235, 0.2)',
                                         // 'rgba(255, 206, 86, 0.2)',
                                         // 'rgba(75, 192, 192, 0.2)',
+                                        'rgba(153, 102, 255, 0.2)',
+                                        // 'rgba(255, 159, 64, 0.2)'
+                                    ],
+                                    borderColor: [
+                                        // 'rgba(255, 99, 132, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
+                                        // 'rgba(255, 206, 86, 1)',
+                                        // 'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        // 'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1,
+                                }],
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: false,
+                                            min: 0,
+                                            callback: function(value) {
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                            }
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        ticks: {
+                                            fontSize: 8
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+
+
+                        var ctx = document.getElementById('spending_chart_biweekly').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'line',
+                            plugins: [ChartRegressions],
+                            data: {
+                                labels: response['labels_biweekly'],
+                                datasets: [{
+                                    label: 'Dollars Spent',
+                                    data: response['values_biweekly'],
+                                    regressions: {
+                                        type: 'linear',
+                                        line: { color: 'red', width: 1},
+                                    },
+                                    backgroundColor: [
+                                        // 'rgba(255, 99, 132, 0.2)',
+                                        // 'rgba(54, 162, 235, 0.2)',
+                                        // 'rgba(255, 206, 86, 0.2)',
+                                        'rgba(75, 192, 192, 0.2)',
                                         // 'rgba(153, 102, 255, 0.2)',
                                         // 'rgba(255, 159, 64, 0.2)'
                                     ],
                                     borderColor: [
                                         // 'rgba(255, 99, 132, 1)',
-                                        'rgba(54, 162, 235, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
                                         // 'rgba(255, 206, 86, 1)',
-                                        // 'rgba(75, 192, 192, 1)',
+                                        'rgba(75, 192, 192, 1)',
                                         // 'rgba(153, 102, 255, 1)',
                                         // 'rgba(255, 159, 64, 1)'
                                     ],
@@ -609,16 +671,16 @@
                                         line: { color: 'red', width: 1},
                                     },
                                     backgroundColor: [
-                                        // 'rgba(255, 99, 132, 0.2)',
-                                        'rgba(54, 162, 235, 0.2)',
+                                        'rgba(255, 99, 132, 0.2)',
+                                        // 'rgba(54, 162, 235, 0.2)',
                                         // 'rgba(255, 206, 86, 0.2)',
                                         // 'rgba(75, 192, 192, 0.2)',
                                         // 'rgba(153, 102, 255, 0.2)',
                                         // 'rgba(255, 159, 64, 0.2)'
                                     ],
                                     borderColor: [
-                                        // 'rgba(255, 99, 132, 1)',
-                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 99, 132, 1)',
+                                        // 'rgba(54, 162, 235, 1)',
                                         // 'rgba(255, 206, 86, 1)',
                                         // 'rgba(75, 192, 192, 1)',
                                         // 'rgba(153, 102, 255, 1)',

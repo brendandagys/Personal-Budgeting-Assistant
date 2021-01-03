@@ -286,6 +286,36 @@ def get_purchases_chart_data(request):
         labels_weekly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_weekly] # Removing the year component, as the label is too long
 
 
+        # BI-WEEKLY CHART
+        dates_list = pd.date_range(start=start_date_filter, end=end_date_filter, freq='14D').strftime('%Y-%m-%d').tolist() # This will be a DateTimeIndex. Last two methods format the dates into strings and turn into a list
+        if dates_list[-1] != str(end_date_filter):
+            dates_list.append(str(end_date_filter)) # Ensure we get all data up to the end_date_filter, even if the interval leaves a remainder
+
+        labels_biweekly = []
+        values_biweekly = []
+
+        for date in dates_list: # If the last date is greater than end_date_filter, change it to end_date_filter, add the label, and end loop
+            end_date = str(datetime.datetime.strptime(date, '%Y-%m-%d').date()+datetime.timedelta(days=13))
+            if date == str(end_date_filter): # Prevent showing a range like '01-01 - 01-01'. Instead, just show one date
+                labels_biweekly.append(date)
+                break
+            if end_date >= str(end_date_filter): # Make sure that the very last date is no greater than end_date_filter
+                labels_biweekly.append(date + ' - ' + str(end_date_filter))
+                break
+            labels_biweekly.append(date + ' - ' + end_date)
+
+        for date_range in labels_biweekly:
+            if ' - ' in date_range:
+                start_date, end_date = date_range.split(' - ')
+            else:
+                start_date, end_date = (date_range, date_range)
+            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum']
+            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
+            values_biweekly.append(amount_sum + amount_2_sum)
+
+        labels_biweekly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_biweekly] # Removing the year component, as the label is too long
+
+
         # MONTHLY CHART
         dates_list = [start_date_filter] # List of datetime objects
         start_date_monthly = start_date_filter
@@ -322,7 +352,8 @@ def get_purchases_chart_data(request):
         labels_monthly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_monthly] # Removing the year component, as the label is too long
 
 
-        return JsonResponse({'labels_daily': labels_daily, 'values_daily': values_daily, 'labels_weekly': labels_weekly, 'values_weekly': values_weekly, 'labels_monthly': labels_monthly, 'values_monthly': values_monthly})
+        return JsonResponse({'labels_daily': labels_daily, 'values_daily': values_daily, 'labels_weekly': labels_weekly, 'values_weekly': values_weekly,
+                             'labels_biweekly': labels_biweekly, 'values_biweekly': values_biweekly, 'labels_monthly': labels_monthly, 'values_monthly': values_monthly})
 
 
 @login_required
