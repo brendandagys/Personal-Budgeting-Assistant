@@ -387,11 +387,11 @@ def homepage(request):
     if request.method == 'GET':
         context = {}
 
-        context['account_to_use'] = request.user.profile.account_to_use # None, if not set
+        context['account_to_use'] = user_object.profile.account_to_use # None, if not set
         context['account_to_use_currency'] = context['account_to_use'].currency if context['account_to_use'] else None
-        context['second_account_to_use'] = request.user.profile.second_account_to_use
+        context['second_account_to_use'] = user_object.profile.second_account_to_use
         context['second_account_to_use_currency'] = context['second_account_to_use'].currency if context['second_account_to_use'] else None
-        context['third_account_to_use'] = request.user.profile.third_account_to_use
+        context['third_account_to_use'] = user_object.profile.third_account_to_use
         context['third_account_to_use_currency'] = context['third_account_to_use'].currency if context['third_account_to_use'] else None
 
         # Create a filter object if this user hasn't loaded any pages yet
@@ -466,6 +466,7 @@ def homepage(request):
         purchase_instance = Purchase()
 
         if purchase_form.is_valid():
+            purchase_instance.user = user_object
             purchase_instance.date = purchase_form.cleaned_data['date']
             purchase_instance.time = purchase_form.cleaned_data['time'] # Cleaning done in forms.py
             purchase_instance.item = purchase_form.cleaned_data['item'].strip()
