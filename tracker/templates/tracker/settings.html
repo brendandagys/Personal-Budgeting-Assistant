@@ -25,6 +25,16 @@
     <body>
         <div class="container-fluid">
             <br>
+            <h6 style="text-align:center;">User Profile Settings</h6>
+            <p style="font-size:0.5rem; text-align:center;">Set default Accounts to charge when entering purchases. Set default currencies to use.</p>
+            <form id="profile_form" action="" method="post">
+                {% csrf_token %}
+                <table class="center">
+                    {{ profile_form }}
+                </table>
+            </form>
+
+            <br><br>
             <h6 style="text-align:center;">Purchase Category Settings</h6>
             <p style="font-size:0.5rem; text-align:center;">Change the name of a Purchase Category, set the threshold for alerts, or change the rolling window in which alerts trigger.</p>
             <form id="threshold_formset" method="post">
@@ -44,11 +54,12 @@
                     {% endfor %}
                 </table>
             </form>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_purchase_category" type="button" class="btn btn-sm btn-outline-danger">Delete a Purchase Category...</button></div>
 
             <br>
             <h6 style="text-align:center;">Account Settings</h6>
             <p style="font-size:0.5rem; text-align:center;">Change the name of an Account, specify if it's a credit account, set the currency, and indicate if it's active.</p>
-            <form id="account_formset" method="post">
+            <form id="account_formset" action="" method="post">
                 {{ account_formset.management_form }}
                 <table style="table-layout:fixed; margin:auto; max-width:345px;">
                     <tr style="font-size:0.7rem; text-align:center;">
@@ -67,6 +78,7 @@
                     {% endfor %}
                 </table>
             </form>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_account" type="button" class="btn btn-sm btn-outline-danger">Delete an Account...</button></div>
 
             <br>
             <h6 style="text-align:center;">Recurring Payments</h6>
@@ -91,6 +103,7 @@
                     </tr>
                 {% endfor %}
             </table>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_reccuring" type="button" class="btn btn-sm btn-outline-danger">Delete a Recurring Payment...</button></div>
 
             <br>
             <form id="recurring_form" action="" method="post">
@@ -99,10 +112,66 @@
                     {{ recurring_form }}
                 </table> </br>
 
-                <input id="submit_button" style="margin-top:-5px;" class="btn btn-sm btn-primary" type="submit" value="Add Recurrence" name="recurring_form_submit">
+                <input class="btn btn-sm btn-primary" type="submit" value="Add Recurrence" name="recurring_form_submit">
             </form>
+
+            <br>
+            <h6 style="text-align:center;">Quick Entries</h6>
+            <p style="font-size:0.5rem; text-align:center;">Add a Quick Entry for the Purchase Form.</p>
+            <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
+                <tr style="font-size:0.5rem; text-align:center;">
+                    <th>Category</th>
+                    <th>Item</th>
+                    <th>Amount</th>
+                    <th>Category 2</th>
+                    <th>Amount 2</th>
+                    <th>Specifics</th>
+                </tr>
+                {% for quick_entry in quick_entry_list %}
+                    <tr style="font-size:0.4rem; text-align:center;">
+                        <td style="vertical-align:middle;">{{ quick_entry.category }}</td>
+                        <td style="vertical-align:middle;">{{ quick_entry.item }}</td>
+                        <td style="vertical-align:middle;">{{ quick_entry.amount }}</td>
+                        <td style="vertical-align:middle;">{{ quick_entry.category_2 }}</td>
+                        <td style="vertical-align:middle;">{{ quick_entry.amount_2 }}</td>
+                        <td style="vertical-align:middle;">{{ quick_entry.description }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_quick_entry" type="button" class="btn btn-sm btn-outline-danger">Delete a Quick Entry...</button></div>
+
+            <br>
+            <form id="quick_entry_form" action="" method="post">
+                {% csrf_token %}
+                <table class="center">
+                    {{ quick_entry_form }}
+                </table> </br>
+
+                <input class="btn btn-sm btn-primary" type="submit" value="Add Quick Entry" name="quick_entry_form_submit">
+            </form>
+            <br>
+
 
         </div>
     </body>
 
 </html>
+
+<script type="text/javascript">
+    if ({{purchase_category_count}} === 0) {
+        $('#delete_purchase_category').hide()
+    }
+    if ({{account_count}} === 0) {
+        $('#delete_account').hide()
+    }
+    if ({{recurring_count}} === 0) {
+        $('#delete_recurring').hide()
+    }
+    if ({{quick_entry_count}} === 0) {
+        $('#delete_quick_entry').hide()
+    }
+    
+    $(document).ready(function() {
+
+    });
+</script>

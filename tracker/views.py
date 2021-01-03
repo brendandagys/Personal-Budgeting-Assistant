@@ -10,9 +10,9 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 from django.views import generic
-from .forms import PurchaseForm, AccountForm, RecurringForm
+from .forms import PurchaseForm, AccountForm, RecurringForm, QuickEntryForm, ProfileForm
 from django.forms import modelformset_factory, NumberInput, TextInput, CheckboxInput, Select # Could have imported from .forms, if imported there
-from .models import Purchase, Filter, Recurring, Alert, PurchaseCategory, Account, AccountUpdate, Profile
+from .models import Purchase, QuickEntry, Filter, Recurring, Alert, PurchaseCategory, Account, AccountUpdate, Profile
 
 from django.db.models import Sum
 
@@ -434,63 +434,6 @@ def homepage(request):
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
 
-        # PurchaseCategory.objects.filter(category='').delete()
-        # instance = PurchaseCategory.objects.get(category='Gas')
-        # print(instance)
-        # for object in Purchase.objects.all():
-        #     object.category_2 = None
-        #     object.save()
-
-        # Get all bill instances
-        # apple_music_queryset = Bill.objects.filter(bill='Apple Music').order_by('-last_update_date') # Querysets can return zero items
-        # cell_phone_plan_queryset = Bill.objects.filter(bill='Cell phone plan').order_by('-last_update_date')
-        # car_insurance_queryset = Bill.objects.filter(bill='Car insurance').order_by('-last_update_date')
-        # rent_queryset = Bill.objects.filter(bill='Rent').order_by('-last_update_date')
-        # gym_membership_queryset = Bill.objects.filter(bill='Gym membership').order_by('-last_update_date')
-
-        # def check_bill_payments(bill, queryset):
-        #     # Will create a Purchase object if True, since the month will match in the second if-statement
-        #     instance_created_flag = False
-        #     # If an instance doesn't exist, create it
-        #     if len(queryset) == 0:
-        #         if bill != 'Gym membership':
-        #             instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(year, month, bill_information[bill][0]))
-        #             instance_created_flag = True
-        #         else: # Create gym membership Bill
-        #             instance = Bill.objects.create(bill = bill, last_update_date = datetime.datetime(2020, 2, 14))
-        #     else:
-        #         instance = queryset[0] # instance is either a Queryset or a real instance. This ensures it always becomes the latter
-        #     # Check if bills for the current month have been recorded
-        #     if bill != 'Gym membership':
-        #         if instance.last_update_date.month != month and day >= instance.last_update_date.day:# or instance_created_flag is True:
-        #             instance.last_update_date = datetime.datetime(year, month, bill_information[bill][0]) # Update the date. Won't matter if instance was just created
-        #             instance.save()
-        #
-        #             Purchase.objects.create(date = datetime.datetime(year, month, bill_information[bill][0]),
-        #                                     time = '00:00',
-        #                                     amount = bill_information[bill][2],
-        #                                     category = 'Bills',
-        #                                     category_2 = '', # Worked without this line, but being safe
-        #                                     item = bill,
-        #                                     description = bill_information[bill][3] )
-        #     else:
-        #         if (((date + relativedelta(weekday=FR(-1))) - instance.last_update_date).days)%14 == 0 and (date - instance.last_update_date).days >=14:
-        #             instance.last_update_date = date + relativedelta(weekday=FR(-1))
-        #             instance.save()
-        #
-        #             Purchase.objects.create(date = date + relativedelta(weekday=FR(-1)),
-        #                                     time = '00:00',
-        #                                     amount = 10.16,
-        #                                     category = 'Bills',
-        #                                     category_2 = '', # Worked without this line, but being safe
-        #                                     item = 'Gym membership',
-        #                                     description = 'Bi-weekly fee.' )
-
-        # check_bill_payments('Apple Music', apple_music_queryset)
-        # check_bill_payments('Cell phone plan', cell_phone_plan_queryset)
-        # check_bill_payments('Car insurance', car_insurance_queryset)
-        # check_bill_payments('Rent', rent_queryset)
-        # check_bill_payments('Gym membership', gym_membership_queryset)
 
     elif request.method == 'POST':
 
@@ -702,6 +645,7 @@ class PurchaseListView(generic.ListView):
     def get_queryset(self):
         pass
 
+
     def get_context_data(self, *args, **kwargs):
         user_object = self.request.user
 
@@ -757,12 +701,34 @@ def settings(request):
                                                        'active': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'})})
 
         context['threshold_formset'] = ThresholdFormSet()
+
         context['account_formset'] = AccountFormSet()
 
         context['recurring_list'] = Recurring.objects.filter(user=user_object)
         context['recurring_form'] = RecurringForm()
 
+        context['quick_entry_list'] = QuickEntry.objects.filter(user=user_object)
+        context['quick_entry_form'] = QuickEntryForm()
+
+        profile_form_data = {'account_to_use': user_object.profile.account_to_use.id,
+                             'second_account_to_use': user_object.profile.second_account_to_use.id,
+                             'third_account_to_use': user_object.profile.third_account_to_use.id,
+                             'credit_account': user_object.profile.credit_account.id,
+                             'debit_account': user_object.profile.debit_account.id,
+                             'primary_currency': user_object.profile.primary_currency,
+                             'secondary_currency': user_object.profile.secondary_currency,}
+
+        context['profile_form'] = ProfileForm(profile_form_data)
+
+        context['purchase_category_count'] = len(PurchaseCategory.objects.filter(user=user_object))
+        context['account_count'] = len(Account.objects.filter(user=user_object))
+        context['recurring_count'] = len(Recurring.objects.filter(user=user_object))
+        context['quick_entry_count'] = len(QuickEntry.objects.filter(user=user_object))
+
         return render(request, 'tracker/settings.html', context=context)
+
+    elif request.method == 'POST':
+        return HttpResponse()
 
 
 @login_required

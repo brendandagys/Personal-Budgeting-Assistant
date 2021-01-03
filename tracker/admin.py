@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from .models import Purchase, PurchaseCategory, Filter, Account, AccountUpdate, Recurring, Alert, Profile
+from .models import Purchase, QuickEntry, PurchaseCategory, Filter, Account, AccountUpdate, Recurring, Alert, Profile
 
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -30,6 +30,10 @@ admin.site.register(User, CustomUserAdmin)
 class PurchaseResource(resources.ModelResource):
     class Meta:
         model = Purchase
+
+class QuickEntryResource(resources.ModelResource):
+    class Meta:
+        model = QuickEntry
 
 class PurchaseCategoryResource(resources.ModelResource):
     class Meta:
@@ -59,8 +63,14 @@ class AlertResource(resources.ModelResource):
 @admin.register(Purchase)
 class PurchaseAdmin(ImportExportModelAdmin):
     resource_class = PurchaseResource
-    list_display = ('date', 'time', 'category', 'category_2', 'item', 'amount', 'amount_2', 'description', 'currency', 'exchange_rate')
-    list_filter = ['date', 'category', 'item', 'currency']
+    list_display = ('user', 'date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency', 'exchange_rate')
+    list_filter = ['user', 'date', 'category', 'item', 'currency']
+
+@admin.register(QuickEntry)
+class QuickEntryAdmin(ImportExportModelAdmin):
+    resource_class = QuickEntryResource
+    list_display = ('user', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description')
+    list_filter = ['user', 'category', 'item']
 
 @admin.register(PurchaseCategory)
 class PurchaseCategoryAdmin(ImportExportModelAdmin):

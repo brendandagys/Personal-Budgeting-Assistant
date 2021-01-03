@@ -39,13 +39,13 @@ class PurchaseCategory(models.Model):
 
 
 class Purchase(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='purchases')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='purchases_1')
     date = models.DateField(verbose_name='Date', default=current_date)
     time = models.CharField(blank=True, default=current_time, max_length=5, verbose_name='Time (24 hr.)')
     item = models.CharField(max_length=100, verbose_name='Item(s)')
-    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='purchases_1') # blank=False by default...
+    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='purchases_2') # blank=False by default...
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='purchases_2')
+    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='purchases_3')
     amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
     description = models.TextField(blank=True, verbose_name='Details')
     currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
@@ -58,13 +58,30 @@ class Purchase(models.Model):
 
     def __str__(self):
         if self.category_2:
-            return ', '.join([self.user.username, str(self.date), self.time, str(self.category.category), str(self.category_2.category), self.item, str(self.amount)])
-        return ', '.join([self.user.username, str(self.date), self.time, str(self.category.category), self.item, str(self.amount)])
+            return ', '.join([self.user.username, str(self.date), self.time, self.category.category, self.category_2.category, self.item, str(self.amount)])
+        return ', '.join([self.user.username, str(self.date), self.time, self.category.category, self.item, str(self.amount)])
 
 @receiver(models.signals.post_delete, sender=Purchase)
 def remove_file_from_s3(sender, instance, using, **kwargs):
     if instance.receipt:
         instance.receipt.delete(save=False)
+
+
+class QuickEntry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='quick_entry_1')
+    item = models.CharField(max_length=100, verbose_name='Item(s)')
+    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='quick_entry_2') # blank=False by default...
+    amount = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount')
+    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='quick_entry_3')
+    amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
+    description = models.TextField(blank=True, verbose_name='Details')
+
+    class Meta:
+        verbose_name_plural = 'Quick Entries'
+        verbose_name = 'Quick Entry'
+
+    def __str__(self):
+        return ', '.join([self.user.username, self.category.category, self.item])
 
 
 class Filter(models.Model):
@@ -181,11 +198,11 @@ class Recurring(models.Model):
         ('Specific', 'Specific'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='recurrings')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='recurrings_1')
     name = models.CharField(max_length=40, verbose_name='Name')
     description = models.TextField(blank=True, verbose_name='Details')
     type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')
-    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='recurrings')
+    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='recurrings_2')
     active = models.BooleanField(default=True, verbose_name='Active')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
 

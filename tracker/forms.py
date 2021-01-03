@@ -1,4 +1,4 @@
-from django.forms import ModelForm, DateField, DecimalField, NumberInput, CharField, IntegerField # All added for ModelForms
+from django.forms import Form, ModelForm, DateField, DecimalField, NumberInput, TextInput, Textarea, CharField, ChoiceField, IntegerField # All added for ModelForms
 
 import datetime
 from django.utils import timezone
@@ -6,7 +6,7 @@ from django.utils import timezone
 def current_date():
     return datetime.date.today()
 
-from .models import Purchase, Account, AccountUpdate, Recurring
+from .models import Purchase, Account, AccountUpdate, Recurring, QuickEntry, Profile
 
 
 class PurchaseForm(ModelForm):
@@ -71,6 +71,46 @@ class PurchaseForm(ModelForm):
         fields = ['date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency', 'receipt']
 
 
+class QuickEntryForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(QuickEntryForm, self).__init__(*args, **kwargs)
+
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
+            self.fields[field].label = ''
+
+        self.fields['item'].widget.attrs.update({'placeholder': 'Item(s)...'})
+        self.fields['amount'].widget.attrs.update({'placeholder': 'Amount...', 'inputmode': 'decimal'})
+        self.fields['amount_2'].widget.attrs.update({'placeholder': 'Optional amount...', 'inputmode': 'decimal'})
+        self.fields['description'].widget.attrs.update({'rows': 3, 'placeholder': 'Specifics...'})
+
+        # The choices that display in the form field match models.py __str__ ... I want __str__ for Admin, but only the category text in the form field
+        category_choices = []
+        for choice in self.fields['category'].choices:
+            if choice[0] == '': # First value is ('', '---------')
+                category_choices.append((choice[0], choice[1]))
+            else:
+                category_choices.append((choice[0], choice[1].split(',')[1].strip())) # (1, 'brendan, Coffee, None, 30 days')
+        self.fields['category'].choices = category_choices
+        self.fields['category_2'].choices = category_choices
+
+    class Meta:
+        model = QuickEntry
+        fields = ['category', 'item', 'amount', 'category_2', 'amount_2', 'description']
+
+
+class ProfileForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProfileForm, self).__init__(*args, **kwargs)
+
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm green'})
+
+    class Meta:
+        model = Profile
+        exclude = ['user']
+
+
 class AccountForm(ModelForm):
     def __init__(self, user_object, *args, **kwargs): # Added user_object argument to __init__ !
         super(AccountForm, self).__init__(*args, **kwargs)
@@ -83,7 +123,7 @@ class AccountForm(ModelForm):
             # Get the last value for the account. If it's None, make placeholder value 0
             last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
             self.fields[account.account] = DecimalField(label=account.account, max_digits=9, decimal_places=2, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px',
-                                                                                                                                                    'inputmode': 'decimal', 'placeholder': '${:20,.2f}'.format(last_value)}))
+                                                                                                                                                         'inputmode': 'decimal', 'placeholder': '${:20,.2f}'.format(last_value)}))
 
     class Meta:
         model = Account
