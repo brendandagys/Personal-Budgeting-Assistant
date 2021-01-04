@@ -54,7 +54,7 @@
                     {% endfor %}
                 </table>
             </form>
-            <div style="text-align:center; margin-top:10px;"><button id="delete_purchase_category" type="button" class="btn btn-sm btn-outline-danger">Delete a Purchase Category...</button></div>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_Purchase_Category" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete a Purchase Category...</button></div>
 
             <br>
             <h6 style="text-align:center;">Account Settings</h6>
@@ -78,7 +78,7 @@
                     {% endfor %}
                 </table>
             </form>
-            <div style="text-align:center; margin-top:10px;"><button id="delete_account" type="button" class="btn btn-sm btn-outline-danger">Delete an Account...</button></div>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_Account" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete an Account...</button></div>
 
             <br>
             <h6 style="text-align:center;">Recurring Payments</h6>
@@ -103,7 +103,7 @@
                     </tr>
                 {% endfor %}
             </table>
-            <div style="text-align:center; margin-top:10px;"><button id="delete_reccuring" type="button" class="btn btn-sm btn-outline-danger">Delete a Recurring Payment...</button></div>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_Recurring_Payment" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete a Recurring Payment...</button></div>
 
             <br>
             <form id="recurring_form" action="" method="post">
@@ -112,7 +112,7 @@
                     {{ recurring_form }}
                 </table> </br>
 
-                <input class="btn btn-sm btn-primary" type="submit" value="Add Recurrence" name="recurring_form_submit">
+                <input class="btn btn-sm btn-primary" type="submit" value="Add Recurring Payment" name="recurring_form_submit">
             </form>
 
             <br>
@@ -138,7 +138,7 @@
                     </tr>
                 {% endfor %}
             </table>
-            <div style="text-align:center; margin-top:10px;"><button id="delete_quick_entry" type="button" class="btn btn-sm btn-outline-danger">Delete a Quick Entry...</button></div>
+            <div style="text-align:center; margin-top:10px;"><button id="delete_Quick_Entry" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete a Quick Entry...</button></div>
 
             <br>
             <form id="quick_entry_form" action="" method="post">
@@ -159,19 +159,45 @@
 
 <script type="text/javascript">
     if ({{purchase_category_count}} === 0) {
-        $('#delete_purchase_category').hide()
+        $('#delete_Purchase_Category').hide()
     }
     if ({{account_count}} === 0) {
-        $('#delete_account').hide()
+        $('#delete_Account').hide()
     }
     if ({{recurring_count}} === 0) {
-        $('#delete_recurring').hide()
+        $('#delete_Recurring_Payment').hide()
     }
     if ({{quick_entry_count}} === 0) {
-        $('#delete_quick_entry').hide()
+        $('#delete_Quick_Entry').hide()
     }
-    
-    $(document).ready(function() {
 
+    $(document).ready(function() {
+        $(document).on('click', '.delete_button', function() {
+            let model = $(this).attr('id').slice(7).replace('_', ' ');
+            let id_type = 'name';
+            if (model === 'Quick Entry') {
+                id_type = 'ID';
+            }
+            let to_delete = prompt('\nPlease enter the exact ' + id_type + ' of the ' + model + ' that you want to delete:')
+            console.log(model);
+            console.log(to_delete.trim());
+            if (to_delete != null && to_delete.trim() !== '') {
+                $.ajax({
+                    type: 'POST',
+                    url: '',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'model': model,
+                            'to_delete': to_delete.trim(),
+                    },
+                    context: this, // To allow access in the callback functions
+                    success: function (response) {
+                        console.log('Deleted ' + model + ': ' + to_delete.trim());
+                    },
+                    error: function (response) {
+                        console.log('There was an issue deleting ' + model + ': ' + to_delete.trim());
+                    }
+                });
+            }
+        });
     });
 </script>

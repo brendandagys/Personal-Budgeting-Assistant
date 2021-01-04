@@ -727,7 +727,18 @@ def settings(request):
 
         return render(request, 'tracker/settings.html', context=context)
 
+
     elif request.method == 'POST':
+        if 'to_delete' in request.POST:
+            if request.POST['model'] == 'Purchase Category':
+                PurchaseCategory.objects.get(user=user_object, category=request.POST['to_delete']).delete()
+            elif request.POST['model'] == 'Account':
+                Account.objects.get(user=user_object, account=request.POST['to_delete']).delete()
+            elif request.POST['model'] == 'Recurring Payment':
+                Recurring.objects.get(user=user_object, name=request.POST['to_delete']).delete()
+            elif request.POST['model'] == 'Quick Entry':
+                QuickEntry.objects.get(user=user_object, id=request.POST['to_delete']).delete()
+
         return HttpResponse()
 
 
