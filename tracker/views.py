@@ -682,9 +682,9 @@ class PurchaseListView(generic.ListView):
 
 @login_required
 def settings(request):
+    user_object = request.user
+    
     if request.method == 'GET':
-        user_object = request.user
-
         context = {}
 
         ThresholdFormSet = modelformset_factory(PurchaseCategory,

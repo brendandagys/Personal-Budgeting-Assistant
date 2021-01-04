@@ -191,10 +191,10 @@
                     },
                     context: this, // To allow access in the callback functions
                     success: function (response) {
-                        console.log('Deleted ' + model + ': ' + to_delete.trim());
+                        alert('\nDeleted ' + model + ': ' + to_delete.trim());
                     },
                     error: function (response) {
-                        console.log('There was an issue deleting ' + model + ': ' + to_delete.trim());
+                        alert('\nThere was an issue deleting ' + model + ': ' + to_delete.trim());
                     }
                 });
             }
