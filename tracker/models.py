@@ -221,8 +221,8 @@ class Recurring(models.Model):
     xth_after_months = models.PositiveIntegerField(blank=True, null=True, verbose_name='Xth After Months')
 
     class Meta:
-        verbose_name_plural = 'Recurrings'
-        verbose_name = 'Recurring'
+        verbose_name_plural = 'Recurrings Payments'
+        verbose_name = 'Recurring Payment'
         ordering = ['-amount']
 
     def __str__(self):
