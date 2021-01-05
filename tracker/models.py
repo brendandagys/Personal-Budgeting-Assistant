@@ -245,7 +245,6 @@ class Profile(models.Model):
     credit_account = models.ForeignKey(Account, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Credit Account', related_name='profiles_4')
     debit_account = models.ForeignKey(Account, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Debit Account', related_name='profiles_5')
     primary_currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Primary Currency')
-    secondary_currency = models.CharField(choices=CURRENCIES, default='EUR', max_length=10, verbose_name='Secondary Currency')
 
     class Meta:
         verbose_name = 'Profile'
