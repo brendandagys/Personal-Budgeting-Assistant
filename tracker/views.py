@@ -187,7 +187,7 @@ def get_json_queryset(request):
         if purchase[1] in purchase_categories_list: # If second category matches...
             if purchase[3] is not None: # If there is a second value, always add it
                 purchases_sum+=purchase[3]
-            elif purchase[0] not in purchase_categories_list: # If no 'amount_2', first category DIDN'T match (we don't want to double-count), add 'amount' (in this case first three of tuple are populated)
+            elif purchase[0] not in purchase_categories_list: # If no 'amount_2', and first category DIDN'T match (we don't want to double-count), add 'amount' (in this case first three of tuple are populated)
                 purchases_sum+=purchase[2]
 
     return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum)}, safe=False)
@@ -239,7 +239,17 @@ def get_purchases_chart_data(request):
         print('Filters for chart: ' + str(current_filter_list_unique))
 
 
-        queryset = Purchase.objects.filter(Q(user=user_object) & Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'amount').order_by('date')
+        queryset = Purchase.objects.filter(Q(user=user_object) & Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'category', 'category_2', 'amount', 'amount_2')
+
+        def get_period_sum(queryset, start_date, end_date):
+            # If the first PurchaseCategory matches, always add amount_1 to the total
+            sum_1 = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum']
+            # If the second PurchaseCategory matches AND amount_2 is given, always add amount_2 to the total
+            sum_2 = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__gt=0, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__gt=0, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
+            # If the second PurchaseCategory matches AND amount_2 is not given AND first PurchaseCategory didn't match (avoid double-counting), add amount_1 to the total
+            sum_3 = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date__gte=start_date, date__lte=end_date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date__gte=start_date, date__lte=end_date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum']
+
+            return sum_1 + sum_2 + sum_3
 
 
         # DAILY CHART
@@ -251,9 +261,12 @@ def get_purchases_chart_data(request):
 
         for date in labels_daily:
             date = date[:-6] # Remove the prefix we just added so we can filter with the date
-            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount'))['amount__sum']
-            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount_2'))['amount_2__sum']
-            values_daily.append(amount_sum + amount_2_sum)
+
+            sum_1 = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date=date).aggregate(Sum('amount'))['amount__sum']
+            sum_2 = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__gt=0, date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__gt=0, date=date).aggregate(Sum('amount_2'))['amount_2__sum']
+            sum_3 = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date=date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date=date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum']
+
+            values_daily.append(sum_1 + sum_2 + sum_3)
 
 
         # WEEKLY CHART
@@ -279,9 +292,8 @@ def get_purchases_chart_data(request):
                 start_date, end_date = date_range.split(' - ')
             else:
                 start_date, end_date = (date_range, date_range)
-            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum']
-            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
-            values_weekly.append(amount_sum + amount_2_sum)
+
+            values_weekly.append(get_period_sum(queryset, start_date, end_date))
 
         labels_weekly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_weekly] # Removing the year component, as the label is too long
 
@@ -309,9 +321,8 @@ def get_purchases_chart_data(request):
                 start_date, end_date = date_range.split(' - ')
             else:
                 start_date, end_date = (date_range, date_range)
-            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum']
-            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
-            values_biweekly.append(amount_sum + amount_2_sum)
+
+            values_biweekly.append(get_period_sum(queryset, start_date, end_date))
 
         labels_biweekly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_biweekly] # Removing the year component, as the label is too long
 
@@ -345,9 +356,8 @@ def get_purchases_chart_data(request):
                 start_date, end_date = date_range.split(' - ')
             else:
                 start_date, end_date = (date_range, date_range)
-            amount_sum = 0 if queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount'))['amount__sum']
-            amount_2_sum = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, date__gte=start_date, date__lte=end_date).aggregate(Sum('amount_2'))['amount_2__sum']
-            values_monthly.append(amount_sum + amount_2_sum)
+
+            values_monthly.append(get_period_sum(queryset, start_date, end_date))
 
         labels_monthly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_monthly] # Removing the year component, as the label is too long
 
@@ -360,8 +370,8 @@ def get_purchases_chart_data(request):
 def get_net_worth_chart_data(request):
     user_object = request.user
 
-    labels_daily = []
-    values_daily = []
+    labels = []
+    values = []
 
     queryset = AccountUpdate.objects.filter(account__user=user_object) # Ordered by -timestamp
     distinct_accounts_list = set(queryset.values_list('account', flat=True)) # List of ints
@@ -371,9 +381,9 @@ def get_net_worth_chart_data(request):
         latest_value_dict[account] = 0
 
     for datetime_index in pd.date_range(queryset.last().timestamp.date(), queryset.first().timestamp.date(), freq='D'): # freq='D' is default; returns a DateTime index
-        labels_daily.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
+        labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
 
-    for date in labels_daily:
+    for date in labels:
         start_date = date[:-6] # Remove the prefix we just added so we can filter with the date
         end_date = str(datetime.datetime.strptime(date[:-6], '%Y-%m-%d').date()+datetime.timedelta(days=1))
 
@@ -399,10 +409,10 @@ def get_net_worth_chart_data(request):
 
             accounts_sum+=last_account_value_on_date
 
-        values_daily.append(accounts_sum)
+        values.append(accounts_sum)
 
 
-    return JsonResponse({'labels_daily': labels_daily, 'values_daily': values_daily})
+    return JsonResponse({'labels': labels, 'values': values})
 
 
 @login_required
@@ -683,7 +693,7 @@ class PurchaseListView(generic.ListView):
 @login_required
 def settings(request):
     user_object = request.user
-    
+
     if request.method == 'GET':
         context = {}
 

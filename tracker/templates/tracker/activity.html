@@ -269,6 +269,12 @@
             }
         });
 
+        $('#datepicker, #datepicker_2').on('keyup', function(e) {
+            if ($(this).val().length === 10) {
+                $(this).blur();
+            }
+        });
+
 
         get_accounts_sum = function() {
             $.ajax({
@@ -381,10 +387,10 @@
                         type: 'line',
                         plugins: [ChartRegressions],
                         data: {
-                            labels: response['labels_daily'],
+                            labels: response['labels'],
                             datasets: [{
                                 label: 'Dollars',
-                                data: response['values_daily'],
+                                data: response['values'],
                                 regressions: {
                                     type: 'linear',
                                     line: { color: 'red', width: 1},
@@ -413,7 +419,6 @@
                                 yAxes: [{
                                     ticks: {
                                         beginAtZero: false,
-                                        min: 0,
                                         callback: function(value) {
                                             return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
                                         }

@@ -207,6 +207,13 @@
                 }
             });
 
+            $('#datepicker, #datepicker_2').on('keyup', function(e) {
+                if ($(this).val().length === 10) {
+                    $(this).blur();
+                }
+            });
+            
+
             // Hide 2 fields and add an anchor link button
             $('#id_category_2,#id_amount_2').hide();
             $('#id_amount').after('<tr><td style="padding-top:5px;"><a id="custom_anchor_link" class="text-info" style="font-size:1rem;">Add 2<sup>nd</sup> category</a></td></tr>');
