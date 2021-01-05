@@ -193,11 +193,6 @@ class Recurring(models.Model):
         ('Weekend', 'Weekend'),
     ]
 
-    XTH_MODES = [
-        ('General', 'General'),
-        ('Specific', 'Specific'),
-    ]
-
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='recurrings_1')
     name = models.CharField(max_length=40, verbose_name='Name')
     description = models.TextField(blank=True, verbose_name='Details')
@@ -208,7 +203,7 @@ class Recurring(models.Model):
 
     start_date = models.DateField(default=current_date, verbose_name='Start Date')
 
-    days = models.CharField(blank=True, max_length=100, verbose_name='Days')
+    dates = models.CharField(blank=True, max_length=100, verbose_name='Dates')
     weekdays = models.CharField(blank=True, max_length=100, verbose_name='Weekdays')
 
     number = models.PositiveIntegerField(blank=True, null=True, default=30, verbose_name='Number')
@@ -216,7 +211,6 @@ class Recurring(models.Model):
     interval_type = models.CharField(blank=True, choices=INTERVAL_TYPES, max_length=15, verbose_name='Interval Type')
 
     xth_type = models.CharField(blank=True, choices=XTH_TYPES, max_length=15, verbose_name='Xth Type')
-    xth_mode = models.CharField(blank=True, choices=XTH_MODES, max_length=15, verbose_name='Xth Mode')
     xth_after_specific_date = models.DateField(blank=True, null=True, verbose_name='Xth After Specific Date')
     xth_after_months = models.PositiveIntegerField(blank=True, null=True, verbose_name='Xth After Months')
 
