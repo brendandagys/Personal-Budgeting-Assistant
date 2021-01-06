@@ -177,6 +177,8 @@
         $('#delete_Quick_Entry').hide()
     }
 
+    $('#quick_entry_table_div').find('td:contains("None")').each(function(i, v) { v.innerText = '' });
+
     $(document).ready(function() {
         $('.delete_button').on('click', function() {
             let model = $(this).attr('id').slice(7).replace('_', ' ');
@@ -204,6 +206,19 @@
                         alert('\nThere was an issue deleting ' + model + ': ' + to_delete.trim());
                     }
                 });
+            }
+        });
+
+        $('#datepicker, #datepicker_2').on('keyup', function(e) {
+            if ($(this).val().length === 10) {
+                $(this).blur();
+            }
+        });
+
+
+        $('#threshold_formset').find('input[name$="threshold"]').on('keyup', function() {
+            if ($(this).val().includes('.') && $(this).val().split('.')[1].length === 2) {
+                $(this).blur();
             }
         });
 

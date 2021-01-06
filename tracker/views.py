@@ -802,7 +802,7 @@ def settings(request):
 
     elif request.method == 'POST':
         if 'type' in request.POST:
-            if request.POST['type'] == 'Delete':
+            if request.POST['type'] == 'Delete': # ALL ARE TRIMMED in the front-end!
                 if request.POST['model'] == 'Purchase Category':
                     PurchaseCategory.objects.get(user=user_object, category=request.POST['to_delete']).delete()
                 elif request.POST['model'] == 'Account':
@@ -818,7 +818,6 @@ def settings(request):
                     user_object.save()
                 elif request.POST['model'] == 'Purchase Category':
                     purchase_category_object = PurchaseCategory.objects.get(id=request.POST['id'])
-                    print(request.POST)
                     if request.POST['field'] == 'threshold':
                         value = Decimal(request.POST['value'])
                     elif request.POST['field'] == 'threshold_rolling_days':
