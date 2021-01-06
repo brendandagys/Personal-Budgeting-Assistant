@@ -165,8 +165,8 @@ class AccountUpdate(models.Model):
 
 class Recurring(models.Model):
     RECURRING_TYPES = [
-        ('Credit', 'Credit'),
-        ('Debit', 'Debit'),
+        ('Credit', 'Credit (Bill)'),
+        ('Debit', 'Debit (Income)'),
     ]
 
     FREQUENCY_TYPES = [
@@ -208,7 +208,7 @@ class Recurring(models.Model):
 
     number = models.PositiveIntegerField(blank=True, null=True, default=30, verbose_name='Number')
 
-    interval_type = models.CharField(blank=True, choices=INTERVAL_TYPES, max_length=15, verbose_name='Interval Type')
+    interval_type = models.CharField(blank=True, choices=INTERVAL_TYPES, default='Days', max_length=15, verbose_name='Interval Type')
 
     xth_type = models.CharField(blank=True, choices=XTH_TYPES, max_length=15, verbose_name='Xth Type')
     xth_after_specific_date = models.DateField(blank=True, null=True, verbose_name='Xth After Specific Date')

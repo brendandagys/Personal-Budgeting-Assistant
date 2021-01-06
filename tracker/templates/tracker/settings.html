@@ -172,6 +172,36 @@
     }
 
     $(document).ready(function() {
+        $.each(['#id_number', '#id_interval_type', '#id_xth_type', '#id_xth_after_specific_date', '#id_xth_after_months'], function(i, v) { $(v + ',label[for="' + v.substring(1) + '"]').hide(); });
+        $('#id_weekdays').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link" class="text-info" style="font-size:0.8rem;">Set an interval instead...</a></td></tr>');
+        $('label[for="id_weekdays"]').css('margin-bottom', '28px');
+
+        $(document).on('click', '#custom_anchor_link', function(x) {
+            $('#id_dates, #id_weekdays, label[for="id_dates"], label[for="id_weekdays"], #custom_anchor_link').hide();
+            $('#id_dates, #id_weekdays').val('');
+            $('#id_number, #id_interval_type, label[for="id_number"], label[for="id_interval_type"]').show();
+            $('#id_interval_type').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link_2" class="text-info" style="font-size:0.8rem;">Every X<sup>th</sup> _______ ...</a></td></tr>');
+            $('label[for="id_interval_type"]').css('margin-bottom', '28px');
+        })
+
+        $(document).on('click', '#custom_anchor_link_2', function(x) {
+            $('label[for="id_number"]').html('X<sup>th</sup> Instance:');
+            $('#id_interval_type, label[for="id_interval_type"], #custom_anchor_link_2').hide();
+            $('#id_number, #id_interval_type').val('');
+            $('#id_xth_type, #id_xth_after_specific_date, #id_xth_after_months, label[for="id_xth_type"], label[for="id_xth_after_specific_date"], label[for="id_xth_after_months"]').show();
+            $('#id_xth_after_months').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link_3" class="text-info" style="font-size:0.8rem;">Specific date/weekday...</a></td></tr>');
+            $('label[for="id_xth_after_months"]').css('margin-bottom', '28px');
+        })
+
+        $(document).on('click', '#custom_anchor_link_3', function(x) {
+            $('label[for="id_number"]').text('Every:');
+            $('#id_number, #id_xth_type, #id_xth_after_specific_date, #id_xth_after_months, label[for="id_number"], label[for="id_xth_type"], label[for="id_xth_after_months"], label[for="id_xth_after_specific_date"], #custom_anchor_link_3').hide();
+            $('#id_number, #id_xth_type, #id_xth_after_specific_date, #id_xth_after_months').val('');
+            $('#id_dates, #id_weekdays, label[for="id_dates"], label[for="id_weekdays"]').show();
+            $('#id_weekdays').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link" class="text-info" style="font-size:0.8rem;">Set an interval instead...</a></td></tr>');
+        })
+
+
         $(document).on('click', '.delete_button', function() {
             let model = $(this).attr('id').slice(7).replace('_', ' ');
             let id_type = 'name';

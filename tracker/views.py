@@ -725,8 +725,7 @@ def settings(request):
                              'third_account_to_use': user_object.profile.third_account_to_use.id,
                              'credit_account': user_object.profile.credit_account.id,
                              'debit_account': user_object.profile.debit_account.id,
-                             'primary_currency': user_object.profile.primary_currency,
-                             'secondary_currency': user_object.profile.secondary_currency,}
+                             'primary_currency': user_object.profile.primary_currency, }
 
         context['profile_form'] = ProfileForm(profile_form_data)
 

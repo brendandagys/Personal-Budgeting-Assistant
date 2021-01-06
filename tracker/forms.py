@@ -1,6 +1,7 @@
-from django.forms import Form, ModelForm, DateField, DecimalField, NumberInput, TextInput, Textarea, CharField, ChoiceField, IntegerField # All added for ModelForms
+from django.forms import Form, ModelForm, DecimalField, NumberInput, CharField, SelectMultiple
 
 import datetime
+from calendar import day_name
 from django.utils import timezone
 
 def current_date():
@@ -138,6 +139,14 @@ class RecurringForm(ModelForm):
             self.fields[field].widget.attrs.update({'class': 'form-control form-control-sm', 'style': 'width:13rem'})
 
         self.fields['description'].widget.attrs.update({'rows': 2})
+        self.fields['dates'].widget = SelectMultiple(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in range(1,32)))
+        self.fields['weekdays'].widget = SelectMultiple(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in day_name))
+        self.fields['number'].label = 'Every'
+        self.fields['interval_type'].label = 'Unit'
+        self.fields['xth_type'].label = 'Of'
+        self.fields['xth_after_specific_date'].label = 'After This Date'
+        self.fields['xth_after_months'].label = 'Every __ Months'
+
 
     class Meta:
         model = Recurring
