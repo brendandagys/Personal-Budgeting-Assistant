@@ -63,7 +63,7 @@ class AlertResource(resources.ModelResource):
 @admin.register(Purchase)
 class PurchaseAdmin(ImportExportModelAdmin):
     resource_class = PurchaseResource
-    list_display = ('user', 'date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency', 'exchange_rate')
+    list_display = ('id', 'user', 'date', 'time', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description', 'currency', 'exchange_rate')
     list_filter = ['user', 'date', 'category', 'item', 'currency']
 
 @admin.register(QuickEntry)

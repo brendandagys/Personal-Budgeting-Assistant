@@ -458,7 +458,7 @@
 
 
             // When switching from a date to blank string, this ensures that the 'change' event fires
-            $(document).on('focusout', '#datepicker, #datepicker_2', function(e) {
+            $('#datepicker, #datepicker_2').on('focusout', function(e) {
                 if ($(this).val() === '') {
                     $.ajax({
                         type: 'POST',
@@ -481,7 +481,7 @@
             });
 
 
-            $(document).on('change', '#datepicker, #datepicker_2', function(e) {
+            $('#datepicker, #datepicker_2').on('change', function(e) {
                 console.log('Start date: ' + $('#datepicker').val());
                 console.log('End date: ' + $('#datepicker_2').val());
 

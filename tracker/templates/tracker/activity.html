@@ -473,7 +473,7 @@
         });
 
 
-        $(document).on('click', '#reset_credit_card', function (e) {
+        $('#reset_credit_card').on('click', function (e) {
             $.ajax({
                 type: 'POST',
                 url: 'reset_credit_card/',
@@ -524,7 +524,7 @@
 
 
         // When switching from a date to blank string, the 'change' event does not fire
-        $(document).on('focusout', '#datepicker, #datepicker_2', function(e) {
+        $('#datepicker, #datepicker_2').on('focusout', function(e) {
             if ($(this).val() === '') {
                 $.ajax({
                     type: 'POST',
@@ -547,7 +547,7 @@
         });
 
 
-        $(document).on('change', '#datepicker, #datepicker_2', function(e) {
+        $('#datepicker, #datepicker_2').on('change', function(e) {
             console.log('Start date: ' + $('#datepicker').val());
             console.log('End date: ' + $('#datepicker_2').val());
 
