@@ -450,7 +450,7 @@
                         charts();
                     },
                     error: function() {
-                        console.log('There was an issue updating the filter: ' + $(this).attr('id'));
+                        alert('\nThere was an issue updating the filter: ' + $(this).attr('id'));
                     }
                 });
                 return false;
@@ -474,7 +474,7 @@
                             charts();
                         },
                         error: function() {
-                            console.log('Error updating date filter.');
+                            alert('\nError updating date filter to: ' + $(this).val());
                         },
                   });
                 }
@@ -509,7 +509,7 @@
                             charts();
                         },
                         error: function() {
-                            console.log('Error updating date filter.');
+                            alert('\nError updating date filter to: ' + $(this).val());
                         },
                     });
                 }

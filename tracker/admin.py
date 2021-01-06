@@ -69,30 +69,30 @@ class PurchaseAdmin(ImportExportModelAdmin):
 @admin.register(QuickEntry)
 class QuickEntryAdmin(ImportExportModelAdmin):
     resource_class = QuickEntryResource
-    list_display = ('user', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description')
+    list_display = ('id', 'user', 'category', 'item', 'amount', 'category_2', 'amount_2', 'description')
     list_filter = ['user', 'category', 'item']
 
 @admin.register(PurchaseCategory)
 class PurchaseCategoryAdmin(ImportExportModelAdmin):
     resource_class = PurchaseCategoryResource
-    list_display = ('id', 'category', 'threshold', 'threshold_rolling_days', 'category_created_datetime')
+    list_display = ('id', 'user', 'category', 'threshold', 'threshold_rolling_days', 'category_created_datetime')
     readonly_fields = ('category_created_datetime',)
 
 @admin.register(Filter)
 class FilterAdmin(ImportExportModelAdmin):
     resource_class = FilterResource
-    list_display = ('id', 'page', 'category_filter_1', 'category_filter_2', 'category_filter_3', 'start_date_filter', 'end_date_filter', 'last_updated')
+    list_display = ('id', 'user', 'page', 'category_filter_1', 'category_filter_2', 'category_filter_3', 'start_date_filter', 'end_date_filter', 'last_updated')
     readonly_fields = ('last_updated',)
 
 @admin.register(Recurring)
 class RecurringAdmin(ImportExportModelAdmin):
     resource_class = RecurringResource
-    list_display = ('name', 'type', 'account', 'active', 'amount')
+    list_display = ('id', 'user', 'name', 'type', 'account', 'active', 'amount')
 
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):
     resource_class = AccountResource
-    list_display = ('id', 'account', 'active', 'credit', 'currency', 'account_created_datetime')
+    list_display = ('id', 'user', 'account', 'active', 'credit', 'currency', 'account_created_datetime')
     readonly_fields = ('account_created_datetime',)
 
 @admin.register(AccountUpdate)

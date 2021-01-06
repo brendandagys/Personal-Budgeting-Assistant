@@ -695,50 +695,113 @@ def settings(request):
     user_object = request.user
 
     if request.method == 'GET':
-        context = {}
+        if 'type' in request.GET:
+            if request.GET['model'] == 'Profile':
+                return JsonResponse({'account_to_use': user_object.profile.account_to_use.id,
+                                     'second_account_to_use': user_object.profile.second_account_to_use.id,
+                                     'third_account_to_use': user_object.profile.third_account_to_use.id,
+                                     'credit_account': user_object.profile.credit_account.id,
+                                     'debit_account': user_object.profile.debit_account.id,
+                                     'primary_currency': user_object.profile.primary_currency,})
 
-        ThresholdFormSet = modelformset_factory(PurchaseCategory,
-                                                fields=('category', 'threshold', 'threshold_rolling_days'),
-                                                widgets={'category': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px;'}),
-                                                         'threshold': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:95px;', 'inputmode': 'decimal'}),
-                                                         'threshold_rolling_days': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:53px;', 'inputmode': 'numeric'})})
+            elif request.GET['model'] == 'Recurring':
+                table_string = '''
+<table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
+    <tr style="font-size:0.7rem; text-align:center;">
+        <th>Name</th>
+        <th>Type</th>
+        <th>Account</th>
+        <th>Active</th>
+        <th>Amount</th>
+        <th>Freq.</th>
+    </tr>
+'''
 
-        AccountFormSet = modelformset_factory(Account,
-                                              exclude=(),
-                                              widgets={'account': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:200px;'}),
-                                                       'credit': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'}),
-                                                       'currency': Select(attrs={'class': 'form-control form-control-sm', 'style': 'width:67px; margin:auto;'}),
-                                                       'active': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'})})
+                for object in Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'active', 'amount'):
+                    table_string+='''
+    <tr style="font-size:0.5rem; text-align:center;">
+        <td style="vertical-align:middle;">{0}</td>
+        <td style="vertical-align:middle;">{1}</td>
+        <td style="vertical-align:middle;">{2}</td>
+        <td style="vertical-align:middle;">{3}</td>
+        <td style="vertical-align:middle;">{4}</td>
+        <td style="vertical-align:middle;">{5}</td>
+    </tr>
+'''.format(object['name'], object['type'], object['account__account'], object['active'], object['amount'], 'hey')
+                return JsonResponse(table_string + '</table>', safe=False)
 
-        context['threshold_formset'] = ThresholdFormSet()
+            elif request.GET['model'] == 'Quick Entry':
+                table_string = '''
+<table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
+    <tr style="font-size:0.7rem; text-align:center;">
+        <th>Category</th>
+        <th>Item</th>
+        <th>Amount</th>
+        <th>Category 2</th>
+        <th>Amount 2</th>
+        <th>Specifics</th>
+    </tr>
+'''
 
-        context['account_formset'] = AccountFormSet()
+                for object in QuickEntry.objects.filter(user=user_object).values('category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description'):
+                    table_string+='''
+    <tr style="font-size:0.5rem; text-align:center;">
+        <td style="vertical-align:middle;">{0}</td>
+        <td style="vertical-align:middle;">{1}</td>
+        <td style="vertical-align:middle;">{2}</td>
+        <td style="vertical-align:middle;">{3}</td>
+        <td style="vertical-align:middle;">{4}</td>
+        <td style="vertical-align:middle;">{5}</td>
+    </tr>
+'''.format(object['category__category'], object['item'], object['amount'], object['category_2__category'].replace('None', ''), object['amount_2'].replace('None', ''), 'hey')
+                return JsonResponse(table_string + '</table>', safe=False)
 
-        context['recurring_list'] = Recurring.objects.filter(user=user_object)
-        context['recurring_form'] = RecurringForm()
 
-        context['quick_entry_list'] = QuickEntry.objects.filter(user=user_object)
-        context['quick_entry_form'] = QuickEntryForm()
+        else: # Inital page load
+            context = {}
 
-        profile_form_data = {'account_to_use': user_object.profile.account_to_use.id,
-                             'second_account_to_use': user_object.profile.second_account_to_use.id,
-                             'third_account_to_use': user_object.profile.third_account_to_use.id,
-                             'credit_account': user_object.profile.credit_account.id,
-                             'debit_account': user_object.profile.debit_account.id,
-                             'primary_currency': user_object.profile.primary_currency, }
+            ThresholdFormSet = modelformset_factory(PurchaseCategory,
+                                                    fields=('category', 'threshold', 'threshold_rolling_days'),
+                                                    widgets={'category': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px;'}),
+                                                             'threshold': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:95px;', 'inputmode': 'decimal'}),
+                                                             'threshold_rolling_days': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:53px;', 'inputmode': 'numeric'})})
 
-        context['profile_form'] = ProfileForm(profile_form_data)
+            AccountFormSet = modelformset_factory(Account,
+                                                  exclude=(),
+                                                  widgets={'account': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:200px;'}),
+                                                           'credit': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'}),
+                                                           'currency': Select(attrs={'class': 'form-control form-control-sm', 'style': 'width:67px; margin:auto;'}),
+                                                           'active': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'})})
 
-        context['purchase_category_count'] = len(PurchaseCategory.objects.filter(user=user_object))
-        context['account_count'] = len(Account.objects.filter(user=user_object))
-        context['recurring_count'] = len(Recurring.objects.filter(user=user_object))
-        context['quick_entry_count'] = len(QuickEntry.objects.filter(user=user_object))
+            context['threshold_formset'] = ThresholdFormSet()
 
-        return render(request, 'tracker/settings.html', context=context)
+            context['account_formset'] = AccountFormSet()
+
+            context['recurring_list'] = Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'active', 'amount')
+            context['recurring_form'] = RecurringForm()
+
+            context['quick_entry_list'] = QuickEntry.objects.filter(user=user_object).values('category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
+            context['quick_entry_form'] = QuickEntryForm()
+
+            profile_form_data = {'account_to_use': user_object.profile.account_to_use.id,
+                                 'second_account_to_use': user_object.profile.second_account_to_use.id,
+                                 'third_account_to_use': user_object.profile.third_account_to_use.id,
+                                 'credit_account': user_object.profile.credit_account.id,
+                                 'debit_account': user_object.profile.debit_account.id,
+                                 'primary_currency': user_object.profile.primary_currency, }
+
+            context['profile_form'] = ProfileForm(profile_form_data)
+
+            context['purchase_category_count'] = PurchaseCategory.objects.filter(user=user_object).count()
+            context['account_count'] = Account.objects.filter(user=user_object).count()
+            context['recurring_count'] = Recurring.objects.filter(user=user_object).count()
+            context['quick_entry_count'] = QuickEntry.objects.filter(user=user_object).count()
+
+            return render(request, 'tracker/settings.html', context=context)
 
 
     elif request.method == 'POST':
-        if 'to_delete' in request.POST:
+        if request.POST['type'] == 'Delete':
             if request.POST['model'] == 'Purchase Category':
                 PurchaseCategory.objects.get(user=user_object, category=request.POST['to_delete']).delete()
             elif request.POST['model'] == 'Account':
@@ -747,6 +810,11 @@ def settings(request):
                 Recurring.objects.get(user=user_object, name=request.POST['to_delete']).delete()
             elif request.POST['model'] == 'Quick Entry':
                 QuickEntry.objects.get(user=user_object, id=request.POST['to_delete']).delete()
+
+        elif request.POST['type'] == 'Update':
+            if request.POST['model'] == 'Profile':
+                setattr(user_object.profile, request.POST['id'][3:], Account.objects.get(id=request.POST['value']))
+                user_object.save()
 
         return HttpResponse()
 

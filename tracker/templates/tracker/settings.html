@@ -83,26 +83,28 @@
             <br>
             <h6 style="text-align:center;">Recurring Payments</h6>
             <p style="font-size:0.5rem; text-align:center;">Add and update bills or other recurring payments/income.</p>
-            <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
-                <tr style="font-size:0.7rem; text-align:center;">
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Account</th>
-                    <th>Active</th>
-                    <th>Amount</th>
-                    <th>Freq.</th>
-                </tr>
-                {% for recurring in recurring_list %}
-                    <tr style="font-size:0.5rem; text-align:center;">
-                        <td style="vertical-align:middle;">{{ recurring.name }}</td>
-                        <td style="vertical-align:middle;">{{ recurring.type }}</td>
-                        <td style="vertical-align:middle;">{{ recurring.account }}</td>
-                        <td style="vertical-align:middle;">{{ recurring.active }}</td>
-                        <td style="vertical-align:middle;">{{ recurring.amount }}</td>
-                        <td style="vertical-align:middle;">{{ recurring.frequency }}</td>
+            <div id="recurring_table_div">
+                <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
+                    <tr style="font-size:0.7rem; text-align:center;">
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Account</th>
+                        <th>Active</th>
+                        <th>Amount</th>
+                        <th>Freq.</th>
                     </tr>
-                {% endfor %}
-            </table>
+                    {% for recurring in recurring_list %}
+                        <tr style="font-size:0.5rem; text-align:center;">
+                            <td style="vertical-align:middle;">{{ recurring.name }}</td>
+                            <td style="vertical-align:middle;">{{ recurring.type }}</td>
+                            <td style="vertical-align:middle;">{{ recurring.account__account }}</td>
+                            <td style="vertical-align:middle;">{{ recurring.active }}</td>
+                            <td style="vertical-align:middle;">{{ recurring.amount }}</td>
+                            <td style="vertical-align:middle;">{{ recurring.frequency }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
             <div style="text-align:center; margin-top:10px;"><button id="delete_Recurring_Payment" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete a Recurring Payment...</button></div>
 
             <br>
@@ -118,26 +120,28 @@
             <br>
             <h6 style="text-align:center;">Quick Entries</h6>
             <p style="font-size:0.5rem; text-align:center;">Add a Quick Entry for the Purchase Form.</p>
-            <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
-                <tr style="font-size:0.5rem; text-align:center;">
-                    <th>Category</th>
-                    <th>Item</th>
-                    <th>Amount</th>
-                    <th>Category 2</th>
-                    <th>Amount 2</th>
-                    <th>Specifics</th>
-                </tr>
-                {% for quick_entry in quick_entry_list %}
-                    <tr style="font-size:0.4rem; text-align:center;">
-                        <td style="vertical-align:middle;">{{ quick_entry.category }}</td>
-                        <td style="vertical-align:middle;">{{ quick_entry.item }}</td>
-                        <td style="vertical-align:middle;">{{ quick_entry.amount }}</td>
-                        <td style="vertical-align:middle;">{{ quick_entry.category_2 }}</td>
-                        <td style="vertical-align:middle;">{{ quick_entry.amount_2 }}</td>
-                        <td style="vertical-align:middle;">{{ quick_entry.description }}</td>
+            <div id="quick_entry_table_div">
+                <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
+                    <tr style="font-size:0.5rem; text-align:center;">
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Amount</th>
+                        <th>Category 2</th>
+                        <th>Amount 2</th>
+                        <th>Specifics</th>
                     </tr>
-                {% endfor %}
-            </table>
+                    {% for quick_entry in quick_entry_list %}
+                        <tr style="font-size:0.4rem; text-align:center;">
+                            <td style="vertical-align:middle;">{{ quick_entry.category__category }}</td>
+                            <td style="vertical-align:middle;">{{ quick_entry.item }}</td>
+                            <td style="vertical-align:middle;">{{ quick_entry.amount }}</td>
+                            <td style="vertical-align:middle;">{{ quick_entry.category_2__category }}</td>
+                            <td style="vertical-align:middle;">{{ quick_entry.amount_2 }}</td>
+                            <td style="vertical-align:middle;">{{ quick_entry.description }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
             <div style="text-align:center; margin-top:10px;"><button id="delete_Quick_Entry" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete a Quick Entry...</button></div>
 
             <br>
@@ -186,6 +190,7 @@
                     type: 'POST',
                     url: '',
                     data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'type': 'Delete',
                             'model': model,
                             'to_delete': to_delete.trim(),
                     },
@@ -200,33 +205,104 @@
             }
         });
 
+
+        function get_profile_form() {
+            $.ajax({
+                type: 'GET',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Fetch',
+                        'model': 'Profile',
+                      },
+                success: function(response) {
+                    $.each(response, function(key, value) {
+                          $('#id_' + key).val(value);
+                    });
+                },
+                error: function() {
+                    alert('\nCould not retrieve Profile data!');
+                }
+            });
+        }
+
+        $('#profile_form').find('select').on('change', function() {
+            $.ajax({
+                type: 'POST',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Update',
+                        'model': 'Profile',
+                        'id': $(this).attr('id'),
+                        'value': $(this).val(),
+                },
+                context: this, // To allow access in the callback functions
+                success: function (response) {
+                    $(this).css('background', '#D0F0C0');
+                    console.log('\nSet value to: ' + $(this).find(':selected').text());
+                },
+                error: function (response) {
+                    alert('\nCould not set value to: ' + $(this).find(':selected').text());
+                }
+            });
+        });
+
+
+        function get_recurring_payments_table() {
+            $.ajax({
+                type: 'GET',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Fetch',
+                        'model': 'Recurring',
+                      },
+                success: function(response) {
+                    $('#recurring_table_div').html(response);
+                }
+            });
+        }
+
         $.each(['#id_number', '#id_interval_type', '#id_xth_type', '#id_xth_after_specific_date', '#id_xth_after_months'], function(i, v) { $(v + ',label[for="' + v.substring(1) + '"]').hide(); });
         $('#id_weekdays').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link" class="text-info" style="font-size:0.8rem;">Set an interval instead...</a></td></tr>');
         $('label[for="id_weekdays"]').css('margin-bottom', '28px');
 
-        $(document).on('click', function(x) {
+        $(document).on('click', function() {
             $('#id_dates, #id_weekdays, label[for="id_dates"], label[for="id_weekdays"], #custom_anchor_link').hide();
             $('#id_dates, #id_weekdays').val('');
             $('#id_number, #id_interval_type, label[for="id_number"], label[for="id_interval_type"]').show();
             $('#id_interval_type').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link_2" class="text-info" style="font-size:0.8rem;">Every X<sup>th</sup> _______ ...</a></td></tr>');
             $('label[for="id_interval_type"]').css('margin-bottom', '28px');
-        })
+        });
 
-        $(document).on('click', '#custom_anchor_link_2', function(x) {
+        $(document).on('click', '#custom_anchor_link_2', function() {
             $('label[for="id_number"]').html('X<sup>th</sup> Instance:');
             $('#id_interval_type, label[for="id_interval_type"], #custom_anchor_link_2').hide();
             $('#id_number, #id_interval_type').val('');
             $('#id_xth_type, #id_xth_after_specific_date, #id_xth_after_months, label[for="id_xth_type"], label[for="id_xth_after_specific_date"], label[for="id_xth_after_months"]').show();
             $('#id_xth_after_months').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link_3" class="text-info" style="font-size:0.8rem;">Specific date/weekday...</a></td></tr>');
             $('label[for="id_xth_after_months"]').css('margin-bottom', '28px');
-        })
+        });
 
-        $(document).on('click', '#custom_anchor_link_3', function(x) {
+        $(document).on('click', '#custom_anchor_link_3', function() {
             $('label[for="id_number"]').text('Every:');
             $('#id_number, #id_xth_type, #id_xth_after_specific_date, #id_xth_after_months, label[for="id_number"], label[for="id_xth_type"], label[for="id_xth_after_months"], label[for="id_xth_after_specific_date"], #custom_anchor_link_3').hide();
             $('#id_number, #id_xth_type, #id_xth_after_specific_date, #id_xth_after_months').val('');
             $('#id_dates, #id_weekdays, label[for="id_dates"], label[for="id_weekdays"]').show();
             $('#id_weekdays').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link" class="text-info" style="font-size:0.8rem;">Set an interval instead...</a></td></tr>');
-        })
+        });
+
+
+        function get_quick_entry_table() {
+            $.ajax({
+                type: 'GET',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Fetch',
+                        'model': 'Quick Entry',
+                      },
+                success: function(response) {
+                    $('#quick_entry_table_div').html(response);
+                }
+            });
+        }
     });
 </script>

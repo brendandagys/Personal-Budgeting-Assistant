@@ -168,7 +168,6 @@
             success: function(response) {
                 $.each(response, function(index, category_filter) {
                       $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
-                      // console.log(category_filter);
                 });
             }
         });
@@ -226,10 +225,9 @@
 
                   get_queryset();
                   hide_and_reset_modal();
-
               },
               error: function (response) {
-                  console.log('There was an issue deleting Purchase: ' + $(this).data('id'));
+                  alert('\nThere was an issue deleting Purchase: ' + $(this).data('id'));
               }
           });
         });
@@ -326,7 +324,7 @@
                     $('#purchase_list_div').html(
                         function() {
                             let purchase_list = '<ul class="list_container" style="padding-left:0; margin:22px 0 0;">';
-                            $.each(response['data'], function(index, value) {
+                            $.each(response['data'], function(key, value) {
                                 let id = value.id;
                                 let date = value.date;
                                 let time = value.time;
@@ -458,13 +456,13 @@
                     success: function (response) {
                         console.log($(this).attr('id') + ' updated to: ' + $(this).val());
                         $.each(response, function(id, account_placeholder) {
-                            $('#' + id.replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).attr('placeholder', account_placeholder);
+                            $('#' + $.escapeSelector(id)).attr('placeholder', account_placeholder);
                         });
                         get_accounts_sum();
                         net_worth_chart();
                     },
                     error: function () {
-                        console.log('There was an issue updating the value for ' + $(this).attr('id'));
+                        alert('\nThere was an issue updating the value for: ' + $(this).attr('id').substring(3));
                     }
                 });
             }
@@ -477,14 +475,14 @@
                 url: 'reset_credit_card/',
                 data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
                 success: function(response) {
-                    $('#id_' + response['credit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).val('');
-                    $('#id_' + response['credit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).attr('placeholder', '$                0.00');
-                    $('#id_' + response['debit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).val('');
-                    $('#id_' + response['debit_account'].replace(/[!"# $%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")).attr('placeholder', response['debit_account_balance']);
+                    $('#id_' + $.escapeSelector(response['credit_account'])).val('');
+                    $('#id_' + $.escapeSelector(response['credit_account'])).attr('placeholder', '$                0.00');
+                    $('#id_' + $.escapeSelector(response['debit_account'])).val('');
+                    $('#id_' + $.escapeSelector(response['debit_account'])).attr('placeholder', response['debit_account_balance']);
                     console.log('Credit card successfully reset!'); // DO NOT NEED TO CALL get_accounts_sum() or net_worth_chart(), because decrement in CC accompanied by decrement in chequing balance
                 },
                 error: function() {
-                    console.log('Error resetting credit card.!');
+                    alert('\nError resetting credit card!');
                 },
             });
         });
@@ -514,7 +512,7 @@
                     get_queryset();
                 },
                 error: function() {
-                    console.log('There was an issue updating the filter: ' + $(this).attr('id'));
+                    alert('\nThere was an issue updating the filter: ' + $(this).attr('id'));
                 }
             });
             return false;
@@ -538,7 +536,7 @@
                         get_queryset();
                     },
                     error: function() {
-                        console.log('Error updating date filter.');
+                        alert('\nError updating date filter to: ' + $(this).val());
                     },
               });
             }
@@ -573,7 +571,7 @@
                         get_queryset();
                     },
                     error: function() {
-                        console.log('Error updating date filter.');
+                        alert('\nError updating date filter to: ' + $(this).val());
                     },
                 });
             }
