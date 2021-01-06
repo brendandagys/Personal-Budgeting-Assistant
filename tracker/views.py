@@ -761,7 +761,7 @@ def settings(request):
             context = {}
 
             ThresholdFormSet = modelformset_factory(PurchaseCategory,
-                                                    fields=('category', 'threshold', 'threshold_rolling_days'),
+                                                    fields=('id', 'category', 'threshold', 'threshold_rolling_days'),
                                                     widgets={'category': TextInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px;'}),
                                                              'threshold': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:95px;', 'inputmode': 'decimal'}),
                                                              'threshold_rolling_days': NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:53px;', 'inputmode': 'numeric'})})
@@ -801,22 +801,52 @@ def settings(request):
 
 
     elif request.method == 'POST':
-        if request.POST['type'] == 'Delete':
-            if request.POST['model'] == 'Purchase Category':
-                PurchaseCategory.objects.get(user=user_object, category=request.POST['to_delete']).delete()
-            elif request.POST['model'] == 'Account':
-                Account.objects.get(user=user_object, account=request.POST['to_delete']).delete()
-            elif request.POST['model'] == 'Recurring Payment':
-                Recurring.objects.get(user=user_object, name=request.POST['to_delete']).delete()
-            elif request.POST['model'] == 'Quick Entry':
-                QuickEntry.objects.get(user=user_object, id=request.POST['to_delete']).delete()
+        if 'type' in request.POST:
+            if request.POST['type'] == 'Delete':
+                if request.POST['model'] == 'Purchase Category':
+                    PurchaseCategory.objects.get(user=user_object, category=request.POST['to_delete']).delete()
+                elif request.POST['model'] == 'Account':
+                    Account.objects.get(user=user_object, account=request.POST['to_delete']).delete()
+                elif request.POST['model'] == 'Recurring Payment':
+                    Recurring.objects.get(user=user_object, name=request.POST['to_delete']).delete()
+                elif request.POST['model'] == 'Quick Entry':
+                    QuickEntry.objects.get(user=user_object, id=request.POST['to_delete']).delete()
 
-        elif request.POST['type'] == 'Update':
-            if request.POST['model'] == 'Profile':
-                setattr(user_object.profile, request.POST['id'][3:], Account.objects.get(id=request.POST['value']))
-                user_object.save()
+            elif request.POST['type'] == 'Update':
+                if request.POST['model'] == 'Profile':
+                    setattr(user_object.profile, request.POST['id'][3:], Account.objects.get(id=request.POST['value']))
+                    user_object.save()
+                elif request.POST['model'] == 'Purchase Category':
+                    purchase_category_object = PurchaseCategory.objects.get(id=request.POST['id'])
+                    print(request.POST)
+                    if request.POST['field'] == 'threshold':
+                        value = Decimal(request.POST['value'])
+                    elif request.POST['field'] == 'threshold_rolling_days':
+                        value = int(request.POST['value'])
+                    else:
+                        value = request.POST['value']
+                    setattr(purchase_category_object, request.POST['field'], value)
+                    purchase_category_object.save()
 
-        return HttpResponse()
+            return HttpResponse()
+
+        else:
+            quick_entry_form = QuickEntryForm(request.POST)
+
+            if quick_entry_form.is_valid():
+                quick_entry_instance = QuickEntry()
+
+                quick_entry_instance.user = user_object
+                quick_entry_instance.item = quick_entry_form.cleaned_data['item'].strip()
+                quick_entry_instance.category = quick_entry_form.cleaned_data['category']
+                quick_entry_instance.amount = quick_entry_form.cleaned_data['amount']
+                quick_entry_instance.category_2 = quick_entry_form.cleaned_data['category_2']
+                quick_entry_instance.amount_2 = quick_entry_form.cleaned_data['amount_2']
+                quick_entry_instance.description = quick_entry_form.cleaned_data['description'].strip() if len(quick_entry_form.cleaned_data['description'].strip()) == 0 or quick_entry_form.cleaned_data['description'].strip()[-1] == '.' else quick_entry_form.cleaned_data['description'].strip() + '.' # Add a period if not present
+
+                quick_entry_instance.save()
+
+                return redirect('settings')
 
 
 @login_required

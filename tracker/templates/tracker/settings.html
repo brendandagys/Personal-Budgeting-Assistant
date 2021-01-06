@@ -47,6 +47,7 @@
                     </tr>
                     {% for form in threshold_formset %}
                         <tr>
+                            <td style="display:none;">{{ form.id }}</td>
                             <td style="width:55%">{{ form.category }}</td>
                             <td style="width:30%">{{ form.threshold }}</td>
                             <td style="width:17%">{{ form.threshold_rolling_days }}</td>
@@ -70,6 +71,7 @@
                     </tr>
                     {% for form in account_formset %}
                         <tr>
+                            <td style="display:none;">{{ form.id }}</td>
                             <td style="width:65%">{{ form.account }}</td>
                             <td style="width:10%">{{ form.credit }}</td>
                             <td style="width:15%">{{ form.currency }}</td>
@@ -247,6 +249,30 @@
         });
 
 
+        $('#threshold_formset').on('change', function(e) {
+            $.ajax({
+                type: 'POST',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Update',
+                        'model': 'Purchase Category',
+                        'id': $('#' + e.target.id).parent().siblings().first().children().val(),
+                        'field': e.target.id.split('-').slice(-1)[0],
+                        'value': e.target.value,
+                },
+                context: this, // To allow access in the callback functions
+                success: function (response) {
+                    $('#' + e.target.id).css('background', '#D0F0C0');
+                    console.log('\nSet value to: ' + e.target.value);
+                },
+                error: function (response) {
+                    alert('\nCould not set value to: ' + e.target.value);
+                }
+            });
+
+        });
+
+
         function get_recurring_payments_table() {
             $.ajax({
                 type: 'GET',
@@ -265,7 +291,7 @@
         $('#id_weekdays').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link" class="text-info" style="font-size:0.8rem;">Set an interval instead...</a></td></tr>');
         $('label[for="id_weekdays"]').css('margin-bottom', '28px');
 
-        $(document).on('click', function() {
+        $(document).on('click', '#custom_anchor_link', function() {
             $('#id_dates, #id_weekdays, label[for="id_dates"], label[for="id_weekdays"], #custom_anchor_link').hide();
             $('#id_dates, #id_weekdays').val('');
             $('#id_number, #id_interval_type, label[for="id_number"], label[for="id_interval_type"]').show();
