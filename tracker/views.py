@@ -753,7 +753,7 @@ def settings(request):
         <td style="vertical-align:middle;">{4}</td>
         <td style="vertical-align:middle;">{5}</td>
     </tr>
-'''.format(object['category__category'], object['item'], object['amount'], object['category_2__category'].replace('None', ''), object['amount_2'].replace('None', ''), 'hey')
+'''.format(str(object['category__category']).replace('None', ''), object['item'], object['amount'], str(object['category_2__category']).replace('None', ''), str(object['amount_2']).replace('None', ''), 'hey')
                 return JsonResponse(table_string + '</table>', safe=False)
 
 
@@ -802,32 +802,57 @@ def settings(request):
 
     elif request.method == 'POST':
         if 'type' in request.POST:
+            data_dict = {}
+
             if request.POST['type'] == 'Delete': # ALL ARE TRIMMED in the front-end!
                 if request.POST['model'] == 'Purchase Category':
-                    PurchaseCategory.objects.get(user=user_object, category=request.POST['to_delete']).delete()
+                    PurchaseCategory.objects.filter(user=user_object, category=request.POST['to_delete']).delete()
                 elif request.POST['model'] == 'Account':
-                    Account.objects.get(user=user_object, account=request.POST['to_delete']).delete()
+                    Account.objects.filter(user=user_object, account=request.POST['to_delete']).delete()
                 elif request.POST['model'] == 'Recurring Payment':
-                    Recurring.objects.get(user=user_object, name=request.POST['to_delete']).delete()
+                    Recurring.objects.filter(user=user_object, name=request.POST['to_delete']).delete()
                 elif request.POST['model'] == 'Quick Entry':
-                    QuickEntry.objects.get(user=user_object, id=request.POST['to_delete']).delete()
+                    QuickEntry.objects.filter(user=user_object, id=request.POST['to_delete']).delete()
 
             elif request.POST['type'] == 'Update':
                 if request.POST['model'] == 'Profile':
                     setattr(user_object.profile, request.POST['id'][3:], Account.objects.get(id=request.POST['value']))
                     user_object.save()
+
                 elif request.POST['model'] == 'Purchase Category':
-                    purchase_category_object = PurchaseCategory.objects.get(id=request.POST['id'])
+                    if request.POST['id'] == '':
+                        purchase_category_object = PurchaseCategory.objects.create(user=user_object)
+                        data_dict.update({'id': purchase_category_object.id})
+                    else:
+                        purchase_category_object = PurchaseCategory.objects.get(id=request.POST['id'])
                     if request.POST['field'] == 'threshold':
                         value = Decimal(request.POST['value'])
                     elif request.POST['field'] == 'threshold_rolling_days':
                         value = int(request.POST['value'])
-                    else:
+                    else: # Field is 'category'
                         value = request.POST['value']
                     setattr(purchase_category_object, request.POST['field'], value)
                     purchase_category_object.save()
 
-            return HttpResponse()
+                elif request.POST['model'] == 'Account':
+                    if request.POST['id'] == '':
+                        account_object = Account.objects.create(user=user_object)
+                        data_dict.update({'id': account_object.id})
+                    else:
+                        account_object = Account.objects.get(id=request.POST['id'])
+
+                    if request.POST['field'] == 'account':
+                        value = request.POST['value']
+                    elif request.POST['field'] == 'credit': # .val() comes through as 'on' for checkboxes. Use .is(':checked') ... but easier to toggle here
+                        value = not(account_object.credit)
+                    elif request.POST['field'] == 'currency':
+                        value = request.POST['value']
+                    else: # Field is 'active'
+                        value = not(account_object.active)
+                    setattr(account_object, request.POST['field'], value)
+                    account_object.save()
+
+            return JsonResponse(data_dict)
 
         else:
             quick_entry_form = QuickEntryForm(request.POST)

@@ -177,7 +177,7 @@
         $('#delete_Quick_Entry').hide()
     }
 
-    $('#quick_entry_table_div').find('td:contains("None")').each(function(i, v) { v.innerText = '' });
+    $('#quick_entry_table_div').find('td:contains("None")').each(function() { this.innerText = '' });
 
     $(document).ready(function() {
         $('.delete_button').on('click', function() {
@@ -187,8 +187,7 @@
                 id_type = 'ID';
             }
             let to_delete = prompt('\nPlease enter the exact ' + id_type + ' of the ' + model + ' that you want to delete:')
-            console.log(model);
-            console.log(to_delete.trim());
+
             if (to_delete != null && to_delete.trim() !== '') {
                 $.ajax({
                     type: 'POST',
@@ -200,6 +199,14 @@
                     },
                     context: this, // To allow access in the callback functions
                     success: function (response) {
+                        if (model === 'Purchase Category') {
+                            get_quick_entry_table();
+                        }
+                        else if (model === 'Account') {
+                            get_profile_form();
+                            get_recurring_payments_table();
+                        }
+
                         alert('\nDeleted ' + model + ': ' + to_delete.trim());
                     },
                     error: function (response) {
@@ -208,6 +215,7 @@
                 });
             }
         });
+
 
         $('#datepicker, #datepicker_2').on('keyup', function(e) {
             if ($(this).val().length === 10) {
@@ -220,6 +228,13 @@
             if ($(this).val().includes('.') && $(this).val().split('.')[1].length === 2) {
                 $(this).blur();
             }
+        });
+
+
+        $('#id_amount, #id_amount_2').on('keyup', function() {
+            if ($(this).val().includes('.') && $(this).val().split('.')[1].length === 2) {
+                $(this).blur();
+          }
         });
 
 
@@ -264,7 +279,20 @@
         });
 
 
+        var $clone_row_threshold = $('#threshold_formset').find('tr').last().clone(); // Make a copy of the empty last row
+        var last_row_number_threshold = parseInt($clone_row_threshold.find('input').last().attr('id').split('-')[1]); // Extract the last row's form counter
+
         $('#threshold_formset').on('change', function(e) {
+            if (parseInt(e.target.id.split('-')[1]) === last_row_number_threshold) {
+                $('#threshold_formset tr').last().after($clone_row_threshold); // Insert the clone after the current last row
+                $('#threshold_formset tr').last().children().each(function(){ // For each td of the last tr...
+                    let id = $(this).children().prop('id'); // Get the field's form/row counter
+                    $(this).children().prop('id', id.split('-')[0] + '-' + (last_row_number_threshold+1) + '-' + id.split('-')[2]); // Update each input id to contain the new form/row counter
+                });
+                $clone_row_threshold = $clone_row_threshold.clone(); // Necessary to dynamically add a second form
+                last_row_number_threshold++; // Increment the last form/row counter for the next new form...
+            }
+            
             $.ajax({
                 type: 'POST',
                 url: '',
@@ -273,15 +301,64 @@
                         'model': 'Purchase Category',
                         'id': $('#' + e.target.id).parent().siblings().first().children().val(),
                         'field': e.target.id.split('-').slice(-1)[0],
-                        'value': e.target.value,
+                        'value': e.target.value.trim(),
                 },
                 context: this, // To allow access in the callback functions
                 success: function (response) {
                     $('#' + e.target.id).css('background', '#D0F0C0');
-                    console.log('\nSet value to: ' + e.target.value);
+                    if ('id' in response) {
+                        $('#' + e.target.id).parent().siblings().first().children().val(response['id']);
+                        $('#' + e.target.id).parent().siblings().first().children().attr('value', (response['id']));
+                    }
+                    // console.log(response['id']);
+                    console.log('\nSet value to: ' + e.target.value.trim());
+                    get_quick_entry_table();
                 },
                 error: function (response) {
-                    alert('\nCould not set value to: ' + e.target.value);
+                    alert('\nCould not set value to: ' + e.target.value.trim());
+                }
+            });
+        });
+
+
+        var $clone_row_account = $('#account_formset').find('tr').last().clone(); // Make a copy of the empty last row
+        var last_row_number_account = parseInt($clone_row_account.find('input').last().attr('id').split('-')[1]); // Extract the last row's form counter
+
+        $('#account_formset').on('change', function(e) {
+            if (parseInt(e.target.id.split('-')[1]) === last_row_number_account) {
+                $('#account_formset tr').last().after($clone_row_account); // Insert the clone after the current last row
+                $('#account_formset tr').last().children().each(function(){ // For each td of the last tr...
+                    let id = $(this).children().prop('id'); // Get the field's form/row counter
+                    $(this).children().prop('id', id.split('-')[0] + '-' + (last_row_number_account+1) + '-' + id.split('-')[2]); // Update each input id to contain the new form/row counter
+                });
+                $clone_row_account = $clone_row_account.clone(); // Necessary to dynamically add a second form
+                last_row_number_account++; // Increment the last form/row counter for the next new form...
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Update',
+                        'model': 'Account',
+                        'id': $('#' + e.target.id).parent().siblings().first().children().val(),
+                        'field': e.target.id.split('-').slice(-1)[0],
+                        'value': e.target.value.trim(),
+                },
+                context: this, // To allow access in the callback functions
+                success: function (response) {
+                    $('#' + e.target.id).css('background', '#D0F0C0');
+                    if ('id' in response) {
+                        $('#' + e.target.id).parent().siblings().first().children().val(response['id']);
+                        $('#' + e.target.id).parent().siblings().first().children().attr('value', (response['id']));
+                    }
+                    // console.log(response['id']);
+                    console.log('\nSet value to: ' + e.target.value.trim());
+                    get_profile_form();
+                    get_recurring_payments_table();
+                },
+                error: function (response) {
+                    alert('\nCould not set value to: ' + e.target.value.trim());
                 }
             });
 
@@ -298,6 +375,7 @@
                       },
                 success: function(response) {
                     $('#recurring_table_div').html(response);
+                    console.log('Refreshed Recurring Payments table.');
                 }
             });
         }
@@ -342,6 +420,7 @@
                       },
                 success: function(response) {
                     $('#quick_entry_table_div').html(response);
+                    console.log('Refreshed Quick Entry table.');
                 }
             });
         }
