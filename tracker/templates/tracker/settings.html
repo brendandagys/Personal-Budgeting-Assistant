@@ -247,7 +247,8 @@
                         'model': 'Profile',
                       },
                 success: function(response) {
-                    $.each(response, function(key, value) {
+                    $('#profile_form select').not('#id_primary_currency').empty().append(response['choices'])
+                    $.each(response['values'], function(key, value) {
                           $('#id_' + key).val(value);
                     });
                 },
@@ -269,7 +270,7 @@
                 },
                 context: this, // To allow access in the callback functions
                 success: function (response) {
-                    $(this).css('background', '#D0F0C0');
+                    $(this).css('background-color', '#D0F0C0');
                     console.log('\nSet value to: ' + $(this).find(':selected').text());
                 },
                 error: function (response) {
@@ -292,7 +293,7 @@
                 $clone_row_threshold = $clone_row_threshold.clone(); // Necessary to dynamically add a second form
                 last_row_number_threshold++; // Increment the last form/row counter for the next new form...
             }
-            
+
             $.ajax({
                 type: 'POST',
                 url: '',

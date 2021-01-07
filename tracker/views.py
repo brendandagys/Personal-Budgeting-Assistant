@@ -697,12 +697,18 @@ def settings(request):
     if request.method == 'GET':
         if 'type' in request.GET:
             if request.GET['model'] == 'Profile':
-                return JsonResponse({'account_to_use': user_object.profile.account_to_use.id,
-                                     'second_account_to_use': user_object.profile.second_account_to_use.id,
-                                     'third_account_to_use': user_object.profile.third_account_to_use.id,
-                                     'credit_account': user_object.profile.credit_account.id,
-                                     'debit_account': user_object.profile.debit_account.id,
-                                     'primary_currency': user_object.profile.primary_currency,})
+                choices = ''
+                for x in Account.objects.values('id', 'account'): # Using a generator or list comprehension wasn't working
+                    choices+='<option value="{0}">{1}</option>'.format(x['id'], x['account'])
+
+                return JsonResponse({'choices': choices,
+                                     'values': {'account_to_use': user_object.profile.account_to_use.id,
+                                                'second_account_to_use': user_object.profile.second_account_to_use.id,
+                                                'third_account_to_use': user_object.profile.third_account_to_use.id,
+                                                'credit_account': user_object.profile.credit_account.id,
+                                                'debit_account': user_object.profile.debit_account.id,
+                                                'primary_currency': user_object.profile.primary_currency,
+                                    } })
 
             elif request.GET['model'] == 'Recurring':
                 table_string = '''
