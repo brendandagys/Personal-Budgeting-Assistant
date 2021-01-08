@@ -182,6 +182,7 @@ class Recurring(models.Model):
     ]
 
     XTH_TYPES = [
+        ('Weekday', 'Weekday'),
         ('Sunday', 'Sunday'),
         ('Monday', 'Monday'),
         ('Tuesday', 'Tuesday'),
@@ -189,7 +190,6 @@ class Recurring(models.Model):
         ('Thursday', 'Thursday'),
         ('Friday', 'Friday'),
         ('Saturday', 'Saturday'),
-        ('Weekday', 'Weekday'),
         ('Weekend', 'Weekend'),
     ]
 
@@ -198,6 +198,7 @@ class Recurring(models.Model):
     description = models.TextField(blank=True, verbose_name='Details')
     type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='recurrings_2')
+    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='recurrings_3') # blank=False by default...
     active = models.BooleanField(default=True, verbose_name='Active')
     amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
 
@@ -211,7 +212,7 @@ class Recurring(models.Model):
     interval_type = models.CharField(blank=True, choices=INTERVAL_TYPES, default='Days', max_length=15, verbose_name='Interval Type')
 
     xth_type = models.CharField(blank=True, choices=XTH_TYPES, max_length=15, verbose_name='Xth Type')
-    xth_after_specific_date = models.DateField(blank=True, null=True, verbose_name='Xth After Specific Date')
+    xth_from_specific_date = models.CharField(blank=True, max_length=10, verbose_name='Xth From Specific Date')
     xth_after_months = models.PositiveIntegerField(blank=True, null=True, verbose_name='Xth After Months')
 
     class Meta:

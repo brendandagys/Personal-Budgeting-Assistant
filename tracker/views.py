@@ -157,7 +157,7 @@ def get_json_queryset(request):
                                                filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                if x is not None]
 
-    queryset_data = Purchase.objects.filter(Q(user=user_object) & Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time')
+    queryset_data = Purchase.objects.filter(Q(user=user_object) & Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time', 'category__category', 'item')
 
     purchases_list = list(queryset_data.values()) # List of dictionaries
 
@@ -712,54 +712,58 @@ def settings(request):
 
             elif request.GET['model'] == 'Recurring':
                 table_string = '''
-<table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
-    <tr style="font-size:0.7rem; text-align:center;">
+<table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
+    <tr style="font-size:0.4rem; text-align:center;">
         <th>Name</th>
-        <th>Type</th>
+        <th style="width:11%">Type</th>
         <th>Account</th>
-        <th>Active</th>
-        <th>Amount</th>
+        <th>Category</th>
+        <th style="width:11%">Active</th>
+        <th style="width:13.5%">Amount</th>
         <th>Freq.</th>
     </tr>
 '''
 
-                for object in Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'active', 'amount'):
+                for object in Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount'):
                     table_string+='''
-    <tr style="font-size:0.5rem; text-align:center;">
+    <tr style="font-size:0.3rem; text-align:center;">
         <td style="vertical-align:middle;">{0}</td>
         <td style="vertical-align:middle;">{1}</td>
         <td style="vertical-align:middle;">{2}</td>
         <td style="vertical-align:middle;">{3}</td>
         <td style="vertical-align:middle;">{4}</td>
         <td style="vertical-align:middle;">{5}</td>
+        <td style="vertical-align:middle;">{6}</td>
     </tr>
-'''.format(object['name'], object['type'], object['account__account'], object['active'], object['amount'], 'hey')
+'''.format(object['name'], object['type'], str(object['account__account']).replace('None', ''), str(object['category__category']).replace('None', ''), object['active'], object['amount'], '')
                 return JsonResponse(table_string + '</table>', safe=False)
 
             elif request.GET['model'] == 'Quick Entry':
                 table_string = '''
-<table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
-    <tr style="font-size:0.7rem; text-align:center;">
+<table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
+    <tr style="font-size:0.4rem; text-align:center;">
+        <th style="width:7%">ID</th>
         <th>Category</th>
         <th>Item</th>
-        <th>Amount</th>
+        <th style="width:13.5%">Amount</th>
         <th>Category 2</th>
-        <th>Amount 2</th>
+        <th style="width:13.5%">Amount 2</th>
         <th>Specifics</th>
     </tr>
 '''
 
-                for object in QuickEntry.objects.filter(user=user_object).values('category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description'):
+                for object in QuickEntry.objects.filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description'):
                     table_string+='''
-    <tr style="font-size:0.5rem; text-align:center;">
+    <tr style="font-size:0.3rem; text-align:center;">
         <td style="vertical-align:middle;">{0}</td>
         <td style="vertical-align:middle;">{1}</td>
         <td style="vertical-align:middle;">{2}</td>
         <td style="vertical-align:middle;">{3}</td>
         <td style="vertical-align:middle;">{4}</td>
         <td style="vertical-align:middle;">{5}</td>
+        <td style="vertical-align:middle;">{6}</td>
     </tr>
-'''.format(str(object['category__category']).replace('None', ''), object['item'], object['amount'], str(object['category_2__category']).replace('None', ''), str(object['amount_2']).replace('None', ''), 'hey')
+'''.format(str(object['id']), str(object['category__category']).replace('None', ''), object['item'], object['amount'], str(object['category_2__category']).replace('None', ''), str(object['amount_2']).replace('None', ''), object['description'])
                 return JsonResponse(table_string + '</table>', safe=False)
 
 
@@ -783,10 +787,10 @@ def settings(request):
 
             context['account_formset'] = AccountFormSet()
 
-            context['recurring_list'] = Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'active', 'amount')
+            context['recurring_list'] = Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount')
             context['recurring_form'] = RecurringForm()
 
-            context['quick_entry_list'] = QuickEntry.objects.filter(user=user_object).values('category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
+            context['quick_entry_list'] = QuickEntry.objects.filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
             context['quick_entry_form'] = QuickEntryForm()
 
             profile_form_data = {'account_to_use': user_object.profile.account_to_use.id,
@@ -807,76 +811,106 @@ def settings(request):
 
 
     elif request.method == 'POST':
-        if 'type' in request.POST:
-            data_dict = {}
+        data_dict = {}
+        # print(request.POST)
+        if request.POST['type'] == 'Submit':
+            if request.POST['model'] == 'Quick Entry':
+                quick_entry_form = QuickEntryForm(request.POST)
 
-            if request.POST['type'] == 'Delete': # ALL ARE TRIMMED in the front-end!
-                if request.POST['model'] == 'Purchase Category':
-                    PurchaseCategory.objects.filter(user=user_object, category=request.POST['to_delete']).delete()
-                elif request.POST['model'] == 'Account':
-                    Account.objects.filter(user=user_object, account=request.POST['to_delete']).delete()
-                elif request.POST['model'] == 'Recurring Payment':
-                    Recurring.objects.filter(user=user_object, name=request.POST['to_delete']).delete()
-                elif request.POST['model'] == 'Quick Entry':
-                    QuickEntry.objects.filter(user=user_object, id=request.POST['to_delete']).delete()
+                if quick_entry_form.is_valid():
+                    quick_entry_instance = QuickEntry()
 
-            elif request.POST['type'] == 'Update':
-                if request.POST['model'] == 'Profile':
+                    quick_entry_instance.user = user_object
+                    quick_entry_instance.item = quick_entry_form.cleaned_data['item'].strip()
+                    quick_entry_instance.category = quick_entry_form.cleaned_data['category']
+                    quick_entry_instance.amount = quick_entry_form.cleaned_data['amount']
+                    quick_entry_instance.category_2 = quick_entry_form.cleaned_data['category_2']
+                    quick_entry_instance.amount_2 = quick_entry_form.cleaned_data['amount_2']
+                    quick_entry_instance.description = quick_entry_form.cleaned_data['description'].strip() if len(quick_entry_form.cleaned_data['description'].strip()) == 0 or quick_entry_form.cleaned_data['description'].strip()[-1] == '.' else quick_entry_form.cleaned_data['description'].strip() + '.' # Add a period if not present
+
+                    quick_entry_instance.save()
+
+            elif request.POST['model'] == 'Recurring Payment':
+                    recurring_instance = Recurring()
+
+                    recurring_instance.user = user_object
+                    recurring_instance.name = request.POST['name'].strip()
+                    recurring_instance.description = request.POST['description'].strip()
+                    recurring_instance.type = request.POST['recurring_type']
+                    recurring_instance.account = Account.objects.get(id=request.POST['account'])
+                    recurring_instance.category = PurchaseCategory.objects.get(id=request.POST['category'])
+                    recurring_instance.active = True if request.POST['active'] == 'true' else False
+                    recurring_instance.amount = request.POST['amount']
+                    recurring_instance.start_date = request.POST['start_date']
+                    recurring_instance.dates = request.POST['dates']
+                    recurring_instance.weekdays = request.POST['weekdays']
+                    recurring_instance.number = None if request.POST['number'] == '' else request.POST['number']
+                    recurring_instance.interval_type = request.POST['interval_type']
+                    recurring_instance.xth_type = request.POST['xth_type']
+                    recurring_instance.xth_from_specific_date = request.POST['xth_from_specific_date']
+                    recurring_instance.xth_after_months = None if request.POST['xth_after_months'] == '' else request.POST['xth_after_months']
+
+                    recurring_instance.save()
+
+        elif request.POST['type'] == 'Delete': # ALL ARE TRIMMED in the front-end!
+            if request.POST['model'] == 'Purchase Category':
+                to_delete = PurchaseCategory.objects.filter(user=user_object, category=request.POST['to_delete'])
+            elif request.POST['model'] == 'Account':
+                to_delete = Account.objects.filter(user=user_object, account=request.POST['to_delete'])
+            elif request.POST['model'] == 'Recurring Payment':
+                to_delete = Recurring.objects.filter(user=user_object, name=request.POST['to_delete'])
+            elif request.POST['model'] == 'Quick Entry':
+                to_delete = QuickEntry.objects.filter(user=user_object, id=request.POST['to_delete'])
+
+            # Filter will always run, so throw an error if no items to delete were found
+            if to_delete.count() > 0:
+                to_delete.delete()
+            else:
+                raise Exception('No items to delete!')
+
+        elif request.POST['type'] == 'Update':
+            if request.POST['model'] == 'Profile':
+                if request.POST['value'].isdigit(): # request.POST['value'] is a string
                     setattr(user_object.profile, request.POST['id'][3:], Account.objects.get(id=request.POST['value']))
-                    user_object.save()
+                else:
+                    setattr(user_object.profile, request.POST['id'][3:], request.POST['value'])
+                user_object.save()
 
-                elif request.POST['model'] == 'Purchase Category':
-                    if request.POST['id'] == '':
-                        purchase_category_object = PurchaseCategory.objects.create(user=user_object)
-                        data_dict.update({'id': purchase_category_object.id})
-                    else:
-                        purchase_category_object = PurchaseCategory.objects.get(id=request.POST['id'])
-                    if request.POST['field'] == 'threshold':
-                        value = Decimal(request.POST['value'])
-                    elif request.POST['field'] == 'threshold_rolling_days':
-                        value = int(request.POST['value'])
-                    else: # Field is 'category'
-                        value = request.POST['value']
-                    setattr(purchase_category_object, request.POST['field'], value)
-                    purchase_category_object.save()
+            elif request.POST['model'] == 'Purchase Category':
+                if request.POST['id'] == '': # This is the bottom, blank row. Won't have an ID, so create a new object
+                    purchase_category_object = PurchaseCategory.objects.create(user=user_object)
+                    data_dict.update({'id': purchase_category_object.id})
+                else: # Otherwise, get the PurchaseCategory and update the appropriate attribute
+                    purchase_category_object = PurchaseCategory.objects.get(id=request.POST['id'])
+                if request.POST['field'] == 'threshold':
+                    value = Decimal(request.POST['value'])
+                elif request.POST['field'] == 'threshold_rolling_days':
+                    value = int(request.POST['value'])
+                else: # Field is 'category'
+                    value = request.POST['value']
+                setattr(purchase_category_object, request.POST['field'], value)
+                purchase_category_object.save()
 
-                elif request.POST['model'] == 'Account':
-                    if request.POST['id'] == '':
-                        account_object = Account.objects.create(user=user_object)
-                        data_dict.update({'id': account_object.id})
-                    else:
-                        account_object = Account.objects.get(id=request.POST['id'])
+            elif request.POST['model'] == 'Account':
+                if request.POST['id'] == '':
+                    account_object = Account.objects.create(user=user_object)
+                    data_dict.update({'id': account_object.id})
+                else:
+                    account_object = Account.objects.get(id=request.POST['id'])
 
-                    if request.POST['field'] == 'account':
-                        value = request.POST['value']
-                    elif request.POST['field'] == 'credit': # .val() comes through as 'on' for checkboxes. Use .is(':checked') ... but easier to toggle here
-                        value = not(account_object.credit)
-                    elif request.POST['field'] == 'currency':
-                        value = request.POST['value']
-                    else: # Field is 'active'
-                        value = not(account_object.active)
-                    setattr(account_object, request.POST['field'], value)
-                    account_object.save()
+                if request.POST['field'] == 'account':
+                    value = request.POST['value']
+                elif request.POST['field'] == 'credit': # .val() comes through as 'on' for checkboxes. Use .is(':checked') ... but easier to toggle here
+                    value = not(account_object.credit)
+                elif request.POST['field'] == 'currency':
+                    value = request.POST['value']
+                else: # Field is 'active'
+                    value = not(account_object.active)
+                setattr(account_object, request.POST['field'], value)
+                account_object.save()
 
-            return JsonResponse(data_dict)
-
-        else:
-            quick_entry_form = QuickEntryForm(request.POST)
-
-            if quick_entry_form.is_valid():
-                quick_entry_instance = QuickEntry()
-
-                quick_entry_instance.user = user_object
-                quick_entry_instance.item = quick_entry_form.cleaned_data['item'].strip()
-                quick_entry_instance.category = quick_entry_form.cleaned_data['category']
-                quick_entry_instance.amount = quick_entry_form.cleaned_data['amount']
-                quick_entry_instance.category_2 = quick_entry_form.cleaned_data['category_2']
-                quick_entry_instance.amount_2 = quick_entry_form.cleaned_data['amount_2']
-                quick_entry_instance.description = quick_entry_form.cleaned_data['description'].strip() if len(quick_entry_form.cleaned_data['description'].strip()) == 0 or quick_entry_form.cleaned_data['description'].strip()[-1] == '.' else quick_entry_form.cleaned_data['description'].strip() + '.' # Add a period if not present
-
-                quick_entry_instance.save()
-
-                return redirect('settings')
+            return JsonResponse(data_dict) # Only needed for update, to return an ID of the row
+        return HttpResponse()
 
 
 @login_required

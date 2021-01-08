@@ -86,20 +86,22 @@
             <h6 style="text-align:center;">Recurring Payments</h6>
             <p style="font-size:0.5rem; text-align:center;">Add and update bills or other recurring payments/income.</p>
             <div id="recurring_table_div">
-                <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
-                    <tr style="font-size:0.7rem; text-align:center;">
+                <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
+                    <tr style="font-size:0.4rem; text-align:center;">
                         <th>Name</th>
-                        <th>Type</th>
+                        <th style="width:11%">Type</th>
                         <th>Account</th>
-                        <th>Active</th>
-                        <th>Amount</th>
+                        <th>Category</th>
+                        <th style="width:11%">Active</th>
+                        <th style="width:13.5%">Amount</th>
                         <th>Freq.</th>
                     </tr>
                     {% for recurring in recurring_list %}
-                        <tr style="font-size:0.5rem; text-align:center;">
+                        <tr style="font-size:0.3rem; text-align:center;">
                             <td style="vertical-align:middle;">{{ recurring.name }}</td>
                             <td style="vertical-align:middle;">{{ recurring.type }}</td>
                             <td style="vertical-align:middle;">{{ recurring.account__account }}</td>
+                            <td style="vertical-align:middle;">{{ recurring.category__category }}</td>
                             <td style="vertical-align:middle;">{{ recurring.active }}</td>
                             <td style="vertical-align:middle;">{{ recurring.amount }}</td>
                             <td style="vertical-align:middle;">{{ recurring.frequency }}</td>
@@ -123,17 +125,19 @@
             <h6 style="text-align:center;">Quick Entries</h6>
             <p style="font-size:0.5rem; text-align:center;">Add a Quick Entry for the Purchase Form.</p>
             <div id="quick_entry_table_div">
-                <table style="table-layout:fixed; margin:auto; max-width:345px;" class="table table-sm table-striped table-bordered">
-                    <tr style="font-size:0.5rem; text-align:center;">
+                <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
+                    <tr style="font-size:0.4rem; text-align:center;">
+                        <th style="width:7%">ID</th>
                         <th>Category</th>
                         <th>Item</th>
-                        <th>Amount</th>
+                        <th style="width:13.5%">Amount</th>
                         <th>Category 2</th>
-                        <th>Amount 2</th>
+                        <th style="width:13.5%">Amount 2</th>
                         <th>Specifics</th>
                     </tr>
                     {% for quick_entry in quick_entry_list %}
-                        <tr style="font-size:0.4rem; text-align:center;">
+                        <tr style="font-size:0.3rem; text-align:center;">
+                            <td style="vertical-align:middle;">{{ quick_entry.id }}</td>
                             <td style="vertical-align:middle;">{{ quick_entry.category__category }}</td>
                             <td style="vertical-align:middle;">{{ quick_entry.item }}</td>
                             <td style="vertical-align:middle;">{{ quick_entry.amount }}</td>
@@ -199,15 +203,23 @@
                     },
                     context: this, // To allow access in the callback functions
                     success: function (response) {
-                        if (model === 'Purchase Category') {
+                        if (model === 'Purchase Category' || model === 'Quick Entry') {
                             get_quick_entry_table();
                         }
-                        else if (model === 'Account') {
+                        if (model === 'Account') {
                             get_profile_form();
+                            $('#account_formset').find('input[id$="account"][value="' +  to_delete.trim() + '"]').parent().parent().hide(); // Hide the deleted row
+                        }
+                        if (model === 'Purchase Category') {
+                            $('#threshold_formset').find('input[id$="category"][value="' +  to_delete.trim() + '"]').parent().parent().hide(); // Hide the deleted row
+                        }
+                        if (model === 'Recurring Payment' || model === 'Purchase Category' || model === 'Account') {
                             get_recurring_payments_table();
                         }
 
-                        alert('\nDeleted ' + model + ': ' + to_delete.trim());
+                        setTimeout(function(){
+                            alert('\nDeleted ' + model + ': ' + to_delete.trim());
+                        },500);
                     },
                     error: function (response) {
                         alert('\nThere was an issue deleting ' + model + ': ' + to_delete.trim());
@@ -289,6 +301,7 @@
                 $('#threshold_formset tr').last().children().each(function(){ // For each td of the last tr...
                     let id = $(this).children().prop('id'); // Get the field's form/row counter
                     $(this).children().prop('id', id.split('-')[0] + '-' + (last_row_number_threshold+1) + '-' + id.split('-')[2]); // Update each input id to contain the new form/row counter
+                    $(event.target).attr('value', e.target.value); // We must set the value so that we can delete immediately, if we wish. Otherwise, must refresh page
                 });
                 $clone_row_threshold = $clone_row_threshold.clone(); // Necessary to dynamically add a second form
                 last_row_number_threshold++; // Increment the last form/row counter for the next new form...
@@ -331,6 +344,7 @@
                 $('#account_formset tr').last().children().each(function(){ // For each td of the last tr...
                     let id = $(this).children().prop('id'); // Get the field's form/row counter
                     $(this).children().prop('id', id.split('-')[0] + '-' + (last_row_number_account+1) + '-' + id.split('-')[2]); // Update each input id to contain the new form/row counter
+                    $(event.target).attr('value', e.target.value); // We must set the value so that we can delete immediately, if we wish. Otherwise, must refresh page
                 });
                 $clone_row_account = $clone_row_account.clone(); // Necessary to dynamically add a second form
                 last_row_number_account++; // Increment the last form/row counter for the next new form...
@@ -376,13 +390,89 @@
                       },
                 success: function(response) {
                     $('#recurring_table_div').html(response);
-                    console.log('Refreshed Recurring Payments table.');
+                    console.log('Refreshed Recurring Payment table.');
                 }
             });
         }
 
-        $.each(['#id_number', '#id_interval_type', '#id_xth_type', '#id_xth_after_specific_date', '#id_xth_after_months'], function(i, v) { $(v + ',label[for="' + v.substring(1) + '"]').hide(); });
+        // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
+        $('#id_start_date,#id_amount').on('focus', function(e) {
+            $(this).val('');
+        });
+
+
+        // Limit text entry to only numbers
+        $('#id_start_date').on('keydown', function(e) {
+            // console.log($(this).val().length);
+            if ([4,7].includes($(this).val().length) && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
+                $(this).val($(this).val() + '-');
+            }
+            if ((!Number.isInteger(parseInt(e.key)) && !['Backspace', 'Enter', 'Tab'].includes(e.key)) || ($(this).val().length > 9  && !['Backspace', 'Enter', 'Tab'].includes(e.key))) { // Still necessary to check if it's a letter because forms.py attributes aren't working
+                e.preventDefault();
+            }
+            if ($(this).val().length === 5 && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                e.preventDefault();
+            }
+            else if ($(this).val().length === 6 && $(this).val()[5] === '1' && !['0', '1', '2', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                e.preventDefault();
+            }
+            else if ($(this).val().length === 6 && $(this).val()[5] === '2' && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                e.preventDefault();
+            }
+            else if ($(this).val().length === 8 && !['0', '1', '2', '3', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                e.preventDefault();
+            }
+            else if ($(this).val().length === 9 && $(this).val()[8] === '3' && !['0', '1', 'Backspace', 'Enter', 'Tab'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+        $('#id_start_date').on('keyup', function(e) {
+            if ($(this).val().length === 10) {
+                $(this).blur();
+            }
+        });
+
+        $('#recurring_form').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Submit',
+                        'model': 'Recurring Payment',
+                        'name': $('#recurring_form #id_name').val(),
+                        'description': $('#recurring_form #id_description').val(),
+                        'recurring_type': $('#recurring_form #id_type').val(),
+                        'account': $('#recurring_form #id_account').val(),
+                        'category': $('#recurring_form #id_category').val(),
+                        'active': $('#recurring_form #id_active').is(':checked'),
+                        'amount': $('#recurring_form #id_amount').val(),
+                        'start_date': $('#recurring_form #id_start_date').val(),
+                        'dates': $('#recurring_form #id_dates').val().toString(),
+                        'weekdays': $('#recurring_form #id_weekdays').val().toString(),
+                        'number': $('#recurring_form #id_number').val(),
+                        'interval_type': $('#recurring_form #id_interval_type').val(),
+                        'xth_type': $('#recurring_form #id_xth_type').val(),
+                        'xth_from_specific_date': $('#recurring_form #id_xth_from_specific_date').val(),
+                        'xth_after_months': $('#recurring_form #id_xth_after_months').val(),
+                      },
+                success: function(response) {
+                    get_recurring_payments_table();
+                    $('#recurring_form').trigger('reset');
+                    $('#id_number').val('');
+                    console.log('Recurring Payment added.');
+                },
+                error: function(response) {
+                    alert('\nCould not add the Recurring Payment.');
+                }
+            });
+        });
+
+
+        $.each(['#id_number', '#id_interval_type', '#id_xth_type', '#id_xth_from_specific_date', '#id_xth_after_months'], function(i, v) { $(v + ',label[for="' + v.substring(1) + '"]').hide(); });
         $('#id_weekdays').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link" class="text-info" style="font-size:0.8rem;">Set an interval instead...</a></td></tr>');
+        $('#id_number').val('');
         $('label[for="id_weekdays"]').css('margin-bottom', '28px');
 
         $(document).on('click', '#custom_anchor_link', function() {
@@ -397,15 +487,16 @@
             $('label[for="id_number"]').html('X<sup>th</sup> Instance:');
             $('#id_interval_type, label[for="id_interval_type"], #custom_anchor_link_2').hide();
             $('#id_number, #id_interval_type').val('');
-            $('#id_xth_type, #id_xth_after_specific_date, #id_xth_after_months, label[for="id_xth_type"], label[for="id_xth_after_specific_date"], label[for="id_xth_after_months"]').show();
+            $('#id_xth_after_months').val(1);
+            $('#id_xth_type, #id_xth_from_specific_date, #id_xth_after_months, label[for="id_xth_type"], label[for="id_xth_from_specific_date"], label[for="id_xth_after_months"]').show();
             $('#id_xth_after_months').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link_3" class="text-info" style="font-size:0.8rem;">Specific date/weekday...</a></td></tr>');
             $('label[for="id_xth_after_months"]').css('margin-bottom', '28px');
         });
 
         $(document).on('click', '#custom_anchor_link_3', function() {
             $('label[for="id_number"]').text('Every:');
-            $('#id_number, #id_xth_type, #id_xth_after_specific_date, #id_xth_after_months, label[for="id_number"], label[for="id_xth_type"], label[for="id_xth_after_months"], label[for="id_xth_after_specific_date"], #custom_anchor_link_3').hide();
-            $('#id_number, #id_xth_type, #id_xth_after_specific_date, #id_xth_after_months').val('');
+            $('#id_number, #id_xth_type, #id_xth_from_specific_date, #id_xth_after_months, label[for="id_number"], label[for="id_xth_type"], label[for="id_xth_after_months"], label[for="id_xth_from_specific_date"], #custom_anchor_link_3').hide();
+            $('#id_number, #id_xth_type, #id_xth_from_specific_date, #id_xth_after_months').val('');
             $('#id_dates, #id_weekdays, label[for="id_dates"], label[for="id_weekdays"]').show();
             $('#id_weekdays').after('<tr><td style="padding-top:2px;"><a id="custom_anchor_link" class="text-info" style="font-size:0.8rem;">Set an interval instead...</a></td></tr>');
         });
@@ -425,5 +516,31 @@
                 }
             });
         }
+
+        $('#quick_entry_form').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Submit',
+                        'model': 'Quick Entry',
+                        'category': $('#quick_entry_form #id_category').val(),
+                        'item': $('#quick_entry_form #id_item').val(),
+                        'amount': $('#quick_entry_form #id_amount').val(),
+                        'category_2': $('#quick_entry_form #id_category_2').val(),
+                        'amount_2': $('#quick_entry_form #id_amount_2').val(),
+                        'description': $('#quick_entry_form #id_description').val(),
+                      },
+                success: function(response) {
+                    get_quick_entry_table();
+                    $('#quick_entry_form').trigger('reset');
+                    console.log('Quick Entry added.');
+                },
+                error: function(response) {
+                    alert('\nCould not add the Quick Entry.');
+                }
+            });
+        });
     });
 </script>

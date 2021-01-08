@@ -201,7 +201,7 @@
 
 
             // Limit text entry to only numbers
-            $('#datepicker, #datepicker_2').on('keydown', function(e) {
+            $('#datepicker,#datepicker_2').on('keydown', function(e) {
                 // console.log($(this).val().length);
                 if ([4,7].includes($(this).val().length) && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
                     $(this).val($(this).val() + '-');
@@ -226,7 +226,7 @@
                 }
             });
 
-            $('#datepicker, #datepicker_2').on('keyup', function(e) {
+            $('#datepicker,#datepicker_2').on('keyup', function(e) {
                 if ($(this).val().length === 10) {
                     $(this).blur();
                 }

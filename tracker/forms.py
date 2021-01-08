@@ -144,10 +144,19 @@ class RecurringForm(ModelForm):
         self.fields['number'].label = 'Every'
         self.fields['interval_type'].label = 'Unit'
         self.fields['xth_type'].label = 'Of'
-        self.fields['xth_after_specific_date'].label = 'After This Date'
+        self.fields['xth_from_specific_date'].label = 'From This Date'
         self.fields['xth_after_months'].label = 'Every __ Months'
+
+        # The choices that display in the form field match models.py __str__ ... I want __str__ for Admin, but only the category text in the form field
+        category_choices = []
+        for choice in self.fields['category'].choices:
+            if choice[0] == '': # First value is ('', '---------')
+                category_choices.append((choice[0], choice[1]))
+            else:
+                category_choices.append((choice[0], choice[1].split(',')[1].strip())) # (1, 'brendan, Coffee, None, 30 days')
+        self.fields['category'].choices = category_choices
 
 
     class Meta:
         model = Recurring
-        exclude = []
+        exclude = ['user']
