@@ -416,6 +416,40 @@ def get_net_worth_chart_data(request):
 
 
 @login_required
+def get_pie_chart_data(request):
+    user_object = request.user
+
+    labels = []
+    values = []
+
+    filter_instance = Filter.objects.get(user=user_object, page='Activity')
+
+    start_date_filter = filter_instance.start_date_filter
+    end_date_filter = filter_instance.end_date_filter
+
+    if start_date_filter is None:
+        start_date_filter = '2015-01-01'
+
+    if end_date_filter is None:
+        end_date_filter = '2099-12-31'
+
+    purchase_categories_list = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
+                                                     filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
+                                                     filter_instance.category_filter_11, filter_instance.category_filter_12, filter_instance.category_filter_13, filter_instance.category_filter_14, filter_instance.category_filter_15,
+                                                     filter_instance.category_filter_16, filter_instance.category_filter_17, filter_instance.category_filter_18, filter_instance.category_filter_19, filter_instance.category_filter_20,
+                                                     filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
+                                                     if x is not None]
+
+    queryset = Purchase.objects.filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
+
+    for category in purchase_categories_list:
+        labels.append(category)
+        values.append(queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count())
+
+    return JsonResponse({ 'pie_labels': labels, 'pie_values': values })
+
+
+@login_required
 def delete_purchase(request):
     user_object = request.user
 

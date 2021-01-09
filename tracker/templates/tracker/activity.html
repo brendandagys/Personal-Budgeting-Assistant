@@ -84,12 +84,19 @@
 
             <div>
                 <div style="margin:0; text-align:center;">
-                        <h4>Net Worth</h4>
-                        <canvas id="net_worth_chart" width="375" height="250"></canvas>
+                    <h4>Net Worth</h4>
+                    <canvas id="net_worth_chart" width="375" height="250"></canvas>
                 </div>
             </div>
 
-            <hr />
+            <hr>
+
+            <div>
+                <div style="margin:0; text-align:center;">
+                    <h4>Purchase Category Breakdown</h4>
+                    <canvas id="purchase_category_pie_chart" width="375" height="250"></canvas>
+                </div>
+            <hr>
 
             <table style="width:100%;">
 
@@ -225,6 +232,7 @@
 
                   get_queryset();
                   hide_and_reset_modal();
+                  purchase_category_chart();
               },
               error: function (response) {
                   alert('\nThere was an issue deleting Purchase: ' + $(this).data('id'));
@@ -382,7 +390,7 @@
 
             $.ajax({
                 type: 'GET',
-                url: 'charts/',
+                url: 'net_worth_chart/',
                 success: function(response) {
                         console.log(response);
                     var ctx = document.getElementById('net_worth_chart').getContext('2d');
@@ -440,6 +448,38 @@
         }
 
         net_worth_chart();
+
+
+        function purchase_category_chart() {
+            $.ajax({
+                type: 'GET',
+                url: 'purchase_category_chart/',
+                success: function(response) {
+                    var ctx_pie = document.getElementById('purchase_category_pie_chart').getContext('2d');
+                    var myPieChart = new Chart(ctx_pie, {
+                        type: 'pie',
+                        data: {
+                            labels: response['pie_labels'],
+                            datasets: [{
+                                label: 'Category',
+                                data: response['pie_values'],
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.4)',
+                                    'rgba(255, 206, 86, 0.4)',
+                                    'rgba(75, 192, 192, 0.4)',
+                                    'rgba(54, 162, 235, 0.4)',
+                                    'rgba(153, 102, 255, 0.4)'
+                                ],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: []
+                    });
+                }
+            });
+        }
+
+        purchase_category_chart();
 
 
         $('#account_form').find(':input').on('change', function(e) {
@@ -510,6 +550,7 @@
                           // console.log(category_filter);
                     });
                     get_queryset();
+                    purchase_category_chart();
                 },
                 error: function() {
                     alert('\nThere was an issue updating the filter: ' + $(this).attr('id'));
@@ -534,6 +575,7 @@
                     success: function(response) {
                         console.log('Date filter updated!');
                         get_queryset();
+                        purchase_category_chart();
                     },
                     error: function() {
                         alert('\nError updating date filter to: ' + $(this).val());
@@ -569,6 +611,7 @@
                     success: function(response) {
                         console.log('Date filter updated!');
                         get_queryset();
+                        purchase_category_chart();
                     },
                     error: function() {
                         alert('\nError updating date filter to: ' + $(this).val());
