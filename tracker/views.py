@@ -438,6 +438,8 @@ def homepage(request):
         context['third_account_to_use'] = user_object.profile.third_account_to_use
         context['third_account_to_use_currency'] = context['third_account_to_use'].currency if context['third_account_to_use'] else None
 
+        context['primary_currency'] = user_object.profile.primary_currency
+
         # Create a filter object if this user hasn't loaded any pages yet
         filter_instance = Filter.objects.get_or_create(user=user_object, page='Homepage')[0] # Returns a tuple (object, True/False depending on whether or not just created)
 
@@ -793,11 +795,11 @@ def settings(request):
             context['quick_entry_list'] = QuickEntry.objects.filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
             context['quick_entry_form'] = QuickEntryForm()
 
-            profile_form_data = {'account_to_use': user_object.profile.account_to_use.id,
-                                 'second_account_to_use': user_object.profile.second_account_to_use.id,
-                                 'third_account_to_use': user_object.profile.third_account_to_use.id,
-                                 'credit_account': user_object.profile.credit_account.id,
-                                 'debit_account': user_object.profile.debit_account.id,
+            profile_form_data = {'account_to_use': user_object.profile.account_to_use.id if user_object.profile.account_to_use is not None else None,
+                                 'second_account_to_use': user_object.profile.second_account_to_use.id if user_object.profile.second_account_to_use is not None else None,
+                                 'third_account_to_use': user_object.profile.third_account_to_use.id if user_object.profile.third_account_to_use is not None else None,
+                                 'credit_account': user_object.profile.credit_account.id if user_object.profile.credit_account is not None else None,
+                                 'debit_account': user_object.profile.debit_account.id if user_object.profile.debit_account is not None else None,
                                  'primary_currency': user_object.profile.primary_currency, }
 
             context['profile_form'] = ProfileForm(profile_form_data)
@@ -873,7 +875,7 @@ def settings(request):
                 if request.POST['value'].isdigit(): # request.POST['value'] is a string
                     setattr(user_object.profile, request.POST['id'][3:], Account.objects.get(id=request.POST['value']))
                 else:
-                    setattr(user_object.profile, request.POST['id'][3:], request.POST['value'])
+                    setattr(user_object.profile, request.POST['id'][3:], None if request.POST['value'] == '' else request.POST['value'])
                 user_object.save()
 
             elif request.POST['model'] == 'Purchase Category':

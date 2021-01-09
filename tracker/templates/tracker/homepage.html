@@ -199,7 +199,6 @@
                 $(this).val('');
             });
 
-
             // Limit text entry to only numbers
             $('#datepicker,#datepicker_2').on('keydown', function(e) {
                 // console.log($(this).val().length);
@@ -256,6 +255,9 @@
                 $('#id_account_to_use').val('{{third_account_to_use}}');
                 $('#id_currency').val('{{third_account_to_use_currency}}');
                 $('#id_currency').hide();
+            }
+            else {
+                $('#id_currency').val('{{primary_currency}}');
             }
 
 
@@ -370,7 +372,7 @@
                     }
                     else {
                         account = '';
-                        currency = 'CAD';
+                        currency = '{{primary_currency}}';
                     }
                 }
 
@@ -381,13 +383,13 @@
                     }
                     else {
                         account = '';
-                        currency = 'CAD';
+                        currency = '{{primary_currency}}';
                     }
                 }
 
                 else if ($(this).text().includes('{{third_account_to_use}}'.substring(0,35))) {
                     account = '';
-                    currency = 'CAD';
+                    currency = '{{primary_currency}}';
                 }
 
                 else if ($(this).text() === 'Not charging any account...') {
@@ -408,7 +410,8 @@
                     }
                     else {
                         account = '';
-                        currency = 'CAD';
+                        currency = '{{primary_currency}}';
+                        increase_form_height(-37);
                     }
                 }
 

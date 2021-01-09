@@ -57,7 +57,7 @@
             </form>
             <div style="text-align:center; margin-top:10px;"><button id="delete_Purchase_Category" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete a Purchase Category...</button></div>
 
-            <br>
+            <br><br>
             <h6 style="text-align:center;">Account Settings</h6>
             <p style="font-size:0.5rem; text-align:center;">Change the name of an Account, specify if it's a credit account, set the currency, and indicate if it's active.</p>
             <form id="account_formset" action="" method="post">
@@ -82,20 +82,22 @@
             </form>
             <div style="text-align:center; margin-top:10px;"><button id="delete_Account" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete an Account...</button></div>
 
-            <br>
+            <br><br>
             <h6 style="text-align:center;">Recurring Payments</h6>
             <p style="font-size:0.5rem; text-align:center;">Add and update bills or other recurring payments/income.</p>
             <div id="recurring_table_div">
                 <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
-                    <tr style="font-size:0.4rem; text-align:center;">
-                        <th>Name</th>
-                        <th style="width:11%">Type</th>
-                        <th>Account</th>
-                        <th>Category</th>
-                        <th style="width:11%">Active</th>
-                        <th style="width:13.5%">Amount</th>
-                        <th>Freq.</th>
-                    </tr>
+                    {% if recurring_list|length > 0 %}
+                        <tr style="font-size:0.4rem; text-align:center;">
+                            <th>Name</th>
+                            <th style="width:11%">Type</th>
+                            <th>Account</th>
+                            <th>Category</th>
+                            <th style="width:11%">Active</th>
+                            <th style="width:13.5%">Amount</th>
+                            <th>Freq.</th>
+                        </tr>
+                    {% endif %}
                     {% for recurring in recurring_list %}
                         <tr style="font-size:0.3rem; text-align:center;">
                             <td style="vertical-align:middle;">{{ recurring.name }}</td>
@@ -121,20 +123,22 @@
                 <input class="btn btn-sm btn-primary" type="submit" value="Add Recurring Payment" name="recurring_form_submit">
             </form>
 
-            <br>
+            <br><br>
             <h6 style="text-align:center;">Quick Entries</h6>
             <p style="font-size:0.5rem; text-align:center;">Add a Quick Entry for the Purchase Form.</p>
             <div id="quick_entry_table_div">
                 <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
-                    <tr style="font-size:0.4rem; text-align:center;">
-                        <th style="width:7%">ID</th>
-                        <th>Category</th>
-                        <th>Item</th>
-                        <th style="width:13.5%">Amount</th>
-                        <th>Category 2</th>
-                        <th style="width:13.5%">Amount 2</th>
-                        <th>Specifics</th>
-                    </tr>
+                    {% if quick_entry_list|length > 0 %}
+                        <tr style="font-size:0.4rem; text-align:center;">
+                            <th style="width:7%">ID</th>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th style="width:13.5%">Amount</th>
+                            <th>Category 2</th>
+                            <th style="width:13.5%">Amount 2</th>
+                            <th>Specifics</th>
+                        </tr>
+                    {% endif %}
                     {% for quick_entry in quick_entry_list %}
                         <tr style="font-size:0.3rem; text-align:center;">
                             <td style="vertical-align:middle;">{{ quick_entry.id }}</td>
