@@ -1,1 +1,1 @@
-web: gunicorn spending_app.wsgi
+web: gunicorn spending_app.wsgi --log-level debug

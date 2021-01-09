@@ -159,18 +159,9 @@ def get_json_queryset(request):
 
     queryset_data = Purchase.objects.filter(Q(user=user_object) & Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time', 'category__category', 'item')
 
-    purchases_list = list(queryset_data.values()) # List of dictionaries
+    purchases_list = list(queryset_data.values('date', 'time', 'item', 'category__category', 'amount', 'category_2__category', 'amount_2', 'description', 'receipt')) # List of dictionaries
 
-    # Fill a dictionary with the mappings from id to category, as in the front-end only the id would show in the purchase item, because it's a foreign key
-    purchase_category_dict = {}
-    for object in PurchaseCategory.objects.filter(user=user_object).values('id', 'category'): # Queryset of dicts
-        purchase_category_dict[object['id']] = object['category']
-    # Update the id for each PurchaseCategory with the category name
     for dict in purchases_list:
-        dict['category_id'] = purchase_category_dict[dict['category_id']]
-        if dict['category_2_id'] is not None:
-            dict['category_2_id'] = purchase_category_dict[dict['category_2_id']]
-
         # Convert the stored path (media/image.png) to the full URL, and add to the object dict
         # if dict['receipt'] is not None: # May not have a receipt file
         try:
@@ -419,8 +410,7 @@ def get_net_worth_chart_data(request):
 def get_pie_chart_data(request):
     user_object = request.user
 
-    labels = []
-    values = []
+    pie_data = []
 
     filter_instance = Filter.objects.get(user=user_object, page='Activity')
 
@@ -443,10 +433,13 @@ def get_pie_chart_data(request):
     queryset = Purchase.objects.filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
 
     for category in purchase_categories_list:
-        labels.append(category)
-        values.append(queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count())
+        pie_data.append((category, queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()))
 
-    return JsonResponse({ 'pie_labels': labels, 'pie_values': values })
+    pie_data.sort(key=lambda x: x[1], reverse=True) # Reverse-sort the list of tuples by the second values: the counts
+
+    pie_data = list(zip(*pie_data[:7])) # Only keep seven, for readability | * is unpacking operator
+
+    return JsonResponse({ 'pie_labels': pie_data[0], 'pie_values': pie_data[1] })
 
 
 @login_required
@@ -502,11 +495,12 @@ def homepage(request):
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
             purchase_instance.receipt = request.FILES['receipt'] if len(request.FILES) > 0 and request.FILES['receipt'].size < 50000001 else None # Make sure file was uploaded, and check size (also done in front-end)
 
-            purchase_instance.save()
-
-
             # If an account to charge was available, and chosen in front-end, create the appropriate AccountUpdate object...
             account_object_to_charge = Account.objects.get(user=user_object, account=purchase_form.cleaned_data['account_to_use']) if purchase_form.cleaned_data['account_to_use'] != '' else None
+            purchase_instance.account = account_object_to_charge
+
+            purchase_instance.save()
+
 
             if account_object_to_charge:
                 account_balance = AccountUpdate.objects.filter(account=account_object_to_charge).order_by('-timestamp').first().value

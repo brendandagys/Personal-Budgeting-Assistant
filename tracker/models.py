@@ -38,35 +38,6 @@ class PurchaseCategory(models.Model):
         return ', '.join([self.user.username, self.category, str(self.threshold), str(self.threshold_rolling_days) + ' days'])
 
 
-class Purchase(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='purchases_1')
-    date = models.DateField(verbose_name='Date', default=current_date)
-    time = models.CharField(blank=True, default=current_time, max_length=5, verbose_name='Time (24 hr.)')
-    item = models.CharField(max_length=100, verbose_name='Item(s)')
-    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='purchases_2') # blank=False by default...
-    amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
-    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='purchases_3')
-    amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
-    description = models.TextField(blank=True, verbose_name='Details')
-    currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
-    exchange_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD') # Default 1 unnecessary as we always run get_exchange_rate()
-    receipt=models.FileField(blank=True, null=True, upload_to='media/', verbose_name='Receipt') # Eventually, switch to ImageField?
-
-    class Meta:
-        verbose_name_plural = 'Purchases'
-        verbose_name = 'Purchase'
-
-    def __str__(self):
-        if self.category_2:
-            return ', '.join([self.user.username, str(self.date), self.time, self.category.category, self.category_2.category, self.item, str(self.amount)])
-        return ', '.join([self.user.username, str(self.date), self.time, self.category.category, self.item, str(self.amount)])
-
-@receiver(models.signals.post_delete, sender=Purchase)
-def remove_file_from_s3(sender, instance, using, **kwargs):
-    if instance.receipt:
-        instance.receipt.delete(save=False)
-
-
 class QuickEntry(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='quick_entry_1')
     item = models.CharField(max_length=100, verbose_name='Item(s)')
@@ -146,6 +117,36 @@ class Account(models.Model):
 
     def __str__(self):
         return ', '.join([self.account])#, str(self.credit), str(self.active), str(self.account_created_datetime)])
+
+
+class Purchase(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='purchases_1')
+    date = models.DateField(verbose_name='Date', default=current_date)
+    time = models.CharField(blank=True, default=current_time, max_length=5, verbose_name='Time (24 hr.)')
+    item = models.CharField(max_length=100, verbose_name='Item(s)')
+    category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='purchases_2') # blank=False by default...
+    amount = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Amount')
+    category_2 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category 2', related_name='purchases_3')
+    amount_2 = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Amount 2')
+    description = models.TextField(blank=True, verbose_name='Details')
+    account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='purchases_4')
+    currency = models.CharField(choices=CURRENCIES, default='CAD', max_length=10, verbose_name='Currency')
+    exchange_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD') # Default 1 unnecessary as we always run get_exchange_rate()
+    receipt=models.FileField(blank=True, null=True, upload_to='media/', verbose_name='Receipt') # Eventually, switch to ImageField?
+
+    class Meta:
+        verbose_name_plural = 'Purchases'
+        verbose_name = 'Purchase'
+
+    def __str__(self):
+        if self.category_2:
+            return ', '.join([self.user.username, str(self.date), self.time, self.category.category, self.category_2.category, self.item, str(self.amount)])
+        return ', '.join([self.user.username, str(self.date), self.time, self.category.category, self.item, str(self.amount)])
+
+@receiver(models.signals.post_delete, sender=Purchase)
+def remove_file_from_s3(sender, instance, using, **kwargs):
+    if instance.receipt:
+        instance.receipt.delete(save=False)
 
 
 class AccountUpdate(models.Model):
