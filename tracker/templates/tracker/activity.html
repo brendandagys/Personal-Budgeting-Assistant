@@ -35,19 +35,11 @@
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="floating_bar row">
-
-                <div class="navigation_link col-sm-12">
-                    <a id="homepage_link" class="homepage_link" href="{% url 'homepage' %}">Form + Charts</a>
-                    <a id="admin_link" target="_blank" style="position:fixed; top:10px; right:20px; z-index:900;" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
-                    <a id="activity_link" style="position:fixed; top:47.5px; right:15px; width:70px; z-index:900;" class="btn btn-outline-primary btn-sm" href="{% url 'settings' %}">Settings</a>
-                </div>
-
-                <div class="col-sm-12">
-                    <b><h2 id="total_spent" class="total_spent"></h2></b>
-                </div>
-
+        <div class="floating_bar_short row">
+            <div style="padding-top:9px;" class="col-sm-12">
+                <a id="home_link"  class="btn btn-outline-primary btn-sm" href="{% url 'homepage' %}">Form + Charts</a>
+                <a id="settings_link"  class="btn btn-outline-secondary btn-sm" href="{% url 'settings' %}">Settings</a>
+                <a id="admin_link" target="_blank" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
             </div>
         </div>
 
@@ -91,11 +83,11 @@
 
             <hr>
 
-            <div>
-                <div style="margin:0; text-align:center;">
-                    <h4>Purchase Category Breakdown</h4>
-                    <canvas id="purchase_category_pie_chart" width="375" height="250"></canvas>
-                </div>
+            <div style="margin:0; text-align:center;">
+                <h4>Purchase Category Breakdown</h4>
+                <canvas id="purchase_category_pie_chart" width="375" height="250"></canvas>
+            </div>
+
             <hr>
 
             <table style="width:100%;">
@@ -105,12 +97,6 @@
                         <a id="All Categories" class="no_filter filter_identifier" href="">ALL CATEGORIES</a>
                     </td>
                 </tr>
-
-                <!-- <tr>
-                    <td colspan="2" style="width:100%; text-align:center;">
-                        <p class="filter_headers">Categories</p>
-                    </td>
-                </tr> -->
 
                 {% for filter_tuple in purchase_categories_tuples_list %}
                     <tr class="category_sizing">
@@ -132,12 +118,12 @@
                 <!-- <div class="col-sm-12"></div> -->
                 <!-- <div align="center" class="col-sm-2"> -->
                       <!-- <p><b><small>From</small></b></p> -->
-                      <input style="display:inline-block; text-align:center; width:120px; float:left; margin-left:21%;" class="form-control" type="text" pattern="\d*" placeholder="From..." type="text" id="datepicker">
+                      <input style="display:inline-block; text-align:center; width:120px; float:left; margin-left:18%;" class="form-control" type="text" pattern="\d*" placeholder="From..." type="text" id="datepicker">
                 <!-- </div> -->
 
                 <!-- <div align="center" class="col-sm-2"> -->
                       <!-- <p><b><small>To</small></b></p> -->
-                      <input style="display:inline-block; text-align:center; width:120px; float:right; margin-right:13%;" class="form-control" type="text" pattern="\d*" placeholder="To..." type="text" id="datepicker_2">
+                      <input style="display:inline-block; text-align:center; width:120px; float:right; margin-right:10%;" class="form-control" type="text" pattern="\d*" placeholder="To..." type="text" id="datepicker_2">
                 <!-- </div> -->
                 <!-- <div class="col-sm-12"></div> -->
                 </span>
@@ -148,6 +134,15 @@
             <div class="purchase_list_div col-sm-12">
 
                 <h2 id="purchase_list_header" class="purchase_header">Purchases <span id="purchases_count"></span></h2>
+
+                <div class="wrapper" style="position:sticky; top:3.5rem;">
+                    <div id="past_period_1" class="box a"></div>
+                    <div id="past_period_2" class="box b"></div>
+                    <div id="past_period_3" class="box c"></div>
+                    <div id="past_period_4" class="box d"></div>
+                    <div id="total_spent" class="box e"></div>
+
+                </div>
 
                 <div id="purchase_list_div"></div>
 
@@ -319,6 +314,11 @@
                     console.log(response); // object
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent
+                    $('#past_period_1').html(response['past_periods']['labels'][0] + ': $' + response['past_periods']['values'][0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+                    $('#past_period_2').html(response['past_periods']['labels'][1] + ': $' + response['past_periods']['values'][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+                    $('#past_period_3').html(response['past_periods']['labels'][2] + ': $' + response['past_periods']['values'][2].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+                    $('#past_period_4').html(response['past_periods']['labels'][3] + ': $' + response['past_periods']['values'][3].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+
                     if (response['data'].length > 0) {
                         $('#purchase_list_header').html('Purchases <span id="purchases_count"></span>');
                         $('#purchases_count').html('(' + response['data'].length + ')');
@@ -431,7 +431,7 @@
                                     ticks: {
                                         beginAtZero: false,
                                         callback: function(value) {
-                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                                         }
                                     }
                                 }],

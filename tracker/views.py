@@ -150,12 +150,51 @@ def get_json_queryset(request):
     if end_date_filter is None:
         end_date_filter = '2099-12-31'
 
+    if isinstance(start_date_filter, str):
+        start_date_filter = datetime.datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+
+    if isinstance(end_date_filter, str):
+        end_date_filter = datetime.datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+
+    days_difference = (end_date_filter - start_date_filter).days + 1
+
+
     purchase_categories_list = [x.id for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
                                                filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
                                                filter_instance.category_filter_11, filter_instance.category_filter_12, filter_instance.category_filter_13, filter_instance.category_filter_14, filter_instance.category_filter_15,
                                                filter_instance.category_filter_16, filter_instance.category_filter_17, filter_instance.category_filter_18, filter_instance.category_filter_19, filter_instance.category_filter_20,
                                                filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                if x is not None]
+
+
+    periods = []
+    sums = []
+
+    for x in range(1, 5):
+        temp_start_date = start_date_filter-datetime.timedelta(days=x*days_difference)
+        temp_end_date = start_date_filter-datetime.timedelta(days=x*days_difference)+datetime.timedelta(days=days_difference-1)
+        periods.append('{} - {}'.format(temp_start_date, temp_end_date))
+
+        temp_queryset = Purchase.objects.filter(user=user_object, date__gte=temp_start_date, date__lte=temp_end_date)
+
+        # Get the total cost of all of the purchases
+        past_purchases_sum = 0
+        for purchase in list(temp_queryset.values_list('category', 'category_2', 'amount', 'amount_2')): # Returns a Queryset of tuples
+            if purchase[0] in purchase_categories_list: # If first category matches, always add 'amount'
+                past_purchases_sum+=purchase[2]
+            if purchase[1] in purchase_categories_list: # If second category matches...
+                if purchase[3] is not None: # If there is a second value, always add it
+                    past_purchases_sum+=purchase[3]
+                elif purchase[0] not in purchase_categories_list: # If no 'amount_2', and first category DIDN'T match (we don't want to double-count), add 'amount' (in this case first three of tuple are populated)
+                    past_purchases_sum+=purchase[2]
+        sums.append(past_purchases_sum)
+
+    periods.reverse()
+    sums.reverse()
+
+    # print(days_difference)
+    # print(periods)
+    # print(sums)
 
     queryset_data = Purchase.objects.filter(Q(user=user_object) & Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time', 'category__category', 'item')
 
@@ -181,7 +220,7 @@ def get_json_queryset(request):
             elif purchase[0] not in purchase_categories_list: # If no 'amount_2', and first category DIDN'T match (we don't want to double-count), add 'amount' (in this case first three of tuple are populated)
                 purchases_sum+=purchase[2]
 
-    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum)}, safe=False)
+    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum), 'past_periods': {'labels': periods, 'values': sums}}, safe=False)
 
 
 @login_required # Don't think this is necessary
