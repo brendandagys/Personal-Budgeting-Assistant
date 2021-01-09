@@ -485,7 +485,7 @@ def homepage(request):
                 if account_object_to_charge.credit: # True if a credit account
                     amount_to_charge*=-1
 
-                AccountUpdate.objects.create(account=account_object_to_charge, value=account_balance-amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
+                AccountUpdate.objects.create(account=account_object_to_charge, purchase=purchase_instance, value=account_balance-amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
 
 
             return redirect('homepage')
