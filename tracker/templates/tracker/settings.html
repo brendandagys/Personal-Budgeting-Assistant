@@ -24,7 +24,15 @@
 
     <body>
         <div class="container-fluid">
-            <br>
+            <div class="floating_bar_short row">
+                <div style="padding-top:9px;" class="col-sm-12">
+                    <a id="home_link"  class="btn btn-outline-primary btn-sm" href="{% url 'homepage' %}">Form + Charts</a>
+                    <a id="activity_link" class="btn btn-outline-secondary btn-sm" href="{% url 'activity' %}">Balances + Purchases</a>
+                    <a id="admin_link" target="_blank" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
+                </div>
+            </div>
+
+            <br><br><br>
             <h6 style="text-align:center;">User Profile Settings</h6>
             <p style="font-size:0.5rem; text-align:center;">Set default Accounts to charge when entering purchases. Set default currencies to use.</p>
             <form id="profile_form" action="" method="post">

@@ -25,20 +25,22 @@
 
          <script src="{% static 'js/linear_regression.js' %}"></script>
 
-         <title>Purchase Form and Charts</title>
+         <title>Purchase Form + Charts</title>
     </head>
 
     <body>
 
         <div class="lighter_background container-fluid">
-            <div class="row">
-
-                <div class="navigation_link col-sm-12">
-                    <a class="homepage_link" style="z-index:999 !important;" href="{% url 'activity' %}">Purchases/Account Balances</a>
+            <div class="floating_bar_short row">
+                <div style="padding-top:9px;" class="col-sm-12">
+                    <a id="activity_link" class="btn btn-outline-primary btn-sm" href="{% url 'activity' %}">Balances + Purchases</a>
+                    <a id="settings_link"  class="btn btn-outline-secondary btn-sm" href="{% url 'settings' %}">Settings</a>
+                    <a id="admin_link" target="_blank" class="btn btn-outline-info btn-sm" href="{% url 'admin:index' %}">Admin</a>
                 </div>
+            </div>
 
-                <br><br>
-
+            <br><br>
+            <div style="margin-top:15px;" class="row">
                 <a id="custom_anchor_link_3" style="margin:auto;" class="text-primary small">Quick entry...</a>
 
                 <div id="form_div" class="col-sm-12" style="height:460px;">

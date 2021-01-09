@@ -271,6 +271,18 @@ select[id^="id_"] {
     background-color: #FAFAFA;
 }
 
+.floating_bar_short {
+    position: fixed;
+    margin: auto !important;
+    width: 100%;
+    height: 50px;
+    right: 0.01%;
+    text-align: center;
+    z-index: 1000;
+    border-bottom: 2px solid slategrey;
+    background-color: #FAFAFA;
+}
+
 .white_background {
     background-color: white !important;
 }
