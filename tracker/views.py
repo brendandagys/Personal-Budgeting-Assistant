@@ -714,7 +714,7 @@ def settings(request):
 
             elif request.GET['model'] == 'Recurring':
                 table_string = '''
-<table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
+<table id="recurring_table" style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
     <tr style="font-size:0.4rem; text-align:center;">
         <th>Name</th>
         <th style="width:11%">Type</th>
@@ -728,7 +728,7 @@ def settings(request):
 
                 for object in Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount'):
                     table_string+='''
-    <tr style="font-size:0.3rem; text-align:center;">
+    <tr class="hover" style="font-size:0.3rem; text-align:center;">
         <td style="vertical-align:middle;">{0}</td>
         <td style="vertical-align:middle;">{1}</td>
         <td style="vertical-align:middle;">{2}</td>
@@ -911,7 +911,16 @@ def settings(request):
                 setattr(account_object, request.POST['field'], value)
                 account_object.save()
 
-            return JsonResponse(data_dict) # Only needed for update, to return an ID of the row
+            elif request.POST['model'] == 'Recurring Payment':
+                recurring_queryset = Recurring.objects.filter(name=request.POST['name'])
+                for object in recurring_queryset:
+                    if object.active:
+                        object.active = False
+                    else:
+                        object.active = True
+                    object.save()
+
+            return JsonResponse(data_dict) # Only needed for update, to return an ID of the row for Purchase Category and Account
         return HttpResponse()
 
 

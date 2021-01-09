@@ -86,7 +86,7 @@
             <h6 style="text-align:center;">Recurring Payments</h6>
             <p style="font-size:0.5rem; text-align:center;">Add and update bills or other recurring payments/income.</p>
             <div id="recurring_table_div">
-                <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
+                <table id="recurring_table" style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
                     {% if recurring_list|length > 0 %}
                         <tr style="font-size:0.4rem; text-align:center;">
                             <th>Name</th>
@@ -99,7 +99,7 @@
                         </tr>
                     {% endif %}
                     {% for recurring in recurring_list %}
-                        <tr style="font-size:0.3rem; text-align:center;">
+                        <tr class="hover" style="font-size:0.3rem; text-align:center;">
                             <td style="vertical-align:middle;">{{ recurring.name }}</td>
                             <td style="vertical-align:middle;">{{ recurring.type }}</td>
                             <td style="vertical-align:middle;">{{ recurring.account__account }}</td>
@@ -398,6 +398,46 @@
                 }
             });
         }
+
+
+        $(document).on({
+            mouseenter: function() {
+                $(this).css('opacity', 0.7);
+            },
+            mouseleave: function() {
+                $(this).css('opacity', 1);
+            }
+        }, '#recurring_table tr.hover');
+
+
+        $(document).on('click', '#recurring_table tr.hover', function() {
+            if ($(this).children(':nth-child(5)').html() === 'True') {
+                $(this).children(':nth-child(5)').html('False');
+                var switch_to = 'False'
+            }
+            else {
+                $(this).children(':nth-child(5)').html('True');
+                var switch_to = 'True'
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'type': 'Update',
+                        'model': 'Recurring Payment',
+                        'name': $(this).children(':nth-child(1)').html(),
+                },
+                context: this, // To allow access in the callback functions
+                success: function (response) {
+                    console.log('Switched Recurring Payment status to: ' + switch_to);
+                },
+                error: function (response) {
+                    alert('\nCould not switch Recurring Payment status.');
+                }
+            });
+        });
+
 
         // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
         $('#id_start_date,#id_amount').on('focus', function(e) {
