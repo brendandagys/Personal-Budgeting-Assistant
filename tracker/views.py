@@ -145,7 +145,7 @@ def get_json_queryset(request):
     end_date_filter = filter_instance.end_date_filter
 
     if start_date_filter is None:
-        start_date_filter = '2015-01-01'
+        start_date_filter = '2019-01-01'
 
     if end_date_filter is None:
         end_date_filter = '2099-12-31'
@@ -272,7 +272,7 @@ def get_purchases_chart_data(request):
         print('Filters for chart: ' + str(current_filter_list_unique))
 
 
-        queryset = Purchase.objects.filter(Q(user=user_object) & Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'category', 'category_2', 'amount', 'amount_2')
+        queryset = Purchase.objects.select_related('category', 'category_2').filter(Q(user=user_object) & Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'category', 'category_2', 'amount', 'amount_2')
 
         def get_period_sum(queryset, start_date, end_date):
             # If the first PurchaseCategory matches, always add amount_1 to the total
