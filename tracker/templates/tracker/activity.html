@@ -21,6 +21,8 @@
          <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
          <script src="{% static 'js/linear_regression.js' %}"></script>
 
+         <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
         <title>Account Balances + Purchase List</title>
@@ -81,16 +83,15 @@
                 </div>
             </div>
 
-            <hr>
-
-            <div style="margin:0; text-align:center;">
+            <div id="purchase_category_div" style="margin:0; text-align:center;">
+                <hr>
                 <h4>Purchase Category Breakdown</h4>
                 <canvas id="purchase_category_pie_chart" width="375" height="250"></canvas>
             </div>
 
             <hr>
 
-            <table style="width:100%;">
+            <table id="filter_table" style="width:100%;">
 
                 <tr>
                     <td colspan="2" style="width:100%; text-align:center; padding-bottom:10px;">
@@ -141,7 +142,6 @@
                     <div id="past_period_3" class="box c"></div>
                     <div id="past_period_4" class="box d"></div>
                     <div id="total_spent" class="box e"></div>
-
                 </div>
 
                 <div id="purchase_list_div"></div>
@@ -227,7 +227,6 @@
 
                   get_queryset();
                   hide_and_reset_modal();
-                  purchase_category_chart();
               },
               error: function (response) {
                   alert('\nThere was an issue deleting Purchase: ' + $(this).data('id'));
@@ -304,7 +303,7 @@
 
 
         // General function to fetch the Queryset and populate the page with it
-        get_queryset = function() {
+        get_queryset = function(inital_page_load=false) {
             $.ajax({
                 type: 'GET',
                 url: 'get_purchases/',
@@ -323,9 +322,17 @@
                         $('#purchase_list_header').html('Purchases <span id="purchases_count"></span>');
                         $('#purchases_count').html('(' + response['data'].length + ')');
                         $('#no_purchases_spacing').hide();
+                        if (response['categories_count'] > 1) {
+                            $('#purchase_category_div').show();
+                            purchase_category_chart();
+                        }
+                        else {
+                            $('#purchase_category_div').hide();
+                        }
                     }
                     else if ($('#purchase_list_header').text() !== 'No purchases to list!') {
                         $('#purchase_list_header').text('No purchases to list!');
+                        $('#purchase_category_div').hide();
                     }
 
                     $('#purchase_list_div').html('');
@@ -378,12 +385,20 @@
                             return purchase_list.concat('</ul>');
                         }
                     );
+                    if (inital_page_load === false) {
+                        if ($('#purchase_category_div').is(':hidden')) {
+                            window.scrollTo({top: $('#filter_table').offset().top - 50, behavior: 'smooth'});
+                        }
+                        else {
+                            window.scrollTo({top: $('#purchase_category_div').offset().top, behavior: 'smooth'});
+                        }
+                    }
                 }
             });
         }
 
         // Populate the Purchase list upon initial page load
-        get_queryset();
+        get_queryset(inital_page_load=true);
 
 
         function net_worth_chart() {
@@ -392,6 +407,7 @@
                 type: 'GET',
                 url: 'net_worth_chart/',
                 success: function(response) {
+                        console.log('Received net worth chart data!');
                         console.log(response);
                     var ctx = document.getElementById('net_worth_chart').getContext('2d');
                     var myChart = new Chart(ctx, {
@@ -455,37 +471,55 @@
                 type: 'GET',
                 url: 'purchase_category_chart/',
                 success: function(response) {
-                    var ctx_pie = document.getElementById('purchase_category_pie_chart').getContext('2d');
-                    var myPieChart = new Chart(ctx_pie, {
-                        type: 'pie',
-                        data: {
-                            labels: response['pie_labels'],
-                            datasets: [{
-                                label: 'Category',
-                                data: response['pie_values'],
-                                backgroundColor: [
-                                    'rgba(255, 99, 132, 0.4)',
-                                    'rgba(255, 206, 86, 0.4)',
-                                    'rgba(75, 192, 192, 0.4)',
-                                    'rgba(153, 102, 255, 0.4)',
-                                    'rgba(255, 99, 132, 0.4)',
-                                    'rgba(54, 162, 235, 0.4)',
-                                    'rgba(255, 206, 86, 0.4)',
-                                    // 'rgba(75, 192, 192, 0.4)',
-                                    // 'rgba(54, 162, 235, 0.4)',
-                                    // 'rgba(153, 102, 255, 0.4)',
-                                ],
-                                borderWidth: 2
-                            }]
-                        },
-                        options: []
-                    });
+                    console.log('Received Purchase Category pie chart data!');
+                    console.log(response);
+                    if (response['pie_labels'].length > 1) { // Hiding and showing is taken care of in get_queryset()
+                        var ctx_pie = document.getElementById('purchase_category_pie_chart').getContext('2d');
+                        var myPieChart = new Chart(ctx_pie, {
+                            type: 'pie',
+                            data: {
+                                labels: response['pie_labels'],
+                                datasets: [{
+                                    label: 'Category',
+                                    data: response['pie_values'],
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.4)',
+                                        'rgba(255, 206, 86, 0.4)',
+                                        'rgba(75, 192, 192, 0.4)',
+                                        'rgba(153, 102, 255, 0.4)',
+                                        'rgba(255, 99, 132, 0.4)',
+                                        'rgba(54, 162, 235, 0.4)',
+                                        'rgba(255, 206, 86, 0.4)',
+                                        // 'rgba(75, 192, 192, 0.4)',
+                                        // 'rgba(54, 162, 235, 0.4)',
+                                        // 'rgba(153, 102, 255, 0.4)',
+                                    ],
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                legend: {
+                                    display: false
+                                },
+                                plugins: {
+                                    labels: [
+                                    {
+                                        render: 'label',
+                                        position: 'outside',
+                                        fontColor: 'slategray',
+                                    },
+                                    {
+                                        render: 'percentage',
+                                        fontColor: 'slategray',
+                                    }]
+                                }
+                            }
+                        });
+                    }
                 }
             });
         }
-
-        purchase_category_chart();
-
+        // Run on page load from get_queryset()
 
         $('#account_form').find(':input').on('change', function(e) {
             if ($(this).val().trim() !== '' && parseFloat($(this).val()) !== parseFloat($(this).attr('placeholder').substring(1).trim().replace(',', ''))) { // When the value is cleared or the placeholder value is typed, this function shouldn't run
@@ -555,7 +589,6 @@
                           // console.log(category_filter);
                     });
                     get_queryset();
-                    purchase_category_chart();
                 },
                 error: function() {
                     alert('\nThere was an issue updating the filter: ' + $(this).attr('id'));
@@ -580,7 +613,6 @@
                     success: function(response) {
                         console.log('Date filter updated!');
                         get_queryset();
-                        purchase_category_chart();
                     },
                     error: function() {
                         alert('\nError updating date filter to: ' + $(this).val());
@@ -616,7 +648,6 @@
                     success: function(response) {
                         console.log('Date filter updated!');
                         get_queryset();
-                        purchase_category_chart();
                     },
                     error: function() {
                         alert('\nError updating date filter to: ' + $(this).val());

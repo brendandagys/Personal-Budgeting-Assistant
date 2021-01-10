@@ -220,7 +220,7 @@ def get_json_queryset(request):
             elif purchase[0] not in purchase_categories_list: # If no 'amount_2', and first category DIDN'T match (we don't want to double-count), add 'amount' (in this case first three of tuple are populated)
                 purchases_sum+=purchase[2]
 
-    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum), 'past_periods': {'labels': periods, 'values': sums}}, safe=False)
+    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum), 'past_periods': {'labels': periods, 'values': sums}, 'categories_count': len(purchase_categories_list)}, safe=False)
 
 
 @login_required # Don't think this is necessary
@@ -449,18 +449,9 @@ def get_net_worth_chart_data(request):
 def get_pie_chart_data(request):
     user_object = request.user
 
-    pie_data = []
+    data_dict = {'pie_labels': (), 'pie_values': ()}
 
     filter_instance = Filter.objects.get(user=user_object, page='Activity')
-
-    start_date_filter = filter_instance.start_date_filter
-    end_date_filter = filter_instance.end_date_filter
-
-    if start_date_filter is None:
-        start_date_filter = '2015-01-01'
-
-    if end_date_filter is None:
-        end_date_filter = '2099-12-31'
 
     purchase_categories_list = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
                                                      filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
@@ -469,16 +460,32 @@ def get_pie_chart_data(request):
                                                      filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                      if x is not None]
 
-    queryset = Purchase.objects.filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
+    if len(purchase_categories_list) > 0:
 
-    for category in purchase_categories_list:
-        pie_data.append((category, queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()))
+        pie_data = []
 
-    pie_data.sort(key=lambda x: x[1], reverse=True) # Reverse-sort the list of tuples by the second values: the counts
+        start_date_filter = filter_instance.start_date_filter
+        end_date_filter = filter_instance.end_date_filter
 
-    pie_data = list(zip(*pie_data[:7])) # Only keep seven, for readability | * is unpacking operator
+        if start_date_filter is None:
+            start_date_filter = '2015-01-01'
 
-    return JsonResponse({ 'pie_labels': pie_data[0], 'pie_values': pie_data[1] })
+        if end_date_filter is None:
+            end_date_filter = '2099-12-31'
+
+
+        queryset = Purchase.objects.filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
+
+        for category in purchase_categories_list:
+            pie_data.append((category, queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()))
+
+        pie_data.sort(key=lambda x: x[1], reverse=True) # Reverse-sort the list of tuples by the second values: the counts
+
+        pie_data = list(zip(*pie_data[:7])) # Only keep seven, for readability | * is unpacking operator | is a list of two tuples
+
+        data_dict.update({ 'pie_labels': pie_data[0], 'pie_values': pie_data[1] })
+
+    return JsonResponse(data_dict)
 
 
 @login_required
