@@ -32,12 +32,12 @@ def current_date():
     return datetime.date.today()
 
 # Get information about today's date
-date = datetime.date.today()
-year = date.year
-month = date.month
-month_name = calendar.month_name[date.month]
-day = date.day
-weekday = date.weekday()
+# date = datetime.date.today()
+# year = date.year
+# month = date.month
+# month_name = calendar.month_name[date.month]
+# day = date.day
+# weekday = date.weekday()
 
 
 def get_purchase_categories_tuples_list(user_object):
@@ -198,7 +198,7 @@ def get_json_queryset(request):
 
     queryset_data = Purchase.objects.filter(Q(user=user_object) & Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time', 'category__category', 'item')
 
-    purchases_list = list(queryset_data.values('date', 'time', 'item', 'category__category', 'amount', 'category_2__category', 'amount_2', 'description', 'receipt')) # List of dictionaries
+    purchases_list = list(queryset_data.values('id', 'date', 'time', 'item', 'category__category', 'amount', 'category_2__category', 'amount_2', 'description', 'receipt')) # List of dictionaries
 
     for dict in purchases_list:
         # Convert the stored path (media/image.png) to the full URL, and add to the object dict
@@ -242,6 +242,9 @@ def get_purchases_chart_data(request):
 
         if end_date_filter is None:
             end_date_filter = current_date()
+
+        print(start_date_filter)
+        print(end_date_filter)
 
         print('Days on chart: ' + str((end_date_filter-start_date_filter).days))
 

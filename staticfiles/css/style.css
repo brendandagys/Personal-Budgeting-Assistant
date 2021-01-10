@@ -160,9 +160,8 @@ select[id^="id_"] {
 }
 
 .main_container {
-    /* padding: 0 !important; */
+    padding: 0 !important;
     position: relative;
-    padding-top: 4rem;
 }
 
 .purchase_list_items {
@@ -226,8 +225,7 @@ select[id^="id_"] {
 }
 
 .purchase_list_div {
-    padding: 7px !important;
-    /* margin-top: -3rem; */
+    padding: 5px !important;
     /* background-color: #FAFAFA; */
 }
 
