@@ -145,10 +145,17 @@ def get_json_queryset(request):
     end_date_filter = filter_instance.end_date_filter
 
     if start_date_filter is None:
-        start_date_filter = '2019-01-01'
+        if Purchase.objects.filter(user=user_object).order_by('date').first() is not None: # Date of first purchase recorded
+            start_date_filter = Purchase.objects.filter(user=user_object).order_by('date').first().date # Date of first purchase recorded
+        else:
+            start_date_filter = current_date()
+
 
     if end_date_filter is None:
-        end_date_filter = '2099-12-31'
+        if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of first purchase recorded
+            end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of first purchase recorded
+        else:
+            end_date_filter = current_date()
 
     if isinstance(start_date_filter, str):
         start_date_filter = datetime.datetime.strptime(start_date_filter, '%Y-%m-%d').date()
@@ -238,10 +245,17 @@ def get_purchases_chart_data(request):
         print('End date filter: ' + str(end_date_filter))
 
         if start_date_filter is None or start_date_filter < Purchase.objects.filter(user=user_object).order_by('date').first().date:
-            start_date_filter = Purchase.objects.filter(user=user_object).order_by('date').first().date # Date of first purchase recorded
+            if Purchase.objects.filter(user=user_object).order_by('date').first() is not None: # Date of first purchase recorded
+                start_date_filter = Purchase.objects.filter(user=user_object).order_by('date').first().date # Date of first purchase recorded
+            else:
+                start_date_filter = current_date()
 
-        if end_date_filter is None:
-            end_date_filter = current_date()
+
+        if end_date_filter is None or end_date_filter > Purchase.objects.filter(user=user_object).order_by('date').last().date:
+            if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of first purchase recorded
+                end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of first purchase recorded
+            else:
+                end_date_filter = current_date()
 
         print(start_date_filter)
         print(end_date_filter)
@@ -407,11 +421,11 @@ def get_net_worth_chart_data(request):
     values = []
 
     queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object) # Ordered by -timestamp
-    distinct_accounts_list = set(queryset.values_list('account', flat=True)) # List of ints
+    distinct_accounts_list = [Account.objects.get(id=x) for x in set(queryset.values_list('account', flat=True))] # List of distinct Account objects that have ever had an update...
 
     latest_value_dict = {} # When an Account has no update on a certain date, the queryset will return None; we will then take the most-recent account value
     for account in distinct_accounts_list:
-        latest_value_dict[account] = 0
+        latest_value_dict[account.account] = 0
 
     for datetime_index in pd.date_range(queryset.last().timestamp.date(), queryset.first().timestamp.date(), freq='D'): # freq='D' is default; returns a DateTime index
         labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
@@ -424,12 +438,11 @@ def get_net_worth_chart_data(request):
 
         accounts_sum = 0
 
-        for account in distinct_accounts_list:
-            account_object = Account.objects.get(id=account)
+        for account_object in distinct_accounts_list: # List of objects
 
             last_account_update_on_date = queryset_one_date.filter(account=account_object).order_by('-timestamp').first()
             if last_account_update_on_date is None: # If there is no update on that specific date...
-                last_account_value_on_date = latest_value_dict[account]
+                last_account_value_on_date = latest_value_dict[account_object.account]
             else:
                 last_account_value_on_date = last_account_update_on_date.value
                 if account.credit:
@@ -439,12 +452,11 @@ def get_net_worth_chart_data(request):
                     foreign_value = last_account_value_on_date
                     last_account_value_on_date = convert_currency(last_account_value_on_date, account_object.currency, 'CAD')
 
-                latest_value_dict[account] = last_account_value_on_date
+                latest_value_dict[account_object.account] = last_account_value_on_date
 
             accounts_sum+=last_account_value_on_date
 
         values.append(accounts_sum)
-
 
     return JsonResponse({'labels': labels, 'values': values})
 
@@ -472,10 +484,17 @@ def get_pie_chart_data(request):
         end_date_filter = filter_instance.end_date_filter
 
         if start_date_filter is None:
-            start_date_filter = '2015-01-01'
+            if Purchase.objects.filter(user=user_object).order_by('date').first() is not None: # Date of first purchase recorded
+                start_date_filter = Purchase.objects.filter(user=user_object).order_by('date').first().date # Date of first purchase recorded
+            else:
+                start_date_filter = current_date()
+
 
         if end_date_filter is None:
-            end_date_filter = '2099-12-31'
+            if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of first purchase recorded
+                end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of first purchase recorded
+            else:
+                end_date_filter = current_date()
 
 
         queryset = Purchase.objects.select_related('category', 'category_2').filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
@@ -522,7 +541,8 @@ def homepage(request):
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
-
+        # context['date_to_exclude'] = '' if filter_instance.date_to_exclude is None else str(filter_instance.date_to_exclude)
+        # context['maximum_amount'] = '' if filter_instance.maximum_amount is None else str(filter_instance.maximum_amount)
 
     elif request.method == 'POST':
 
@@ -758,6 +778,9 @@ class PurchaseListView(generic.ListView):
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
+        # context['date_to_exclude'] = '' if filter_instance.date_to_exclude is None else str(filter_instance.date_to_exclude)
+        # context['maximum_amount'] = '' if filter_instance.maximum_amount is None else str(filter_instance.maximum_amount)
+
         context['purchase_category_filters'] = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
                                                                      filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
                                                                      filter_instance.category_filter_11, filter_instance.category_filter_12, filter_instance.category_filter_13, filter_instance.category_filter_14, filter_instance.category_filter_15,

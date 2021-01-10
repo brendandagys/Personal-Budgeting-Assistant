@@ -82,19 +82,17 @@
 
         <br />
 
-        <div class="row" style="width:100%;">
-            <span style="width:100%; margin-right:0;">
-            <!-- <div class="col-sm-12"></div> -->
-            <!-- <div align="center" class="col-sm-2"> -->
-                  <!-- <p><b><small>From</small></b></p> -->
-                  <input style="display:inline-block; text-align:center; width:120px; float:left; margin-left:21%;" class="form-control" type="text" pattern="\d*" placeholder="From..." type="text" id="datepicker">
-            <!-- </div> -->
+        <div class="row">
+            <span style="width:100%;">
+                  <input style="display:inline-block; text-align:center; width:120px; float:left; margin-left:18%;" class="form-control" type="text" pattern="\d*" placeholder="From..." id="datepicker">
+                  <input style="display:inline-block; text-align:center; width:120px; float:right; margin-right:18%;" class="form-control" type="text" pattern="\d*" placeholder="To..." id="datepicker_2">
+            </span>
+        </div>
 
-            <!-- <div align="center" class="col-sm-2"> -->
-                  <!-- <p><b><small>To</small></b></p> -->
-                  <input style="display:inline-block; text-align:center; width:120px; float:right; margin-right:13%;" class="form-control" type="text" pattern="\d*" placeholder="To..." type="text" id="datepicker_2">
-            <!-- </div> -->
-            <!-- <div class="col-sm-12"></div> -->
+        <div class="row" style="margin-top:5px;">
+            <span style="width:100%;">
+                <input style="display:inline-block; text-align:center; width:120px; float:left; margin-left:18%;" class="form-control" type="text" pattern="\d*" placeholder="Exclude..." id="date_to_exclude">
+                <input style="display:inline-block; text-align:center; width:120px; float:right; margin-right:18%;" class="form-control" type="number" placeholder="$ Limit..." id="maximum_amount">
             </span>
         </div>
 
@@ -194,15 +192,17 @@
             // Set the date filters
             $('#datepicker').val('{{start_date}}');
             $('#datepicker_2').val('{{end_date}}');
+            $('#date_to_exclude').val('{{date_to_exclude}}');
+            $('#maximum_amount').val('{{maximum_amount}}');
 
 
             // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
-            $('#datepicker,#datepicker_2').on('focus', function(e) {
+            $('#datepicker,#datepicker_2,#date_to_exclude,#maximum_amount').on('focus', function(e) {
                 $(this).val('');
             });
 
             // Limit text entry to only numbers
-            $('#datepicker,#datepicker_2').on('keydown', function(e) {
+            $('#datepicker,#datepicker_2,#date_to_exclude').on('keydown', function(e) {
                 // console.log($(this).val().length);
                 if ([4,7].includes($(this).val().length) && e.key !== 'Backspace' && Number.isInteger(parseInt(e.key))) {
                     $(this).val($(this).val() + '-');
@@ -227,8 +227,15 @@
                 }
             });
 
-            $('#datepicker,#datepicker_2').on('keyup', function(e) {
+            $('#datepicker,#datepicker_2,#date_to_exclude').on('keyup', function(e) {
                 if ($(this).val().length === 10) {
+                    $(this).blur();
+                }
+            });
+
+
+            $('#maximum_amount').on('keyup', function() {
+                if ($(this).val().includes('.') && $(this).val().split('.')[1].length === 2) {
                     $(this).blur();
                 }
             });

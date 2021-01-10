@@ -90,6 +90,9 @@ class Filter(models.Model):
     category_filter_25 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 25', related_name='filters_26')
     start_date_filter = models.DateField(blank=True, null=True, verbose_name = 'Start Date')
     end_date_filter = models.DateField(blank=True, null=True, verbose_name = 'End Date')
+    date_to_exclude = models.DateField(blank=True, null=True, verbose_name = 'Date to Exclude')
+    amount = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Maximum Amount')
+
     last_updated = models.DateTimeField(auto_now=True, verbose_name='Filter Last Updated')
 
 
