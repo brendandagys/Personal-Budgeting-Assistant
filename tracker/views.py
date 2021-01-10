@@ -175,11 +175,11 @@ def get_json_queryset(request):
         temp_end_date = start_date_filter-datetime.timedelta(days=x*days_difference)+datetime.timedelta(days=days_difference-1)
         periods.append('{} - {}'.format(temp_start_date, temp_end_date))
 
-        temp_queryset = Purchase.objects.filter(user=user_object, date__gte=temp_start_date, date__lte=temp_end_date)
+        temp_queryset = list(Purchase.objects.filter(user=user_object, date__gte=temp_start_date, date__lte=temp_end_date).values_list('category', 'category_2', 'amount', 'amount_2')) # Returns a Queryset of tuples
 
         # Get the total cost of all of the purchases
         past_purchases_sum = 0
-        for purchase in list(temp_queryset.values_list('category', 'category_2', 'amount', 'amount_2')): # Returns a Queryset of tuples
+        for purchase in temp_queryset:
             if purchase[0] in purchase_categories_list: # If first category matches, always add 'amount'
                 past_purchases_sum+=purchase[2]
             if purchase[1] in purchase_categories_list: # If second category matches...
@@ -406,7 +406,7 @@ def get_net_worth_chart_data(request):
     labels = []
     values = []
 
-    queryset = AccountUpdate.objects.filter(account__user=user_object) # Ordered by -timestamp
+    queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object) # Ordered by -timestamp
     distinct_accounts_list = set(queryset.values_list('account', flat=True)) # List of ints
 
     latest_value_dict = {} # When an Account has no update on a certain date, the queryset will return None; we will then take the most-recent account value
@@ -417,7 +417,7 @@ def get_net_worth_chart_data(request):
         labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
 
     for date in labels:
-        start_date = date[:-6] # Remove the prefix we just added so we can filter with the date
+        start_date = date[:-6] # Remove the suffix we just added so we can filter with the date
         end_date = str(datetime.datetime.strptime(date[:-6], '%Y-%m-%d').date()+datetime.timedelta(days=1))
 
         queryset_one_date = queryset.filter(timestamp__gte=start_date, timestamp__lt=end_date) # Has all AccountUpdates on one given date
@@ -428,11 +428,12 @@ def get_net_worth_chart_data(request):
             account_object = Account.objects.get(id=account)
 
             last_account_update_on_date = queryset_one_date.filter(account=account_object).order_by('-timestamp').first()
-            if last_account_update_on_date is None:
+            if last_account_update_on_date is None: # If there is no update on that specific date...
                 last_account_value_on_date = latest_value_dict[account]
             else:
                 last_account_value_on_date = last_account_update_on_date.value
-                last_account_value_on_date*=-1 if account_object.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
+                if account.credit:
+                    last_account_value_on_date*=-1 # If a 'credit' account, change sign before summing with the cumulative total
 
                 if account_object.currency != 'CAD':
                     foreign_value = last_account_value_on_date
@@ -477,7 +478,7 @@ def get_pie_chart_data(request):
             end_date_filter = '2099-12-31'
 
 
-        queryset = Purchase.objects.filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
+        queryset = Purchase.objects.select_related('category', 'category_2').filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
 
         for category in purchase_categories_list:
             pie_data.append((category, queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()))
@@ -803,7 +804,7 @@ def settings(request):
     </tr>
 '''
 
-                for object in Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount'):
+                for object in Recurring.objects.select_related('account', 'category').filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount'):
                     table_string+='''
     <tr class="hover" style="font-size:0.3rem; text-align:center;">
         <td style="vertical-align:middle;">{0}</td>
@@ -831,7 +832,7 @@ def settings(request):
     </tr>
 '''
 
-                for object in QuickEntry.objects.filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description'):
+                for object in QuickEntry.objects.select_related('category', 'category_2').filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description'):
                     table_string+='''
     <tr style="font-size:0.3rem; text-align:center;">
         <td style="vertical-align:middle;">{0}</td>
@@ -866,10 +867,10 @@ def settings(request):
 
             context['account_formset'] = AccountFormSet()
 
-            context['recurring_list'] = Recurring.objects.filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount')
+            context['recurring_list'] = Recurring.objects.select_related('account', 'category').filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount')
             context['recurring_form'] = RecurringForm()
 
-            context['quick_entry_list'] = QuickEntry.objects.filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
+            context['quick_entry_list'] = QuickEntry.objects.select_related('category, category_2').filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
             context['quick_entry_form'] = QuickEntryForm()
 
             profile_form_data = {'account_to_use': user_object.profile.account_to_use.id if user_object.profile.account_to_use is not None else None,
