@@ -488,7 +488,7 @@
                         error: function() {
                             alert('\nError updating date filter to: ' + $(this).val());
                         },
-                  });
+                    });
                 }
             });
 
@@ -526,6 +526,51 @@
                     });
                 }
             })
+
+
+            $('#date_to_exclude, #maximum_amount').on('change', function(e) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'filters/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'page': 'Homepage',
+                            'type': 'Extra Filters',
+                            'id': $(this).attr('id'),
+                            'filter_value': $(this).val(), },
+                    context: this,
+                    success: function(response) {
+                        console.log('Filter updated!');
+                        charts();
+                    },
+                    error: function() {
+                        alert('\nError updating the filter to: ' + $(this).val());
+                    },
+                });
+            });
+
+
+            // When switching from a date to blank string, the 'change' event does not fire
+            $('#date_to_exclude, #maximum_amount').on('focusout', function(e) {
+                if ($(this).val() === '') {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'filters/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                                'page': 'Homepage',
+                                'type': 'Extra Filters',
+                                'id': $(this).attr('id'),
+                                'filter_value': $(this).val(), },
+                        context: this,
+                        success: function(response) {
+                            console.log('Filter updated!');
+                            charts();
+                        },
+                        error: function() {
+                            alert('\nError updating date filter to: ' + $(this).val());
+                        },
+                    });
+                }
+            });
 
 
             function charts() {

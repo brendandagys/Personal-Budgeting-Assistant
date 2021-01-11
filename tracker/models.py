@@ -91,7 +91,7 @@ class Filter(models.Model):
     start_date_filter = models.DateField(blank=True, null=True, verbose_name = 'Start Date')
     end_date_filter = models.DateField(blank=True, null=True, verbose_name = 'End Date')
     date_to_exclude = models.DateField(blank=True, null=True, verbose_name = 'Date to Exclude')
-    amount = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Maximum Amount')
+    maximum_amount = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Maximum Amount')
 
     last_updated = models.DateTimeField(auto_now=True, verbose_name='Filter Last Updated')
 

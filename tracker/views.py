@@ -150,21 +150,13 @@ def get_json_queryset(request):
         else:
             start_date_filter = current_date()
 
-
     if end_date_filter is None:
         if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of first purchase recorded
             end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of first purchase recorded
         else:
             end_date_filter = current_date()
 
-    if isinstance(start_date_filter, str):
-        start_date_filter = datetime.datetime.strptime(start_date_filter, '%Y-%m-%d').date()
-
-    if isinstance(end_date_filter, str):
-        end_date_filter = datetime.datetime.strptime(end_date_filter, '%Y-%m-%d').date()
-
     days_difference = (end_date_filter - start_date_filter).days + 1
-
 
     purchase_categories_list = [x.id for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
                                                filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
@@ -173,16 +165,20 @@ def get_json_queryset(request):
                                                filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                if x is not None]
 
-
     periods = []
     sums = []
+
+    maximum_amount = 10000000 if filter_instance.maximum_amount is None else filter_instance.maximum_amount
+    search_string = request.GET.get('search_string', '')
+
+    periods_queryset = Purchase.objects.select_related('category', 'category_2').filter((Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list)) & (Q(item__icontains=search_string) | Q(description__icontains=search_string)), user=user_object, amount__lt=maximum_amount).exclude(date=filter_instance.date_to_exclude)
 
     for x in range(1, 5):
         temp_start_date = start_date_filter-datetime.timedelta(days=x*days_difference)
         temp_end_date = start_date_filter-datetime.timedelta(days=x*days_difference)+datetime.timedelta(days=days_difference-1)
         periods.append('{} - {}'.format(temp_start_date, temp_end_date))
 
-        temp_queryset = list(Purchase.objects.filter(user=user_object, date__gte=temp_start_date, date__lte=temp_end_date).values_list('category', 'category_2', 'amount', 'amount_2')) # Returns a Queryset of tuples
+        temp_queryset = periods_queryset.filter(date__gte=temp_start_date, date__lte=temp_end_date).values_list('category', 'category_2', 'amount', 'amount_2') # Returns a Queryset of tuples
 
         # Get the total cost of all of the purchases
         past_purchases_sum = 0
@@ -203,7 +199,9 @@ def get_json_queryset(request):
     # print(periods)
     # print(sums)
 
-    queryset_data = Purchase.objects.filter(Q(user=user_object) & Q(date__gte=start_date_filter) & Q(date__lte=end_date_filter) & (Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list))).order_by('-date', '-time', 'category__category', 'item')
+    maximum_amount = 10000000 if filter_instance.maximum_amount is None else filter_instance.maximum_amount
+
+    queryset_data = Purchase.objects.filter((Q(category__in=purchase_categories_list) | Q(category_2__in=purchase_categories_list)) & (Q(item__icontains=search_string) | Q(description__icontains=search_string)), user=user_object, amount__lt=maximum_amount, date__gte=start_date_filter, date__lte=end_date_filter).exclude(date=filter_instance.date_to_exclude).order_by('-date', '-time', 'category__category', 'item')
 
     purchases_list = list(queryset_data.values('id', 'date', 'time', 'item', 'category__category', 'amount', 'category_2__category', 'amount_2', 'description', 'receipt')) # List of dictionaries
 
@@ -285,8 +283,9 @@ def get_purchases_chart_data(request):
         current_filter_list_unique_ids = [PurchaseCategory.objects.get(user=user_object, category=x).id for x in current_filter_list_unique] # To filter the Queryset below, we need to give a list of IDs to the category fields, as it's a foreign key
         print('Filters for chart: ' + str(current_filter_list_unique))
 
+        maximum_amount = 10000000 if filter_instance.maximum_amount is None else filter_instance.maximum_amount
 
-        queryset = Purchase.objects.select_related('category', 'category_2').filter(Q(user=user_object) & Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), date__gte=start_date_filter, date__lte=end_date_filter).values('date', 'category', 'category_2', 'amount', 'amount_2')
+        queryset = Purchase.objects.select_related('category', 'category_2').filter(Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), user=user_object, amount__lt=maximum_amount, date__gte=start_date_filter, date__lte=end_date_filter).exclude(date=filter_instance.date_to_exclude).values('date', 'category', 'category_2', 'amount', 'amount_2')
 
         def get_period_sum(queryset, start_date, end_date):
             # If the first PurchaseCategory matches, always add amount_1 to the total
@@ -496,8 +495,10 @@ def get_pie_chart_data(request):
             else:
                 end_date_filter = current_date()
 
+        maximum_amount = 10000000 if filter_instance.maximum_amount is None else filter_instance.maximum_amount
+        search_string = request.GET.get('search_string', '')
 
-        queryset = Purchase.objects.select_related('category', 'category_2').filter(user=user_object, date__gte=start_date_filter, date__lte=end_date_filter)
+        queryset = Purchase.objects.select_related('category', 'category_2').filter(Q(item__icontains=search_string) | Q(description__icontains=search_string), user=user_object, amount__lt=maximum_amount, date__gte=start_date_filter, date__lte=end_date_filter).exclude(date=filter_instance.date_to_exclude)
 
         for category in purchase_categories_list:
             pie_data.append((category, queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()))
@@ -541,8 +542,8 @@ def homepage(request):
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
-        # context['date_to_exclude'] = '' if filter_instance.date_to_exclude is None else str(filter_instance.date_to_exclude)
-        # context['maximum_amount'] = '' if filter_instance.maximum_amount is None else str(filter_instance.maximum_amount)
+        context['date_to_exclude'] = '' if filter_instance.date_to_exclude is None else str(filter_instance.date_to_exclude)
+        context['maximum_amount'] = '' if filter_instance.maximum_amount is None else str(filter_instance.maximum_amount)
 
     elif request.method == 'POST':
 
@@ -778,8 +779,8 @@ class PurchaseListView(generic.ListView):
 
         context['start_date'] = '' if filter_instance.start_date_filter is None else str(filter_instance.start_date_filter)
         context['end_date'] = '' if filter_instance.end_date_filter is None else str(filter_instance.end_date_filter)
-        # context['date_to_exclude'] = '' if filter_instance.date_to_exclude is None else str(filter_instance.date_to_exclude)
-        # context['maximum_amount'] = '' if filter_instance.maximum_amount is None else str(filter_instance.maximum_amount)
+        context['date_to_exclude'] = '' if filter_instance.date_to_exclude is None else str(filter_instance.date_to_exclude)
+        context['maximum_amount'] = '' if filter_instance.maximum_amount is None else str(filter_instance.maximum_amount)
 
         context['purchase_category_filters'] = [x.category for x in [filter_instance.category_filter_1, filter_instance.category_filter_2, filter_instance.category_filter_3, filter_instance.category_filter_4, filter_instance.category_filter_5,
                                                                      filter_instance.category_filter_6, filter_instance.category_filter_7, filter_instance.category_filter_8, filter_instance.category_filter_9, filter_instance.category_filter_10,
@@ -1064,15 +1065,13 @@ def filter_manager(request):
         current_filter_list_unique = sorted(list(set([x for x in current_filter_list if x])))
         print('Originally applied filters: ' + str(current_filter_list_unique))
 
+    # Tells the pages which Purchase Category filters should be styled
     if request.method == 'GET': # DATE FILTER VALUES ARE SENT IN homepage() and PurchaseListView() ! No need here.
         if len(current_filter_list_unique) == len(full_category_filter_list):
             current_filter_list_unique.append('All Categories')
         return JsonResponse(current_filter_list_unique, safe=False)
 
-    if request.method == 'POST':
-        # Get the filter that was clicked
-        filter_value = request.POST['id'] # The filter 'value' is simply stored in the ID
-        print('Clicked filter value: ' + str(filter_value))
+    elif request.method == 'POST':
 
         if request.POST['type'] == 'Date':
             filter_value = request.POST['filter_value'] # Only present in date-related AJAX calls
@@ -1089,7 +1088,23 @@ def filter_manager(request):
 
             return HttpResponse()
 
+        elif request.POST['type'] == 'Extra Filters':
+            if request.POST['id'] == 'date_to_exclude':
+                if request.POST['filter_value'] == '':
+                    filter_instance.date_to_exclude = None
+                else:
+                    filter_instance.date_to_exclude = request.POST['filter_value']
+            elif request.POST['id'] == 'maximum_amount':
+                filter_instance.maximum_amount = None if request.POST['filter_value'] == '' else request.POST['filter_value']
+
+            filter_instance.save()
+
+            return HttpResponse()
+
         elif request.POST['type'] == 'Category':
+            # Get the filter that was clicked
+            filter_value = request.POST['id'] # The filter 'value' is simply stored in the ID
+            print('Clicked filter value: ' + str(filter_value))
 
             def set_filters(filter_list):
                 reset_filters()
@@ -1151,11 +1166,11 @@ def filter_manager(request):
                     return JsonResponse(full_category_filter_list, safe=False) # safe=False necessary for non-dict objets to be serialized
 
             else:
-                if len(current_filter_list_unique) == 25: # Otherwise, there's an available slot...
+                if len(current_filter_list_unique) == 25:
                     reset_filters()
                     return JsonResponse([], safe=False) # safe=False necessary for non-dict objects to be serialized
 
-                else:
+                else: # Otherwise, there's an available slot...
                     if filter_value in current_filter_list_unique:
                         current_filter_list_unique.remove(filter_value)
                     else:

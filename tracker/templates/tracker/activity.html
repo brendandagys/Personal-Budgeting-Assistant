@@ -136,14 +136,15 @@
 
             <div style="padding:0 4px;" class="col-sm-12">
 
-                <h2 id="purchase_list_header" class="purchase_header">Purchases <span id="purchases_count"></span></h2>
+                <h2 id="purchase_list_header" class="purchase_header">Purchases</h2>
 
                 <div class="wrapper" style="position:sticky; top:3.5rem;">
                     <div id="past_period_1" class="box a"></div>
                     <div id="past_period_2" class="box b"></div>
                     <div id="past_period_3" class="box c"></div>
                     <div id="past_period_4" class="box d"></div>
-                    <div id="total_spent" class="box e"></div>
+                    <div id="purchases_count" class="box e"></div>
+                    <div id="total_spent" class="box f"></div>
                 </div>
 
                 <div id="purchase_list_div"></div>
@@ -240,7 +241,7 @@
 
 
         // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
-        $('#datepicker, #datepicker_2, #date_to_exclude, #maximum_amount').on('focus', function(e) {
+        $('#datepicker, #datepicker_2, #date_to_exclude, #maximum_amount, #search').on('focus', function(e) {
             $(this).val('');
         });
 
@@ -314,11 +315,13 @@
 
 
         // General function to fetch the Queryset and populate the page with it
-        get_queryset = function(inital_page_load=false) {
+        get_queryset = function(initial_page_load=false, search_string='') {
+            console.log(search_string)
             $.ajax({
                 type: 'GET',
                 url: 'get_purchases/',
-                data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                       'search_string': search_string, },
                 success: function(response) {
                     console.log('Retrieved purchases!');
                     console.log(response); // object
@@ -330,12 +333,12 @@
                     $('#past_period_4').html(response['past_periods']['labels'][3] + ': $' + response['past_periods']['values'][3].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
 
                     if (response['data'].length > 0) {
-                        $('#purchase_list_header').html('Purchases <span id="purchases_count"></span>');
-                        $('#purchases_count').html('(' + response['data'].length + ')');
+                        $('#purchase_list_header').html('Purchases');
+                        $('#purchases_count').html(response['data'].length.toLocaleString()); // Will add commas
                         $('#no_purchases_spacing').hide();
                         if (response['categories_count'] > 1) {
                             $('#purchase_category_div').show();
-                            purchase_category_chart();
+                            purchase_category_chart(search_string);
                         }
                         else {
                             $('#purchase_category_div').hide();
@@ -396,7 +399,7 @@
                             return purchase_list.concat('</ul>');
                         }
                     );
-                    if (inital_page_load === false) {
+                    if (initial_page_load === false) {
                         if ($('#purchase_category_div').is(':hidden')) {
                             window.scrollTo({top: $('#filter_table').offset().top - 50, behavior: 'smooth'});
                         }
@@ -409,7 +412,7 @@
         }
 
         // Populate the Purchase list upon initial page load
-        get_queryset(inital_page_load=true);
+        get_queryset(initial_page_load=true);
 
 
         function net_worth_chart() {
@@ -477,10 +480,12 @@
         net_worth_chart();
 
 
-        function purchase_category_chart() {
+        function purchase_category_chart(search_string='') {
             $.ajax({
                 type: 'GET',
                 url: 'purchase_category_chart/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                       'search_string': search_string, },
                 success: function(response) {
                     console.log('Received Purchase Category pie chart data!');
                     console.log(response);
@@ -628,8 +633,62 @@
                     error: function() {
                         alert('\nError updating date filter to: ' + $(this).val());
                     },
-              });
+                });
             }
+        });
+
+
+        $('#date_to_exclude, #maximum_amount').on('focusout', function(e) {
+            $.ajax({
+                type: 'POST',
+                url: 'filters/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'page': 'Activity',
+                        'type': 'Extra Filters',
+                        'id': $(this).attr('id'),
+                        'filter_value': $(this).val(), },
+                context: this,
+                success: function(response) {
+                    console.log('Filter updated!');
+                    get_queryset();
+                },
+                error: function() {
+                    alert('\nError updating the filter to: ' + $(this).val());
+                },
+            });
+        });
+
+
+        // When switching from a date to blank string, the 'change' event does not fire
+        $('#date_to_exclude, #maximum_amount').on('focusout', function(e) {
+            if ($(this).val() === '') {
+                $.ajax({
+                    type: 'POST',
+                    url: 'filters/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'page': 'Activity',
+                            'type': 'Extra Filters',
+                            'id': $(this).attr('id'),
+                            'filter_value': $(this).val(), },
+                    context: this,
+                    success: function(response) {
+                        console.log('Filter updated!');
+                        get_queryset();
+                    },
+                    error: function() {
+                        alert('\nError updating date filter to: ' + $(this).val());
+                    },
+                });
+            }
+        });
+
+
+        $('.filter_identifier, #datepicker, #datepicker_2, #date_to_exclude, #maximum_amount').on('click', function() { $('#search').val(''); });
+
+
+        // When switching from a date to blank string, the 'change' event does not fire
+        $('#search').on('change', function(e) {
+            get_queryset(initial_page_load=false, search_string=$('#search').val()); // This optional argument will be passed to the views.py function, and it will filter the results appropriately
         });
 
 
