@@ -23,8 +23,6 @@
          <!-- JQuery -->
          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-         <script src="{% static 'js/linear_regression.js' %}"></script>
-
          <title>Purchase Form + Charts</title>
     </head>
 
@@ -591,16 +589,11 @@
                         var ctx = document.getElementById('spending_chart').getContext('2d');
                         var myChart = new Chart(ctx, {
                             type: 'line',
-                            plugins: [ChartRegressions],
                             data: {
                                 labels: response['labels_daily'],
                                 datasets: [{
                                     label: 'Dollars Spent',
                                     data: response['values_daily'],
-                                    regressions: {
-                                        type: 'linear',
-                                        line: { color: 'red', width: 1},
-                                    },
                                     backgroundColor: [
                                         // 'rgba(255, 99, 132, 0.2)',
                                         'rgba(54, 162, 235, 0.2)',
@@ -644,16 +637,11 @@
                         var ctx = document.getElementById('spending_chart_weekly').getContext('2d');
                         var myChart = new Chart(ctx, {
                             type: 'line',
-                            plugins: [ChartRegressions],
                             data: {
                                 labels: response['labels_weekly'],
                                 datasets: [{
                                     label: 'Dollars Spent',
                                     data: response['values_weekly'],
-                                    regressions: {
-                                        type: 'linear',
-                                        line: { color: 'red', width: 1},
-                                    },
                                     backgroundColor: [
                                         // 'rgba(255, 99, 132, 0.2)',
                                         // 'rgba(54, 162, 235, 0.2)',
@@ -697,16 +685,11 @@
                         var ctx = document.getElementById('spending_chart_biweekly').getContext('2d');
                         var myChart = new Chart(ctx, {
                             type: 'line',
-                            plugins: [ChartRegressions],
                             data: {
                                 labels: response['labels_biweekly'],
                                 datasets: [{
                                     label: 'Dollars Spent',
                                     data: response['values_biweekly'],
-                                    regressions: {
-                                        type: 'linear',
-                                        line: { color: 'red', width: 1},
-                                    },
                                     backgroundColor: [
                                         // 'rgba(255, 99, 132, 0.2)',
                                         // 'rgba(54, 162, 235, 0.2)',
@@ -750,16 +733,11 @@
                         var ctx = document.getElementById('spending_chart_monthly').getContext('2d');
                         var myChart = new Chart(ctx, {
                             type: 'line',
-                            plugins: [ChartRegressions],
                             data: {
                                 labels: response['labels_monthly'],
                                 datasets: [{
                                     label: 'Dollars Spent',
                                     data: response['values_monthly'],
-                                    regressions: {
-                                        type: 'linear',
-                                        line: { color: 'red', width: 1},
-                                    },
                                     backgroundColor: [
                                         'rgba(255, 99, 132, 0.2)',
                                         // 'rgba(54, 162, 235, 0.2)',
