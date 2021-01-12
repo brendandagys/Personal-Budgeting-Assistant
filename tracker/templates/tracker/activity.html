@@ -87,6 +87,8 @@
                 <hr>
                 <h4>Purchase Category Breakdown</h4>
                 <canvas id="purchase_category_pie_chart" width="375" height="250"></canvas>
+                <button id="category_counts" type="button" class="btn btn-sm btn-outline-primary">Counts</button>
+                <button id="category_sums" type="button" class="btn btn-sm btn-outline-primary">Sums</button>
             </div>
 
             <hr>
@@ -489,6 +491,10 @@
                 success: function(response) {
                     console.log('Received Purchase Category pie chart data!');
                     console.log(response);
+
+                    $('#category_counts, #category_sums').addClass('btn-outline-primary').removeClass('btn-outline-success');
+                    $('#category_' + response['mode']).addClass('btn-outline-success').removeClass('btn-outline-primary');
+
                     if (response['pie_labels'].length > 1) { // Hiding and showing is taken care of in get_queryset()
                         var ctx_pie = document.getElementById('purchase_category_pie_chart').getContext('2d');
                         var myPieChart = new Chart(ctx_pie, {
@@ -525,7 +531,14 @@
                                         fontColor: 'slategray',
                                     },
                                     {
-                                        render: 'percentage',
+                                        render: function(args) {
+                                            if (String(args.value).includes('.')) {
+                                                return '$' + Math.round(args.value, 2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                            }
+                                            else {
+                                                return args.value;
+                                            }
+                                        },
                                         fontColor: 'slategray',
                                     }]
                                 }
@@ -536,6 +549,27 @@
             });
         }
         // Run on page load from get_queryset()
+
+        $('#category_counts, #category_sums').on('click', function (e) {
+            $.ajax({
+                type: 'POST',
+                url: 'filters/',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'page': 'Activity',
+                        'type': 'Mode',
+                        'id': $(this).attr('id'),
+                },
+                context: this,
+                success: function(response) {
+                    console.log('Changed Purchase Category pie chart mode to: ' + $(this).attr('id').split('_')[1]); // DO NOT NEED TO CALL get_accounts_sum() or net_worth_chart(), because decrement in CC accompanied by decrement in chequing balance
+                    purchase_category_chart();
+                },
+                error: function() {
+                    alert('\nError changing Purchase Category pie chart mode!');
+                },
+            });
+        });
+
 
         $('#account_form').find(':input').on('change', function(e) {
             if ($(this).val().trim() !== '' && parseFloat($(this).val()) !== parseFloat($(this).attr('placeholder').substring(1).trim().replace(',', ''))) { // When the value is cleared or the placeholder value is typed, this function shouldn't run
@@ -585,6 +619,13 @@
 
         $('a.filter_identifier').on('click', function(e) {
             e.preventDefault()
+
+            if ($(this).hasClass('green_filters')) {
+                $(this).removeClass('green_filters');
+            }
+            else {
+                $(this).addClass('green_filters');
+            }
 
             $(this).blur(); // Without this, the anchor link remains selected after being clicked
 

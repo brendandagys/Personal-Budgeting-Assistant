@@ -462,7 +462,7 @@ def get_net_worth_chart_data(request):
 def get_pie_chart_data(request):
     user_object = request.user
 
-    data_dict = {'pie_labels': (), 'pie_values': ()}
+    data_dict = { 'pie_labels': (), 'pie_values': () }
 
     filter_instance = Filter.objects.get(user=user_object, page='Activity')
 
@@ -475,8 +475,6 @@ def get_pie_chart_data(request):
 
     if len(purchase_categories_list) > 0:
 
-        pie_data = []
-
         start_date_filter = filter_instance.start_date_filter
         end_date_filter = filter_instance.end_date_filter
 
@@ -486,26 +484,34 @@ def get_pie_chart_data(request):
             else:
                 start_date_filter = current_date()
 
-
         if end_date_filter is None:
             if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of first purchase recorded
                 end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of first purchase recorded
             else:
                 end_date_filter = current_date()
 
+
         maximum_amount = 10000000 if filter_instance.maximum_amount is None else filter_instance.maximum_amount
         search_string = request.GET.get('search_string', '')
 
         queryset = Purchase.objects.select_related('category', 'category_2').filter(Q(item__icontains=search_string) | Q(description__icontains=search_string), user=user_object, amount__lt=maximum_amount, date__gte=start_date_filter, date__lte=end_date_filter).exclude(date=filter_instance.date_to_exclude)
 
-        for category in purchase_categories_list:
-            pie_data.append((category, queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()))
+        pie_data = []
+
+        if filter_instance.pie_chart_mode == 'Counts':
+            mode = 'counts'
+            for category in purchase_categories_list:
+                pie_data.append((category, queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()))
+
+        elif filter_instance.pie_chart_mode == 'Sums':
+            mode = 'sums'
+            for category in purchase_categories_list:
+                pie_data.append((category, queryset.filter(Q(category__category=category)).aggregate(Sum('amount'))['amount__sum'] + (queryset.filter(Q(category_2__category=category, amount_2__isnull=False)).aggregate(Sum('amount_2'))['amount_2__sum'] if len(queryset.filter(Q(category_2__category=category, amount_2__isnull=False))) > 0 else 0)))
 
         pie_data.sort(key=lambda x: x[1], reverse=True) # Reverse-sort the list of tuples by the second values: the counts
-
         pie_data = list(zip(*pie_data[:7])) # Only keep seven, for readability | * is unpacking operator | is a list of two tuples
 
-        data_dict.update({ 'pie_labels': pie_data[0], 'pie_values': pie_data[1] })
+        data_dict.update({ 'pie_labels': pie_data[0], 'pie_values': pie_data[1], 'mode': mode })
 
     return JsonResponse(data_dict)
 
@@ -1033,7 +1039,7 @@ def filter_manager(request):
     else:
         filter_instance = Filter.objects.get(user=user_object, page='Homepage')
 
-    if request.method == 'POST' and request.POST['type'] != 'Date' or request.method == 'GET': # We need these for any GET request, and obviously not for POST requests for the date filters
+    if request.method == 'POST' and request.POST['type'] not in ['Date', 'Mode'] or request.method == 'GET': # We need these for any GET request, and obviously not for POST requests for the date filters
         # Generate a comprehensive list of PurchaseCategories
         full_category_filter_list = []
         for purchase_category in PurchaseCategory.objects.filter(user=user_object):
@@ -1094,6 +1100,16 @@ def filter_manager(request):
                     filter_instance.date_to_exclude = request.POST['filter_value']
             elif request.POST['id'] == 'maximum_amount':
                 filter_instance.maximum_amount = None if request.POST['filter_value'] == '' else request.POST['filter_value']
+
+            filter_instance.save()
+
+            return HttpResponse()
+
+        elif request.POST['type'] == 'Mode':
+            if request.POST['id'] == 'category_counts':
+                filter_instance.pie_chart_mode = 'Counts'
+            elif request.POST['id'] == 'category_sums':
+                filter_instance.pie_chart_mode = 'Sums'
 
             filter_instance.save()
 

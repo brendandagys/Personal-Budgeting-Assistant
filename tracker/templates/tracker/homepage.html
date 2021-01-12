@@ -461,7 +461,7 @@
                     context: this, // To allow access in the callback functions
                     success: function (response) {
                         console.log('Filter POST successful!');
-                        // $('a.filter_identifier').removeClass('green_filters');
+                        $('a.filter_identifier').removeClass('green_filters');
                         $.each(response, function(index, category_filter) {
                               $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
                               // console.log(category_filter);
@@ -627,7 +627,7 @@
                                             beginAtZero: false,
                                             min: 0,
                                             callback: function(value) {
-                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                                             }
                                         }
                                     }],
@@ -680,7 +680,7 @@
                                             beginAtZero: false,
                                             min: 0,
                                             callback: function(value) {
-                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                                             }
                                         }
                                     }],
@@ -733,7 +733,7 @@
                                             beginAtZero: false,
                                             min: 0,
                                             callback: function(value) {
-                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                                             }
                                         }
                                     }],
@@ -786,7 +786,7 @@
                                             beginAtZero: false,
                                             min: 0,
                                             callback: function(value) {
-                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                                             }
                                         }
                                     }],

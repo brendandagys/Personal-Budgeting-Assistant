@@ -61,6 +61,11 @@ class Filter(models.Model):
         ('Activity', 'Activity'),
     ]
 
+    PIE_CHART_MODES = [
+        ('Counts', 'Counts'),
+        ('Sums', 'Sums'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='filters_1')
     page = models.CharField(choices=PAGES, max_length=20, verbose_name='Page')
     category_filter_1 = models.ForeignKey(PurchaseCategory, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Category Filter 1', related_name='filters_2')
@@ -92,6 +97,7 @@ class Filter(models.Model):
     end_date_filter = models.DateField(blank=True, null=True, verbose_name = 'End Date')
     date_to_exclude = models.DateField(blank=True, null=True, verbose_name = 'Date to Exclude')
     maximum_amount = models.DecimalField(blank=True, null=True, max_digits=7, decimal_places=2, verbose_name='Maximum Amount')
+    pie_chart_mode = models.CharField(choices=PIE_CHART_MODES, default='Counts', max_length=10, verbose_name='Pie Chart Mode')
 
     last_updated = models.DateTimeField(auto_now=True, verbose_name='Filter Last Updated')
 
