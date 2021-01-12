@@ -283,9 +283,7 @@ def get_purchases_chart_data(request):
         current_filter_list_unique_ids = [PurchaseCategory.objects.get(user=user_object, category=x).id for x in current_filter_list_unique] # To filter the Queryset below, we need to give a list of IDs to the category fields, as it's a foreign key
         print('Filters for chart: ' + str(current_filter_list_unique))
 
-        maximum_amount = 10000000 if filter_instance.maximum_amount is None else filter_instance.maximum_amount
-
-        queryset = Purchase.objects.select_related('category', 'category_2').filter(Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), user=user_object, amount__lt=maximum_amount, date__gte=start_date_filter, date__lte=end_date_filter).exclude(date=filter_instance.date_to_exclude).values('date', 'category', 'category_2', 'amount', 'amount_2')
+        queryset = Purchase.objects.select_related('category', 'category_2').filter(Q(category__in=current_filter_list_unique_ids) | Q(category_2__in=current_filter_list_unique_ids), user=user_object, date__gte=start_date_filter, date__lte=end_date_filter).exclude(date=filter_instance.date_to_exclude).values('date', 'category', 'category_2', 'amount', 'amount_2')
 
         def get_period_sum(queryset, start_date, end_date):
             # If the first PurchaseCategory matches, always add amount_1 to the total
@@ -295,7 +293,7 @@ def get_purchases_chart_data(request):
             # If the second PurchaseCategory matches AND amount_2 is not given AND first PurchaseCategory didn't match (avoid double-counting), add amount_1 to the total
             sum_3 = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date__gte=start_date, date__lte=end_date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date__gte=start_date, date__lte=end_date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum']
 
-            return sum_1 + sum_2 + sum_3
+            return sum_1 + sum_2 + sum_3 if filter_instance.maximum_amount is None or sum_1 + sum_2 + sum_3 <= filter_instance.maximum_amount else 0
 
 
         # DAILY CHART
@@ -312,7 +310,7 @@ def get_purchases_chart_data(request):
             sum_2 = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__gt=0, date=date).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__gt=0, date=date).aggregate(Sum('amount_2'))['amount_2__sum']
             sum_3 = 0 if queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date=date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category_2__in=current_filter_list_unique_ids, amount_2__isnull=True, date=date).exclude(category__in=current_filter_list_unique_ids).aggregate(Sum('amount'))['amount__sum']
 
-            values_daily.append(sum_1 + sum_2 + sum_3)
+            values_daily.append(sum_1 + sum_2 + sum_3 if filter_instance.maximum_amount is None or sum_1 + sum_2 + sum_3 <= filter_instance.maximum_amount else 0)
 
 
         # WEEKLY CHART
