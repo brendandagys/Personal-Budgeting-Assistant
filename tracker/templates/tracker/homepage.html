@@ -441,6 +441,13 @@
             $('a.filter_identifier').on('click', function(e) {
                 e.preventDefault()
 
+                if ($(this).hasClass('green_filters')) {
+                    $(this).removeClass('green_filters');
+                }
+                else {
+                    $(this).addClass('green_filters');
+                }
+
                 $(this).blur(); // Without this, the anchor link remains selected after being clicked
 
                 $.ajax({
@@ -454,7 +461,7 @@
                     context: this, // To allow access in the callback functions
                     success: function (response) {
                         console.log('Filter POST successful!');
-                        $('a.filter_identifier').removeClass('green_filters');
+                        // $('a.filter_identifier').removeClass('green_filters');
                         $.each(response, function(index, category_filter) {
                               $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
                               // console.log(category_filter);
