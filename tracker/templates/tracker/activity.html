@@ -333,9 +333,10 @@
                     $('#past_period_3').html(response['past_periods']['labels'][2] + ': $' + response['past_periods']['values'][2].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
                     $('#past_period_4').html(response['past_periods']['labels'][3] + ': $' + response['past_periods']['values'][3].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
 
+                    $('#purchases_count').html(response['data'].length.toLocaleString()); // Will add commas
+
                     if (response['data'].length > 0) {
                         $('#purchase_list_header').html('Purchases');
-                        $('#purchases_count').html(response['data'].length.toLocaleString()); // Will add commas
                         $('#no_purchases_spacing').hide();
                         if (response['categories_count'] > 1) {
                             $('#purchase_category_div').show();
