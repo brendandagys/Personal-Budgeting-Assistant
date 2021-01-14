@@ -121,10 +121,11 @@ class AccountForm(ModelForm):
         self.fields = {} # Otherwise a field will appear for each field in the model, but we want a specific field to show for each Account
 
         for account in Account.objects.filter(user=user_object).order_by('id'):
-            # Get the last value for the account. If it's None, make placeholder value 0
-            last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
-            self.fields[account.account] = DecimalField(label=account.account, max_digits=9, decimal_places=2, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px',
-                                                                                                                                                         'inputmode': 'decimal', 'placeholder': '${:20,.2f}'.format(last_value)}))
+            if account.active:
+                # Get the last value for the account. If it's None, make placeholder value 0
+                last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
+                self.fields[account.account] = DecimalField(label=account.account, max_digits=9, decimal_places=2, localize=False, widget=NumberInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:180px',
+                                                                                                                                                             'inputmode': 'decimal', 'placeholder': '${:20,.2f}'.format(last_value)}))
 
     class Meta:
         model = Account
