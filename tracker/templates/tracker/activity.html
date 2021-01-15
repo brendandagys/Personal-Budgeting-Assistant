@@ -88,6 +88,8 @@
                 <canvas id="purchase_category_pie_chart" width="375" height="250"></canvas>
                 <button id="category_counts" type="button" class="btn btn-sm btn-outline-primary">Counts</button>
                 <button id="category_sums" type="button" class="btn btn-sm btn-outline-primary">Sums</button>
+                <button id="category_counts_percents" type="button" class="btn btn-sm btn-outline-primary">Counts (%)</button>
+                <button id="category_sums_percents" type="button" class="btn btn-sm btn-outline-primary">Sums (%)</button>
             </div>
 
             <hr>
@@ -483,11 +485,12 @@
                 url: 'purchase_category_chart/',
                 data: { csrfmiddlewaretoken: '{{ csrf_token }}',
                        'search_string': search_string, },
+                context: this,
                 success: function(response) {
                     console.log('Received Purchase Category pie chart data!');
                     console.log(response);
 
-                    $('#category_counts, #category_sums').addClass('btn-outline-primary').removeClass('btn-outline-success');
+                    $('#category_counts, #category_sums, #category_counts_percents, #category_sums_percents').addClass('btn-outline-primary').removeClass('btn-outline-success');
                     $('#category_' + response['mode']).addClass('btn-outline-success').removeClass('btn-outline-primary');
 
                     if (response['pie_labels'].length > 1) { // Hiding and showing is taken care of in get_queryset()
@@ -527,7 +530,10 @@
                                     },
                                     {
                                         render: function(args) {
-                                            if (String(args.value).includes('.')) {
+                                            if (response['mode'].includes('percent')) {
+                                                return Math.round(args.value, 2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '%';
+                                            }
+                                            else if (String(args.value).includes('.')) {
                                                 return '$' + Math.round(args.value, 2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                                             }
                                             else {
@@ -545,7 +551,7 @@
         }
         // Run on page load from get_queryset()
 
-        $('#category_counts, #category_sums').on('click', function (e) {
+        $('#category_counts, #category_sums, #category_counts_percents, #category_sums_percents').on('click', function (e) {
             $.ajax({
                 type: 'POST',
                 url: 'filters/',
