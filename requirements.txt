@@ -12,6 +12,7 @@ et-xmlfile==1.0.1
 forex-python==1.5
 idna==2.10
 jdcal==1.4.1
+gunicorn==20.0.4
 MarkupPy==1.14
 numpy==1.19.5
 odfpy==1.4.1
