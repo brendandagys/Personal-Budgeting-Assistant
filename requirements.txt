@@ -16,7 +16,7 @@ MarkupPy==1.14
 numpy==1.19.5
 odfpy==1.4.1
 openpyxl==3.0.6
-pandas==1.2.0
+pandas==1.1.4
 psycopg2==2.8.6
 python-dateutil==2.8.1
 python-decouple==3.4
