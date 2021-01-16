@@ -68,6 +68,12 @@ def convert_currency(foreign_value, foreign_currency, desired_currency):
     conversion_rate = get_exchange_rate(foreign_currency, desired_currency)
     return round(foreign_value * conversion_rate, 2) # Convert the currency ... multiplying produces many decimal places, so must round (won't matter for model field, though)
 
+@login_required
+def get_quick_entries(request):
+    user_object = request.user
+
+    return JsonResponse({ 'quick_entries': list(QuickEntry.objects.filter(user=user_object).order_by('item').values()) })
+
 
 @login_required
 def account_update(request):

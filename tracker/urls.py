@@ -16,4 +16,5 @@ urlpatterns = [
     path('activity/reset_credit_card/', views.reset_credit_card),
     path('settings/', views.settings, name='settings'),
     path('charts/', views.get_purchases_chart_data),
+    path('get_quick_entries/', views.get_quick_entries),
 ]

@@ -302,7 +302,7 @@ select[id^="id_"] {
     height: 20%;
     width: 90%;
     border-radius: 15px;
-    top: 40%;
+    top: 25%;
     background: rgba(30,144,255,0.93);
 }
 

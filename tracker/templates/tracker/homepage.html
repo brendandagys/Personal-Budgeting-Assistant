@@ -27,6 +27,12 @@
     </head>
 
     <body>
+        <div id="quick_entry_modal_background" class="quick_entry_modal_background">
+            <div id="quick_entry_modal" class="quick_entry_modal" style="width:338px; height:525px; position:relative; margin:auto;">
+                    <!-- <button id="view_receipt_button" style="position:absolute; right:68px; top:42px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
+                    <button id="delete_purchase_button" style="position:absolute; right:68px; top:84px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button> -->
+            </div>
+        </div>
 
         <div class="lighter_background container-fluid">
             <div class="floating_bar_short row">
@@ -157,6 +163,74 @@
                           // console.log(category_filter);
                     });
                 }
+            });
+
+
+            // Display the modal and modal background if anchor link is clicked
+            $(document).on('click', '#custom_anchor_link_3', function(e) {
+                $('#quick_entry_modal_background').css('visibility', 'visible');
+                $('#quick_entry_modal').css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0});
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'get_quick_entries/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function(response) {
+                        // console.log(response);
+                        $('#quick_entry_modal').html('');
+                        $('#quick_entry_modal').append('<br>');
+                        $.each(response['quick_entries'], function(index, quick_entry) {
+                            console.log(quick_entry);
+                            let item = quick_entry['item'];
+                            let category = quick_entry['category_id'];
+                            let category_2 = quick_entry['category_2_id'];
+                            let amount = quick_entry['amount'];
+                            let amount_2 = quick_entry['amount_2'];
+                            let description = quick_entry['description'];
+
+                            $('#quick_entry_modal').append(`<button
+                            style="width:300px; max-width:300px; margin:2px auto;"
+                            type="button"
+                            class="btn btn-success border quick_entry_button"
+                            data-item="${item}"
+                            data-category="${category}"
+                            data-category_2="${category_2}"
+                            data-amount="${amount}"
+                            data-amount_2="${amount_2}"
+                            data-description="${description}"
+                            >${item}</button> <br>`);
+                        });
+                    }
+                });
+            });
+
+            // After deletion or click outside of the modal, it must be re-hidden
+            hide_and_reset_modal = function() {
+                $('#quick_entry_modal_background').css('visibility', 'hidden');
+                $('#quick_entry_modal').css('visibility', 'hidden');
+            }
+
+            // Hide the modal and modal background if anything other than the modal or nav header is clicked
+            $('#quick_entry_modal_background').on('click', function(e) {
+                hide_and_reset_modal();
+            });
+
+            $(document).on('click', '.quick_entry_button', function() {
+                $('#id_category').val('');
+                $('#id_item').val('');
+                $('#id_amount').val('');
+                $('#id_category_2').val('');
+                $('#id_amount_2').val('');
+                $('#id_description').val('');
+
+                $('#purchase_form').find('#id_category').val($(this).data('category'));
+                $('#purchase_form').find('#id_item').val($(this).data('item'));
+                $('#purchase_form').find('#id_amount').val($(this).data('amount'));
+                $('#purchase_form').find('#id_category_2').val($(this).data('category_2'));
+                $('#purchase_form').find('#id_amount_2').val($(this).data('amount_2'));
+                $('#purchase_form').find('#id_description').val($(this).data('description'));
+
+                hide_and_reset_modal();
             });
 
 
@@ -333,12 +407,12 @@
                 else {
                     $('#id_description').val('');
                 }
-                if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
-                    $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
-                    $('#id_amount').val('2.10');
-                    $('#id_description').focus().val('L, regular. '); // textarea elemented must be inserted into using .text()
-                }
-                else if ($('#id_category :selected').text() === 'Gas') {
+                // if ($('#id_category :selected').text() === 'Coffee') { // Could not figure out how to select using JQuery
+                //     $('#id_item').val('Coffee at McDonalds'); // input elements must use .val()
+                //     $('#id_amount').val('2.10');
+                //     $('#id_description').focus().val('L, regular. '); // textarea elemented must be inserted into using .text()
+                // }
+                if ($('#id_category :selected').text() === 'Gas') {
                     console.log('YES');
                     $('#id_item').val('Gas at Esso');
                     $('#id_description').text(' L, $/L.');
