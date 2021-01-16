@@ -413,7 +413,6 @@
                 //     $('#id_description').focus().val('L, regular. '); // textarea elemented must be inserted into using .text()
                 // }
                 if ($('#id_category :selected').text() === 'Gas') {
-                    console.log('YES');
                     $('#id_item').val('Gas at Esso');
                     $('#id_description').text(' L, $/L.');
                     $('#id_description').focus();
@@ -658,7 +657,7 @@
                     type: 'GET',
                     url: 'charts/',
                     success: function(response) {
-                        console.log(response);
+                        // console.log(response);
 
                         var ctx = document.getElementById('spending_chart').getContext('2d');
                         var myChart = new Chart(ctx, {
