@@ -253,19 +253,6 @@ select[id^="id_"] {
     margin-bottom: 3rem;
 }
 
-.floating_bar {
-    position: fixed;
-    margin: auto !important;
-    width: 100%;
-    height: 90px;
-    right: 0.01%;
-    text-align: center;
-    z-index: 1000;
-    border-bottom: 2px solid slategrey;
-    /* background: rgba(250,250,250,1); */
-    background-color: #FAFAFA;
-}
-
 .floating_bar_short {
     position: fixed;
     top:0 !important;
