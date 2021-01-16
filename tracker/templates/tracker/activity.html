@@ -75,14 +75,14 @@
 
             <hr>
 
-            <div>
+            <div id="net_worth_chart_div" style="position:relative;">
                 <div style="margin:0; text-align:center;">
                     <h4>Net Worth</h4>
                     <canvas id="net_worth_chart" width="375" height="250"></canvas>
                 </div>
             </div>
 
-            <div id="purchase_category_div" style="margin:0; text-align:center;">
+            <div id="purchase_category_div" style="margin:0; text-align:center; position:relative;">
                 <hr>
                 <h4>Purchase Category Breakdown</h4>
                 <canvas id="purchase_category_pie_chart" width="375" height="250"></canvas>
@@ -159,13 +159,36 @@
     </body>
 </html>
 
-<script type="text/javascript">
+<script type="module">
+    import {Spinner} from "{% static 'js/spin.js/spin.js' %}";
+
+    var opts = {
+        lines: 10, // The number of lines to draw
+        length: 38, // The length of each line
+        width: 17, // The line thickness
+        radius: 45, // The radius of the inner circle
+        scale: 1, // Scales overall size of the spinner
+        corners: 1, // Corner roundness (0..1)
+        speed: 1, // Rounds per second
+        rotate: 0, // The rotation offset
+        animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
+        direction: 1, // 1: clockwise, -1: counterclockwise
+        color: '#282730', // CSS color or array of colors
+        fadeColor: 'transparent', // CSS color or array of colors
+        top: '55%', // Top position relative to parent
+        left: '50%', // Left position relative to parent
+        shadow: '0 0 1px transparent', // Box-shadow for the lines
+        zIndex: 2000000000, // The z-index (defaults to 2e9)
+        className: 'spinner', // The CSS class to assign to the spinner
+        position: 'absolute', // Element positioning
+    };
 
     if ('{{debit_account}}' === 'Not set' || '{{credit_account}}' === 'Not set') {
         $('#reset_credit_card').prop('disabled', true);
     }
 
     $(document).ready(function() {
+        var initial_page_load
 
         // Initial indication of the applied filters
         $.ajax({
@@ -202,7 +225,7 @@
         });
 
         // After deletion or click outside of the modal, it must be re-hidden, and the data-id and data-url attributes reset to ''
-        hide_and_reset_modal = function() {
+        var hide_and_reset_modal = function() {
             $('#purchase_modal_background').css('visibility', 'hidden');
             $('#purchase_modal').css('visibility', 'hidden');
             // Unnecessary, but cleaner...
@@ -296,7 +319,7 @@
         });
 
 
-        get_accounts_sum = function() {
+        var get_accounts_sum = function() {
             $.ajax({
                 type: 'GET',
                 url: 'get_accounts_sum/',
@@ -317,7 +340,7 @@
         get_accounts_sum();
 
 
-        enable_filters = function(enable) {
+        var enable_filters = function(enable) {
             if (enable === true) {
                 $('#datepicker, #datepicker_2, #date_to_exclude, #maximum_amount, #search').prop('disabled', false);
             }
@@ -328,7 +351,7 @@
 
 
         // General function to fetch the Queryset and populate the page with it
-        get_queryset = function(initial_page_load=false, search_string='') {
+        var get_queryset = function(initial_page_load=false, search_string='') {
             enable_filters(false);
 
             console.log(search_string)
@@ -434,13 +457,17 @@
 
 
         function net_worth_chart() {
+            var spinner_1 = new Spinner(opts).spin(document.getElementById('net_worth_chart_div'));
 
             $.ajax({
                 type: 'GET',
                 url: 'net_worth_chart/',
                 success: function(response) {
-                        console.log('Received net worth chart data!');
-                        console.log(response);
+                    console.log('Received net worth chart data!');
+                    console.log(response);
+
+                    spinner_1.stop();
+
                     var ctx = document.getElementById('net_worth_chart').getContext('2d');
                     var myChart = new Chart(ctx, {
                         type: 'line',
@@ -494,6 +521,8 @@
 
 
         function purchase_category_chart(search_string='') {
+            var spinner_2 = new Spinner(opts).spin(document.getElementById('purchase_category_div'));
+
             $.ajax({
                 type: 'GET',
                 url: 'purchase_category_chart/',
@@ -503,6 +532,8 @@
                 success: function(response) {
                     console.log('Received Purchase Category pie chart data!');
                     console.log(response);
+
+                    spinner_2.stop();
 
                     $('#category_counts, #category_sums, #category_counts_percents, #category_sums_percents').addClass('btn-outline-primary').removeClass('btn-outline-success');
                     $('#category_' + response['mode']).addClass('btn-outline-success').removeClass('btn-outline-primary');
@@ -635,6 +666,8 @@
         $('a.filter_identifier').on('click', function(e) {
             e.preventDefault()
 
+            enable_filters(false);
+
             if ($(this).hasClass('green_filters')) {
                 $(this).removeClass('green_filters');
             }
@@ -664,6 +697,7 @@
                 },
                 error: function() {
                     alert('\nThere was an issue updating the filter: ' + $(this).attr('id'));
+                    enable_filters(true);
                 }
             });
             return false;

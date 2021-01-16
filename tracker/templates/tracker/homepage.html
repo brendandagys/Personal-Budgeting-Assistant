@@ -102,7 +102,7 @@
 
         <br>
 
-        <div class="bottom_div">
+        <div id="spending_chart_div_1" class="bottom_div" style="position:relative;">
             <div style="margin:0; text-align:center;">
                     <h5>Purchases Trend</h5>
                     <canvas id="spending_chart" width="375" height="250"></canvas>
@@ -111,7 +111,7 @@
 
         <br>
 
-        <div class="bottom_div">
+        <div id="spending_chart_div_2" class="bottom_div" style="position:relative;">
             <div style="margin:0; text-align:center;">
                     <h5>Weekly Trend</h5>
                     <canvas id="spending_chart_weekly" width="375" height="250"></canvas>
@@ -120,7 +120,7 @@
 
         <br>
 
-        <div class="bottom_div">
+        <div id="spending_chart_div_3" class="bottom_div" style="position:relative;">
             <div style="margin:0; text-align:center;">
                     <h5>Bi-Weekly Trend</h5>
                     <canvas id="spending_chart_biweekly" width="375" height="250"></canvas>
@@ -129,7 +129,7 @@
 
         <br>
 
-        <div class="bottom_div">
+        <div id="spending_chart_div_4" class="bottom_div" style="position:relative;">
             <div style="margin:0; text-align:center;">
                     <h5>Monthly Trend</h5>
                     <canvas id="spending_chart_monthly" width="375" height="250"></canvas>
@@ -145,7 +145,30 @@
 
     </body>
 
-    <script>
+    <script type="module">
+        import {Spinner} from "{% static 'js/spin.js/spin.js' %}";
+
+        var opts = {
+            lines: 10, // The number of lines to draw
+            length: 38, // The length of each line
+            width: 17, // The line thickness
+            radius: 45, // The radius of the inner circle
+            scale: 1, // Scales overall size of the spinner
+            corners: 1, // Corner roundness (0..1)
+            speed: 1, // Rounds per second
+            rotate: 0, // The rotation offset
+            animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
+            direction: 1, // 1: clockwise, -1: counterclockwise
+            color: '#282730', // CSS color or array of colors
+            fadeColor: 'transparent', // CSS color or array of colors
+            top: '55%', // Top position relative to parent
+            left: '50%', // Left position relative to parent
+            shadow: '0 0 1px transparent', // Box-shadow for the lines
+            zIndex: 2000000000, // The z-index (defaults to 2e9)
+            className: 'spinner', // The CSS class to assign to the spinner
+            position: 'absolute', // Element positioning
+        };
+
         $('#id_account_to_use').hide();
 
         $('#id_receipt').attr('accept', 'image/*');
@@ -205,7 +228,7 @@
             });
 
             // After deletion or click outside of the modal, it must be re-hidden
-            hide_and_reset_modal = function() {
+            var hide_and_reset_modal = function() {
                 $('#quick_entry_modal_background').css('visibility', 'hidden');
                 $('#quick_entry_modal').css('visibility', 'hidden');
             }
@@ -423,7 +446,7 @@
             });
 
 
-            increase_form_height = function(additional_px) { // Increase the height of the form by the number of pixels passed in
+            var increase_form_height = function(additional_px) { // Increase the height of the form by the number of pixels passed in
                 current_form_height = $('#form_div').height();
                 $('#form_div').css('height', current_form_height + additional_px + 'px');
             }
@@ -512,6 +535,8 @@
             $('a.filter_identifier').on('click', function(e) {
                 e.preventDefault()
 
+                enable_filters(false);
+
                 if ($(this).hasClass('green_filters')) {
                     $(this).removeClass('green_filters');
                 }
@@ -541,6 +566,7 @@
                     },
                     error: function() {
                         alert('\nThere was an issue updating the filter: ' + $(this).attr('id'));
+                        enable_filters(true);
                     }
                 });
                 return false;
@@ -575,7 +601,7 @@
             });
 
 
-            enable_filters = function(enable) {
+            var enable_filters = function(enable) {
                 if (enable === true) {
                     $('#datepicker, #datepicker_2, #date_to_exclude, #maximum_amount').prop('disabled', false);
                 }
@@ -678,11 +704,23 @@
 
 
             function charts() {
+                enable_filters(false);
+
+                var spinner_1 = new Spinner(opts).spin(document.getElementById('spending_chart_div_1'));
+                var spinner_2 = new Spinner(opts).spin(document.getElementById('spending_chart_div_2'));
+                var spinner_3 = new Spinner(opts).spin(document.getElementById('spending_chart_div_3'));
+                var spinner_4 = new Spinner(opts).spin(document.getElementById('spending_chart_div_4'));
+
                 $.ajax({
                     type: 'GET',
                     url: 'charts/',
                     success: function(response) {
                         // console.log(response);
+
+                        spinner_1.stop();
+                        spinner_2.stop();
+                        spinner_3.stop();
+                        spinner_4.stop();
 
                         var ctx = document.getElementById('spending_chart').getContext('2d');
                         var myChart = new Chart(ctx, {
@@ -874,10 +912,9 @@
                                 }
                             }
                         });
+                        enable_filters(true);
                     }
                 });
-
-                enable_filters(true);
             }
 
             charts();
