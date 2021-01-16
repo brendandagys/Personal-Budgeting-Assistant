@@ -316,7 +316,7 @@ select[id^="id_"] {
     /* height: 200%; */
     /* width: 90%; */
     border-radius: 15px;
-    top: 20%;
+    top: 10%;
     background: rgba(30,144,255,0.93);
 }
 

@@ -133,9 +133,9 @@
 
             <br><br>
             <h6 style="text-align:center;">Quick Entries</h6>
-            <p style="font-size:0.5rem; text-align:center;">Add a Quick Entry for the Purchase Form.</p>
+            <p style="font-size:0.5rem; text-align:center;">Add up to 14 Quick Entries for the Purchase Form.</p>
             <div id="quick_entry_table_div">
-                <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
+                <!-- <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
                     {% if quick_entry_list|length > 0 %}
                         <tr style="font-size:0.4rem; text-align:center;">
                             <th style="width:7%">ID</th>
@@ -158,7 +158,7 @@
                             <td style="vertical-align:middle;">{{ quick_entry.description }}</td>
                         </tr>
                     {% endfor %}
-                </table>
+                </table> -->
             </div>
             <div style="text-align:center; margin-top:10px;"><button id="delete_Quick_Entry" type="button" class="btn btn-sm btn-outline-danger delete_button">Delete a Quick Entry...</button></div>
 
@@ -169,7 +169,7 @@
                     {{ quick_entry_form }}
                 </table> </br>
 
-                <input class="btn btn-sm btn-primary" type="submit" value="Add Quick Entry" name="quick_entry_form_submit">
+                <input id="quick_entry_form_submit" class="btn btn-sm btn-primary" type="submit" value="Add Quick Entry" name="quick_entry_form_submit">
             </form>
             <br><br>
 
@@ -563,11 +563,19 @@
                         'model': 'Quick Entry',
                       },
                 success: function(response) {
-                    $('#quick_entry_table_div').html(response);
-                    console.log('Refreshed Quick Entry table.');
+                    $('#quick_entry_table_div').html(response['table_string']);
+                    console.log('Received Quick Entry data for table.');
+                    if (response['count'] !== 14) {
+                        $('#quick_entry_form_submit').prop('disabled', false);
+                    }
+                    else {
+                        $('#quick_entry_form_submit').prop('disabled', true);
+                    }
                 }
             });
         }
+
+        get_quick_entry_table(); // Run on page load, because we removed the table that comes from the context
 
         $('#quick_entry_form').on('submit', function(e) {
             e.preventDefault();

@@ -874,6 +874,8 @@ def settings(request):
                 return JsonResponse(table_string + '</table>', safe=False)
 
             elif request.GET['model'] == 'Quick Entry':
+                count = 0
+
                 table_string = '''
 <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
     <tr style="font-size:0.4rem; text-align:center;">
@@ -888,6 +890,7 @@ def settings(request):
 '''
 
                 for object in QuickEntry.objects.select_related('category', 'category_2').filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description'):
+                    count+=1
                     table_string+='''
     <tr style="font-size:0.3rem; text-align:center;">
         <td style="vertical-align:middle;">{0}</td>
@@ -899,7 +902,7 @@ def settings(request):
         <td style="vertical-align:middle;">{6}</td>
     </tr>
 '''.format(str(object['id']), str(object['category__category']).replace('None', ''), object['item'], object['amount'], str(object['category_2__category']).replace('None', ''), str(object['amount_2']).replace('None', ''), object['description'])
-                return JsonResponse(table_string + '</table>', safe=False)
+                return JsonResponse({ 'table_string': table_string + '</table>', 'count': count }, safe=False)
 
 
         else: # Inital page load
@@ -925,7 +928,7 @@ def settings(request):
             context['recurring_list'] = Recurring.objects.select_related('account', 'category').filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount')
             context['recurring_form'] = RecurringForm()
 
-            context['quick_entry_list'] = QuickEntry.objects.select_related('category, category_2').filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
+            # context['quick_entry_list'] = QuickEntry.objects.select_related('category, category_2').filter(user=user_object).values('id', 'category__category', 'item', 'amount', 'category_2__category', 'amount_2', 'description')
             context['quick_entry_form'] = QuickEntryForm()
 
             profile_form_data = {'account_to_use': user_object.profile.account_to_use.id if user_object.profile.account_to_use is not None else None,
