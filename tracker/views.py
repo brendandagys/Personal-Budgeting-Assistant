@@ -546,9 +546,24 @@ def get_pie_chart_data(request):
 @login_required
 def delete_purchase(request):
     user_object = request.user
+    purchase_object = Purchase.objects.get(id=request.POST['id'])
 
-    Purchase.objects.get(id=request.POST['id']).delete()
+    account_updates = AccountUpdate.objects.filter(purchase__id=request.POST['id'])
+
+    if len(account_updates) > 0:
+        last_account_update_value = AccountUpdate.objects.filter(account=purchase_object.account).order_by('-timestamp').first().value
+        purchase_amount = purchase_object.amount + (0 if purchase_object.amount_2 is None else purchase_object.amount_2) # Brackets were needed
+
+        if purchase_object.account.credit:
+            amended_account_value = last_account_update_value - purchase_amount
+        else:
+            amended_account_value = last_account_update_value + purchase_amount
+
+        AccountUpdate.objects.create(account=purchase_object.account, value=amended_account_value, exchange_rate=get_exchange_rate(purchase_object.account.currency, 'CAD'))
+
+    purchase_object.delete()
     print('\nDeleted Purchase: ' + str(request.POST['id']) + '\n')
+
     return HttpResponse()
 
 
