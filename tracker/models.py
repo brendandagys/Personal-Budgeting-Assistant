@@ -12,7 +12,7 @@ def current_date():
 def current_time():
     return str(timezone.now().time())[0:5]
 
-def current_datetime():
+def current_datetime(): # Migration 0001 will fail if I delete this?
     return timezone.now()
 
 CURRENCIES = [
