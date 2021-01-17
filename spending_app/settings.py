@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import django_heroku
+import dj_database_url
 from decouple import config
 
 SECURE_SSL_REDIRECT = config('SSL_REDIRECT', default=False, cast=bool)
@@ -92,6 +93,10 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+# DATABASES = {}
+if config('HEROKU', default=False, cast=bool):
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600)
 
 
 # Password validation
