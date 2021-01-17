@@ -343,9 +343,11 @@
         var enable_filters = function(enable) {
             if (enable === true) {
                 $('#datepicker, #datepicker_2, #date_to_exclude, #maximum_amount, #search').prop('disabled', false);
+                $('.filter_identifier').removeClass('disable_link');
             }
             else {
                 $('#datepicker, #datepicker_2, #date_to_exclude, #maximum_amount, #search').prop('disabled', true);
+                $('.filter_identifier').addClass('disable_link');
             }
         }
 

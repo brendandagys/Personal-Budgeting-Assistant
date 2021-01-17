@@ -399,3 +399,8 @@ select[id^="id_"] {
     opacity: 1;
   }
 }
+
+.disable_link {
+  pointer-events: none;
+  cursor: default;
+}
