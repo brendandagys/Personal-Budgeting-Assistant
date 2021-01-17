@@ -576,6 +576,8 @@ def homepage(request):
         context['date_to_exclude'] = '' if filter_instance.date_to_exclude is None else str(filter_instance.date_to_exclude)
         context['maximum_amount'] = '' if filter_instance.maximum_amount is None else str(filter_instance.maximum_amount)
 
+        check_recurring_payments(request)
+
     elif request.method == 'POST':
 
         purchase_form = PurchaseForm(request.POST, request.FILES)
@@ -1234,20 +1236,45 @@ def filter_manager(request):
 
                     return JsonResponse(current_filter_list_unique, safe=False) # safe=False necessary for non-dict objects to be serialized
 
+@login_required
+def check_recurring_payments(request):
+    user_object = request.user
 
-# @login_required
-# def mode_manager(request):
-#     if request.method == 'GET':
-#         mode_instance = Mode.objects.last()
-#
-#         if mode_instance is None:
-#             mode_instance = Mode.objects.create(mode='All')
-#
-#         return JsonResponse( {'mode': mode_instance.mode} )
-#
-#     elif request.method == 'POST':
-#         mode_instance = Mode.objects.last()
-#         mode_instance.mode = request.POST['mode']
-#         mode_instance.save()
-#
-#         return HttpResponse()
+    recurrings = Recurring.objects.filter(user=user_object)
+    print()
+    for x in recurrings:
+        print(x)
+        print(x.dates)
+        print(x.interval_type)
+    print()
+
+    for x in recurrings:
+        if x.dates != '' or x.weekdays != '':
+            latest_entry = Purchase.objects.filter(user=user_object, item=x.name).order_by('-date').first()
+            last_date = latest_entry.date if latest_entry is not None else None
+
+            if x.dates != '':
+                dates_to_add = x.dates.split(',')
+                for date in dates_to_add:
+                    next_date = last_date
+                    if current_date().day == date and len(Purchase.objects.filter(user=user_object, item=x.name, date=current_date())) == 0:
+                        Purchase.objects.create(
+                            user=user_object,
+                            date=current_date(),
+                            time='00:00',
+                            item=x.name,
+                            category=x.category,
+                            amount=x.amount,
+                            description=x.description,
+                            account=x.account,
+                            exchange_rate=1,
+                        )
+            if x.weekdays != '':
+                pass
+
+        elif x.interval_type != '':
+            print(2)
+            print(x)
+        elif x.xth_type != '':
+            print(3)
+            print(x)

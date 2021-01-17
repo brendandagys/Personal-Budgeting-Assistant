@@ -28,7 +28,7 @@
 
     <body>
         <div id="quick_entry_modal_background" class="quick_entry_modal_background">
-            <div id="quick_entry_modal" class="quick_entry_modal" style="width:338px; height:542px; position:relative; margin:auto;">
+            <div id="quick_entry_modal" class="quick_entry_modal" style="width:338px; height:545px; position:relative; margin:auto;">
                     <!-- <button id="view_receipt_button" style="position:absolute; right:68px; top:42px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
                     <button id="delete_purchase_button" style="position:absolute; right:68px; top:84px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button> -->
             </div>
@@ -137,11 +137,6 @@
         </div>
 
         <br>
-
-        <!-- <div class="modes col-sm-12">
-          <button id="all_mode" type="button" class="modes btn btn-secondary">Send Alerts After Every Purchase</button>
-          <button id="threshold_mode" type="button" class="modes btn btn-secondary">Send Alerts When Threshold Reached</button>
-        </div> -->
 
     </body>
 
@@ -447,7 +442,7 @@
 
 
             var increase_form_height = function(additional_px) { // Increase the height of the form by the number of pixels passed in
-                current_form_height = $('#form_div').height();
+                var current_form_height = $('#form_div').height();
                 $('#form_div').css('height', current_form_height + additional_px + 'px');
             }
 

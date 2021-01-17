@@ -361,7 +361,7 @@ select[id^="id_"] {
     font-size: 1.3rem;
   }
 
-  @keyframes spinner-line-fade-more {
+  @-webkit-keyframes spinner-line-fade-more {
   0%, 100% {
     opacity: 0; /* minimum opacity */
   }
@@ -370,7 +370,7 @@ select[id^="id_"] {
   }
 }
 
-@keyframes spinner-line-fade-quick {
+@-webkit-keyframes spinner-line-fade-quick {
   0%, 39%, 100% {
     opacity: 0.25; /* minimum opacity */
   }
@@ -379,7 +379,7 @@ select[id^="id_"] {
   }
 }
 
-@keyframes spinner-line-fade-default {
+@-webkit-keyframes spinner-line-fade-default {
   0%, 100% {
     opacity: 0.22; /* minimum opacity */
   }
@@ -388,7 +388,7 @@ select[id^="id_"] {
   }
 }
 
-@keyframes spinner-line-shrink {
+@-webkit-keyframes spinner-line-shrink {
   0%, 25%, 100% {
     /* minimum scale and opacity */
     transform: scale(0.5);
