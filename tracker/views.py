@@ -1255,7 +1255,7 @@ def filter_manager(request):
 def check_recurring_payments(request):
     user_object = request.user
 
-    recurrings = Recurring.objects.filter(user=user_object)
+    recurrings = Recurring.objects.filter(user=user_object, active=True)
     print()
     for x in recurrings:
         print(x)
@@ -1265,27 +1265,48 @@ def check_recurring_payments(request):
 
     for x in recurrings:
         if x.dates != '' or x.weekdays != '':
-            latest_entry = Purchase.objects.filter(user=user_object, item=x.name).order_by('-date').first()
-            last_date = latest_entry.date if latest_entry is not None else None
+            # Get all of the permissible dates/weekdays to add bills
+            acceptable_dates = [] # Will contain strings
+            if x.dates is not None:
+                acceptable_dates+=x.dates.split(',')
+            if x.weekdays is not None:
+                acceptable_dates+=x.weekdays.split(',')
 
-            if x.dates != '':
-                dates_to_add = x.dates.split(',')
-                for date in dates_to_add:
-                    next_date = last_date
-                    if current_date().day == date and len(Purchase.objects.filter(user=user_object, item=x.name, date=current_date())) == 0:
-                        Purchase.objects.create(
-                            user=user_object,
-                            date=current_date(),
-                            time='00:00',
-                            item=x.name,
-                            category=x.category,
-                            amount=x.amount,
-                            description=x.description,
-                            account=x.account,
-                            exchange_rate=1,
-                        )
-            if x.weekdays != '':
+            try: # Not exactly needed, but cleaner...
+                acceptable_dates.remove('') # Returns nothing
+            except Exception:
                 pass
+
+            latest_entry = Purchase.objects.filter(user=user_object, item=x.name).order_by('-date').first()
+            latest_account_value = 0 if AccountUpdate.objects.filter(account=x.account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=x.account).order_by('-timestamp').first().value
+            date_to_iterate_from = latest_entry.date if latest_entry is not None else x.start_date
+
+            # Iterate through each date, from last bill OR start date, to the current date
+            for date in pd.date_range(start=date_to_iterate_from, end=current_date()).strftime('%Y-%m-%d').tolist(): # This will be a DateTimeIndex. Last two methods format the dates into strings and turn into a list
+                date = datetime.datetime.strptime(date, '%Y-%m-%d')
+
+                # If it's an appropriate date, AND the bill hasn't already been recorded on this day...create a Purchase and AccountUpdate
+                if (str(date.day) in acceptable_dates or calendar.day_name[date.weekday()] in acceptable_dates) and len(Purchase.objects.filter(user=user_object, item=x.name, date=date)) == 0:
+                    purchase_object = Purchase.objects.create(
+                        user=user_object,
+                        date=date,
+                        time='00:00',
+                        item=x.name,
+                        category=x.category,
+                        amount=x.amount,
+                        description=x.description,
+                        account=x.account,
+                        exchange_rate=1,
+                    )
+                    print('Created Purchase for: ' + x.name)
+
+                    AccountUpdate.objects.create(
+                        account=x.account,
+                        value=(latest_account_value + x.value) if x.account.credit else (latest_account_value - x.amount),
+                        exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
+                        purchase=purchase_object,
+                    )
+                    print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
 
         elif x.interval_type != '':
             print(2)
