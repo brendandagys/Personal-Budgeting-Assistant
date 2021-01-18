@@ -276,7 +276,7 @@ select[id^="id_"] {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.5);
-    z-index: 800;
+    z-index: 980;
 }
 
 .purchase_modal {
@@ -285,7 +285,7 @@ select[id^="id_"] {
     text-align: center;
     box-shadow: 0 10px 7px 0 rgba(0,0,0,0.2), 0 7px 20px 0 slategray;
     margin: 0 5%;
-    z-index: 995;
+    z-index: 990;
     /* height: 20%;
     width: 90%; */
     border-radius: 15px;
@@ -299,7 +299,7 @@ select[id^="id_"] {
     text-align: center;
     box-shadow: 0 10px 7px 0 rgba(0,0,0,0.2), 0 7px 20px 0 slategray;
     margin: 0 5%;
-    z-index: 995;
+    z-index: 990;
     /* height: 200%; */
     /* width: 90%; */
     border-radius: 15px;
