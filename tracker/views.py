@@ -574,6 +574,24 @@ def homepage(request):
     if request.method == 'GET':
         context = {}
 
+        threshold_dict = {}
+
+        colors = ['bg-success', 'bg-primary', 'bg-info']
+        use_color = 3
+
+        for category in PurchaseCategory.objects.filter(user=user_object, threshold__isnull=False, threshold__gt=0):
+            color_to_use = colors[use_color%3]
+            use_color+=1
+
+            queryset = Purchase.objects.filter(Q(category=category) | Q(category_2=category), date__gte=current_date()-datetime.timedelta(days=category.threshold_rolling_days))
+            sum_1 = 0 if queryset.filter(category=category).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category=category).aggregate(Sum('amount'))['amount__sum']
+            sum_2 = 0 if queryset.filter(category_2=category, amount_2__gt=0).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2=category, amount_2__gt=0).aggregate(Sum('amount_2'))['amount_2__sum']
+            sum_3 = 0 if queryset.filter(category_2=category, amount_2__isnull=True).exclude(category=category).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category_2=category, amount_2__isnull=True).exclude(category=category).aggregate(Sum('amount'))['amount__sum']
+
+            threshold_dict[category] = (category.category, round(100 * (sum_1 + sum_2 + sum_3)/category.threshold, 1), category.threshold, category.threshold_rolling_days, color_to_use)
+
+        context['purchase_category_dict'] = threshold_dict
+
         context['account_to_use'] = user_object.profile.account_to_use # None, if not set
         context['account_to_use_currency'] = context['account_to_use'].currency if context['account_to_use'] else None
         context['second_account_to_use'] = user_object.profile.second_account_to_use
