@@ -223,7 +223,7 @@ class Recurring(models.Model):
     interval_type = models.CharField(blank=True, choices=INTERVAL_TYPES, default='Days', max_length=15, verbose_name='Interval Type')
 
     xth_type = models.CharField(blank=True, choices=XTH_TYPES, max_length=15, verbose_name='Xth Type')
-    xth_from_specific_date = models.CharField(blank=True, max_length=10, verbose_name='Xth From Specific Date')
+    xth_from_specific_date = models.CharField(blank=True, max_length=100, verbose_name='Xth From Specific Date')
     xth_after_months = models.PositiveIntegerField(blank=True, null=True, verbose_name='Xth After Months')
 
     class Meta:

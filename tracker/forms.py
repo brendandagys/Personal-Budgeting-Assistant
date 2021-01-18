@@ -1,4 +1,4 @@
-from django.forms import Form, ModelForm, DecimalField, NumberInput, CharField, SelectMultiple
+from django.forms import Form, ModelForm, DecimalField, NumberInput, CharField, Select, SelectMultiple
 
 import datetime
 from calendar import day_name
@@ -142,6 +142,7 @@ class RecurringForm(ModelForm):
         self.fields['description'].widget.attrs.update({'rows': 2})
         self.fields['dates'].widget = SelectMultiple(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in range(1,32)))
         self.fields['weekdays'].widget = SelectMultiple(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in day_name))
+        self.fields['xth_from_specific_date'].widget = Select(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in range(1,32)))
         self.fields['number'].label = 'Every'
         self.fields['interval_type'].label = 'Unit'
         self.fields['xth_type'].label = 'Of'

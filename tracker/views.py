@@ -1195,3 +1195,51 @@ def check_recurring_payments(request):
         elif x.xth_type != '':
             print(3)
             print(x)
+
+            type_to_day_dict = {
+                'Monday': MO,
+                'Tuesday': TU,
+                'Wednesday': WE,
+                'Thursday': TH,
+                'Friday': FR,
+                'Saturday': SA,
+                'Sunday': SU,
+            }
+
+            months = 0 if x.xth_after_months is None else x.xth_after_months
+
+            while date_to_iterate_from <= current_date():
+                latest_account_value = 0 if AccountUpdate.objects.filter(account=x.account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=x.account).order_by('-timestamp').first().value
+
+                if len(Purchase.objects.filter(user=user_object, item=x.name, date=date_to_iterate_from)) == 0:
+                    purchase_object = Purchase.objects.create(
+                        user=user_object,
+                        date=date_to_iterate_from,
+                        time='00:00',
+                        item=x.name,
+                        category=x.category,
+                        amount=x.amount,
+                        description=x.description,
+                        account=x.account,
+                        exchange_rate=1,
+                    )
+                    print('Created Purchase for: ' + x.name + ', on date: ' + str(date_to_iterate_from)[0:10])
+
+                    AccountUpdate.objects.create(
+                        account=x.account,
+                        value=(latest_account_value + x.amount) if x.account.credit else (latest_account_value - x.amount),
+                        exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
+                        purchase=purchase_object,
+                    )
+                    print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
+
+                if x.xth_type not in ['Weekday', 'Weekend']:
+                    date_to_iterate_from+=relativedelta(months=+months, day=int(x.xth_from_specific_date), weekday=type_to_day_dict[x.xth_type](x.number))
+                elif x.xth_type == 'Weekday':
+                    date_to_iterate_from+=relativedelta(months=+months, day=int(x.xth_from_specific_date))
+                    while date_to_iterate_from.weekday() not in [0, 1, 2, 3, 4]:
+                        date_to_iterate_from+=datetime.timedelta(days=1)
+                elif x.th_type == 'Weekend':
+                    date_to_iterate_from+=relativedelta(months=+months, day=int(x.xth_from_specific_date))
+                    while date_to_iterate_from.weekday() not in [5, 6]:
+                        date_to_iterate_from+=datetime.timedelta(days=1)
