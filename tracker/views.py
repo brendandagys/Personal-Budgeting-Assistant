@@ -157,8 +157,8 @@ def get_json_queryset(request):
             start_date_filter = current_date()
 
     if end_date_filter is None:
-        if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of first purchase recorded
-            end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of first purchase recorded
+        if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of last purchase recorded
+            end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of last purchase recorded
         else:
             end_date_filter = current_date()
 
