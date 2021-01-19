@@ -144,6 +144,7 @@ class RecurringForm(ModelForm):
         self.fields['weekdays'].widget = SelectMultiple(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in day_name))
         self.fields['xth_from_specific_date'].widget = Select(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in range(1,32)))
         self.fields['number'].label = 'Every'
+        self.fields['number'].widget.attrs.update({'inputmode': 'numeric'})
         self.fields['interval_type'].label = 'Unit'
         self.fields['xth_type'].label = 'Of'
         self.fields['xth_from_specific_date'].label = 'From This Date'

@@ -34,7 +34,7 @@
 
             <br><br><br>
             <h6 style="text-align:center;">User Profile Settings</h6>
-            <p style="font-size:0.5rem; text-align:center;">Set default Accounts to charge when entering purchases. Set default currencies to use.</p>
+            <p style="font-size:0.5rem; text-align:center;">Set default Accounts to charge when entering purchases. Set the default currency to use.</p>
             <form id="profile_form" action="" method="post">
                 {% csrf_token %}
                 <table class="center">
@@ -284,7 +284,7 @@
         }
 
         get_profile_form();
-        
+
 
         $('#profile_form').find('select').on('change', function() {
             $.ajax({

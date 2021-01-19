@@ -142,10 +142,10 @@
                 <h2 id="purchase_list_header" class="purchase_header">Purchases</h2>
 
                 <div class="wrapper" style="position:sticky; top:3.25rem;">
-                    <div id="past_period_1" class="box a"></div>
-                    <div id="past_period_2" class="box b"></div>
-                    <div id="past_period_3" class="box c"></div>
-                    <div id="past_period_4" class="box d"></div>
+                    <div id="past_period_1" class="box a" style="justify-content:left; padding-left:7px;"></div>
+                    <div id="past_period_2" class="box b" style="justify-content:left; padding-left:7px;"></div>
+                    <div id="past_period_3" class="box c" style="justify-content:left; padding-left:7px;"></div>
+                    <div id="past_period_4" class="box d" style="justify-content:left; padding-left:7px;"></div>
                     <div id="purchases_count" class="box e"></div>
                     <div id="total_spent" class="box f"></div>
                 </div>
@@ -623,23 +623,25 @@
         // Run on page load from get_queryset()
 
         $('#category_counts, #category_sums, #category_counts_percents, #category_sums_percents').on('click', function (e) {
-            $.ajax({
-                type: 'POST',
-                url: 'filters/',
-                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                        'page': 'Activity',
-                        'type': 'Mode',
-                        'id': $(this).attr('id'),
-                },
-                context: this,
-                success: function(response) {
-                    console.log('Changed Purchase Category pie chart mode to: ' + $(this).attr('id').split('_')[1]); // DO NOT NEED TO CALL get_accounts_sum() or net_worth_chart(), because decrement in CC accompanied by decrement in chequing balance
-                    purchase_category_chart();
-                },
-                error: function() {
-                    alert('\nError changing Purchase Category pie chart mode!');
-                },
-            });
+            if (!$(this).hasClass('btn-outline-success')) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'filters/',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'page': 'Activity',
+                            'type': 'Mode',
+                            'id': $(this).attr('id'),
+                    },
+                    context: this,
+                    success: function(response) {
+                        console.log('Changed Purchase Category pie chart mode to: ' + $(this).attr('id').split('_')[1]); // DO NOT NEED TO CALL get_accounts_sum() or net_worth_chart(), because decrement in CC accompanied by decrement in chequing balance
+                        purchase_category_chart();
+                    },
+                    error: function() {
+                        alert('\nError changing Purchase Category pie chart mode!');
+                    },
+                });
+            }
         });
 
 
