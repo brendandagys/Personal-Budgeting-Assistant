@@ -114,7 +114,7 @@ def get_accounts_sum(request):
 
     accounts_sum = 0
 
-    for account in Account.objects.filter(user=user_object):
+    for account in Account.objects.filter(user=user_object, active=True):
         account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
         account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
 
@@ -423,7 +423,7 @@ def get_net_worth_chart_data(request):
     labels = []
     values = []
 
-    queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object) # Ordered by -timestamp
+    queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object, account__active=True) # Ordered by -timestamp
     distinct_accounts_list = [Account.objects.get(id=x) for x in set(queryset.values_list('account', flat=True))] # List of distinct Account objects that have ever had an update...
 
     latest_value_dict = {} # When an Account has no update on a certain date, the queryset will return None; we will then take the most-recent account value
@@ -627,7 +627,7 @@ def homepage(request):
             purchase_instance.amount = purchase_form.cleaned_data['amount']
             purchase_instance.category_2 = purchase_form.cleaned_data['category_2']
             purchase_instance.amount_2 = purchase_form.cleaned_data['amount_2']
-            purchase_instance.description = purchase_form.cleaned_data['description'].strip() if len(purchase_form.cleaned_data['description'].strip()) == 0 or purchase_form.cleaned_data['description'].strip()[-1] == '.' else purchase_form.cleaned_data['description'].strip() + '.' # Add a period if not present
+            purchase_instance.description = purchase_form.cleaned_data['description'].strip() if len(purchase_form.cleaned_data['description'].strip()) == 0 or purchase_form.cleaned_data['description'].strip()[-1] in ['.', '!', '?'] else purchase_form.cleaned_data['description'].strip() + '.' # Add a period if not present
             purchase_instance.currency = purchase_form.cleaned_data['currency']
             purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
             purchase_instance.receipt = request.FILES['receipt'] if len(request.FILES) > 0 and request.FILES['receipt'].size < 50000001 else None # Make sure file was uploaded, and check size (also done in front-end)
@@ -721,16 +721,16 @@ def settings(request):
     if request.method == 'GET':
         if 'type' in request.GET:
             if request.GET['model'] == 'Profile':
-                choices = ''
-                for x in Account.objects.values('id', 'account'): # Using a generator or list comprehension wasn't working
+                choices = '<option value>---------</option>'
+                for x in Account.objects.filter(active=True).values('id', 'account'): # Using a generator or list comprehension wasn't working
                     choices+='<option value="{0}">{1}</option>'.format(x['id'], x['account'])
 
                 return JsonResponse({'choices': choices,
-                                     'values': {'account_to_use': user_object.profile.account_to_use.id,
-                                                'second_account_to_use': user_object.profile.second_account_to_use.id,
-                                                'third_account_to_use': user_object.profile.third_account_to_use.id,
-                                                'credit_account': user_object.profile.credit_account.id,
-                                                'debit_account': user_object.profile.debit_account.id,
+                                     'values': {'account_to_use': '' if user_object.profile.account_to_use is None else user_object.profile.account_to_use.id,
+                                                'second_account_to_use': '' if user_object.profile.second_account_to_use is None else user_object.profile.second_account_to_use.id,
+                                                'third_account_to_use': '' if user_object.profile.third_account_to_use is None else user_object.profile.third_account_to_use.id,
+                                                'credit_account': '' if user_object.profile.credit_account is None else user_object.profile.credit_account.id,
+                                                'debit_account': '' if user_object.profile.debit_account is None else user_object.profile.debit_account.id,
                                                 'primary_currency': user_object.profile.primary_currency,
                                     } })
 
@@ -830,7 +830,7 @@ def settings(request):
             context['profile_form'] = ProfileForm(profile_form_data)
 
             context['purchase_category_count'] = PurchaseCategory.objects.filter(user=user_object).count()
-            context['account_count'] = Account.objects.filter(user=user_object).count()
+            context['account_count'] = Account.objects.filter(user=user_object).count() # Don't require it to be active, because we still want to be able to delete all accounts
             context['recurring_count'] = Recurring.objects.filter(user=user_object).count()
             context['quick_entry_count'] = QuickEntry.objects.filter(user=user_object).count()
 
@@ -934,6 +934,18 @@ def settings(request):
                 else: # Field is 'active'
                     value = not(account_object.active)
                 setattr(account_object, request.POST['field'], value)
+
+                # If an Account is deactivated, make sure it's removed from Profile options
+                if not(account_object.active):
+                    if user_object.profile.account_to_use == account_object:
+                        user_object.profile.account_to_use = None
+                    if user_object.profile.second_account_to_use == account_object:
+                        user_object.profile.second_account_to_use = None
+                    if user_object.profile.third_account_to_use == account_object:
+                        user_object.profile.third_account_to_use = None
+
+                    user_object.save()
+
                 account_object.save()
 
             elif request.POST['model'] == 'Recurring Payment':

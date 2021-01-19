@@ -133,7 +133,7 @@
 
             <br><br>
             <h6 style="text-align:center;">Quick Entries</h6>
-            <p style="font-size:0.5rem; text-align:center;">Add up to 14 Quick Entries for the Purchase Form.</p>
+            <p style="font-size:0.5rem; text-align:center;">Add Quick Entries for the Purchase Form.</p>
             <div id="quick_entry_table_div">
                 <!-- <table style="table-layout:fixed; margin:auto; max-width:500px;" class="table table-sm table-striped table-bordered">
                     {% if quick_entry_list|length > 0 %}
@@ -271,16 +271,20 @@
                         'model': 'Profile',
                       },
                 success: function(response) {
-                    $('#profile_form select').not('#id_primary_currency').empty().append(response['choices'])
+                    $('#profile_form select').not('#id_primary_currency').empty().append(response['choices']) // Append the current accounts to the select element options
                     $.each(response['values'], function(key, value) {
                           $('#id_' + key).val(value);
                     });
+                    console.log('Refreshed Profile form.');
                 },
                 error: function() {
                     alert('\nCould not retrieve Profile data!');
                 }
             });
         }
+
+        get_profile_form();
+        
 
         $('#profile_form').find('select').on('change', function() {
             $.ajax({
