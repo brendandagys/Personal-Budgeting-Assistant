@@ -1236,7 +1236,7 @@ def check_recurring_payments(request):
                 'Sunday': SU,
             }
 
-            months = 0 if x.xth_after_months is None else x.xth_after_months
+            months = 1 if x.xth_after_months is None else x.xth_after_months
 
             while date_to_iterate_from <= current_date():
                 latest_account_value = 0 if AccountUpdate.objects.filter(account=x.account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=x.account).order_by('-timestamp').first().value

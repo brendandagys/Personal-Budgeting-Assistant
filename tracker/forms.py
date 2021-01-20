@@ -143,12 +143,14 @@ class RecurringForm(ModelForm):
         self.fields['dates'].widget = SelectMultiple(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in range(1,32)))
         self.fields['weekdays'].widget = SelectMultiple(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in day_name))
         self.fields['xth_from_specific_date'].widget = Select(attrs={'class': 'form-control form-control-sm'},choices=((x, x) for x in range(1,32)))
+        self.fields['amount'].widget.attrs.update({'inputmode': 'decimal'})
         self.fields['number'].label = 'Every'
         self.fields['number'].widget.attrs.update({'inputmode': 'numeric'})
         self.fields['interval_type'].label = 'Unit'
         self.fields['xth_type'].label = 'Of'
         self.fields['xth_from_specific_date'].label = 'From This Date'
         self.fields['xth_after_months'].label = 'Every __ Months'
+        self.fields['xth_after_months'].widget.attrs.update({'inputmode': 'numeric'})
 
         # The choices that display in the form field match models.py __str__ ... I want __str__ for Admin, but only the category text in the form field
         category_choices = []

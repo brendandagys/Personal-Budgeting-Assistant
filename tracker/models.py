@@ -207,7 +207,7 @@ class Recurring(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='User', related_name='recurrings_1')
     name = models.CharField(max_length=40, verbose_name='Name')
     description = models.TextField(blank=True, verbose_name='Details')
-    type = models.CharField(choices=RECURRING_TYPES, max_length=20, verbose_name='Type')
+    type = models.CharField(choices=RECURRING_TYPES, default='Credit', max_length=20, verbose_name='Type')
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='recurrings_2')
     category = models.ForeignKey(PurchaseCategory, null=True, on_delete=models.SET_NULL, verbose_name='Category', related_name='recurrings_3') # blank=False by default...
     active = models.BooleanField(default=True, verbose_name='Active')

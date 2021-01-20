@@ -28,10 +28,7 @@
 
     <body>
         <div id="quick_entry_modal_background" class="quick_entry_modal_background">
-            <div id="quick_entry_modal" class="quick_entry_modal" style="width:338px; height:545px; position:relative; margin:auto;">
-                    <!-- <button id="view_receipt_button" style="position:absolute; right:68px; top:42px; width:200px;" type="button" class="btn btn-success border">View Receipt</button> <br>
-                    <button id="delete_purchase_button" style="position:absolute; right:68px; top:84px; width:200px;" type="button" class="btn btn-danger border">Delete Purchase</button> -->
-            </div>
+            <div id="quick_entry_modal" class="quick_entry_modal" style="width:338px; height:545px; position:relative; margin:auto;"></div>
         </div>
 
         <div class="lighter_background container-fluid">
@@ -199,6 +196,19 @@
             });
 
 
+            $('#purchase_form').on('submit', function(e) {
+                if ($('#id_category').val() === $('#id_category_2').val()) {
+                    e.preventDefault();
+                    alert('\nPlease do not duplicate categories.');
+                    $('#id_category_2').val('');
+                }
+                if ($('#id_amount_2').val() !== '' && $('#id_category_2').val() === '') {
+                    e.preventDefault();
+                    alert(('\nYou may not enter a second amount without a second category.'));
+                }
+            });
+
+
             // Display the modal and modal background if anchor link is clicked
             $(document).on('click', '#custom_anchor_link_3', function(e) {
                 $('#quick_entry_modal_background').css('visibility', 'visible');
@@ -222,7 +232,7 @@
                             let description = quick_entry['description'];
 
                             $('#quick_entry_modal').append(`<button
-                            style="width:300px; max-width:300px; margin:2px auto;"
+                            style="width:280px; max-width:280px; margin:2px auto;"
                             type="button"
                             class="btn btn-sm btn-success border quick_entry_button"
                             data-item="${item}"
@@ -376,7 +386,7 @@
 
 
             // Clear the date and time fields when clicked, as we only would click if we wanted to alter the values
-            $('#id_date,#id_time').on('focus', function(e) {
+            $('#id_date,#id_time,#id_amount,#id_amount_2').on('focus', function(e) {
                 $(this).val('');
             });
 

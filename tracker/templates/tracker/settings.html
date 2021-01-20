@@ -491,38 +491,48 @@
 
         $('#recurring_form').on('submit', function(e) {
             e.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: '',
-                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                        'type': 'Submit',
-                        'model': 'Recurring Payment',
-                        'name': $('#recurring_form #id_name').val(),
-                        'description': $('#recurring_form #id_description').val(),
-                        'recurring_type': $('#recurring_form #id_type').val(),
-                        'account': $('#recurring_form #id_account').val(),
-                        'category': $('#recurring_form #id_category').val(),
-                        'active': $('#recurring_form #id_active').is(':checked'),
-                        'amount': $('#recurring_form #id_amount').val(),
-                        'start_date': $('#recurring_form #id_start_date').val(),
-                        'dates': $('#recurring_form #id_dates').val().toString(),
-                        'weekdays': $('#recurring_form #id_weekdays').val().toString(),
-                        'number': $('#recurring_form #id_number').val(),
-                        'interval_type': $('#recurring_form #id_interval_type').val(),
-                        'xth_type': $('#recurring_form #id_xth_type').val(),
-                        'xth_from_specific_date': $('#recurring_form #id_xth_from_specific_date').val(),
-                        'xth_after_months': $('#recurring_form #id_xth_after_months').val(),
-                      },
-                success: function(response) {
-                    get_recurring_payments_table();
-                    $('#recurring_form').trigger('reset');
-                    $('#id_number').val('');
-                    console.log('Recurring Payment added.');
-                },
-                error: function(response) {
-                    alert('\nCould not add the Recurring Payment.');
-                }
-            });
+
+            if ($('#id_interval_type').is(':visible') && ($('#id_number').val() === '' || $('#id_interval_type').val() === '')) {
+                alert('\nPlease enter both a value and a unit.');
+            }
+            else if ($('#id_xth_type').is(':visible') && ($('#id_number').val() === '' || $('#id_xth_type').val() === '')) {
+                e.preventDefault();
+                alert(('\nPlease fill out all fields.'));
+            }
+            else {
+                $.ajax({
+                    type: 'POST',
+                    url: '',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'type': 'Submit',
+                            'model': 'Recurring Payment',
+                            'name': $('#recurring_form #id_name').val(),
+                            'description': $('#recurring_form #id_description').val(),
+                            'recurring_type': $('#recurring_form #id_type').val(),
+                            'account': $('#recurring_form #id_account').val(),
+                            'category': $('#recurring_form #id_category').val(),
+                            'active': $('#recurring_form #id_active').is(':checked'),
+                            'amount': $('#recurring_form #id_amount').val(),
+                            'start_date': $('#recurring_form #id_start_date').val(),
+                            'dates': $('#recurring_form #id_dates').val().toString(),
+                            'weekdays': $('#recurring_form #id_weekdays').val().toString(),
+                            'number': $('#recurring_form #id_number').val(),
+                            'interval_type': $('#recurring_form #id_interval_type').val(),
+                            'xth_type': $('#recurring_form #id_xth_type').val(),
+                            'xth_from_specific_date': $('#recurring_form #id_xth_from_specific_date').val(),
+                            'xth_after_months': $('#recurring_form #id_xth_after_months').val(),
+                          },
+                    success: function(response) {
+                        get_recurring_payments_table();
+                        $('#recurring_form').trigger('reset');
+                        $('#id_number').val('');
+                        console.log('Recurring Payment added.');
+                    },
+                    error: function(response) {
+                        alert('\nCould not add the Recurring Payment.');
+                    }
+                });
+            }
         });
 
 
