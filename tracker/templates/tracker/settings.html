@@ -271,6 +271,7 @@
                         'model': 'Profile',
                       },
                 success: function(response) {
+                    $('#profile_form select').css('background-color', 'transparent');
                     $('#profile_form select').not('#id_primary_currency').empty().append(response['choices']) // Append the current accounts to the select element options
                     $.each(response['values'], function(key, value) {
                           $('#id_' + key).val(value);
