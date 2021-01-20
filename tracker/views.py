@@ -422,8 +422,12 @@ def get_net_worth_chart_data(request):
 
     labels = []
     values = []
+    print(request.GET)
+    if request.GET['account'] == 'All':
+        queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object, account__active=True) # Ordered by -timestamp
+    else:
+        queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object, account__active=True, account=Account.objects.get(id=request.GET['account']))
 
-    queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object, account__active=True) # Ordered by -timestamp
     distinct_accounts_list = [Account.objects.get(id=x) for x in set(queryset.values_list('account', flat=True))] # List of distinct Account objects that have ever had an update...
 
     latest_value_dict = {} # When an Account has no update on a certain date, the queryset will return None; we will then take the most-recent account value
@@ -583,12 +587,12 @@ def homepage(request):
             color_to_use = colors[use_color%3]
             use_color+=1
 
-            queryset = Purchase.objects.filter(Q(category=category) | Q(category_2=category), date__gte=current_date()-datetime.timedelta(days=category.threshold_rolling_days))
+            queryset = Purchase.objects.filter(Q(category=category) | Q(category_2=category), date__gte=current_date()-datetime.timedelta(days=category.threshold_rolling_days)).order_by('date')
             sum_1 = 0 if queryset.filter(category=category).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category=category).aggregate(Sum('amount'))['amount__sum']
             sum_2 = 0 if queryset.filter(category_2=category, amount_2__gt=0).aggregate(Sum('amount_2'))['amount_2__sum'] is None else queryset.filter(category_2=category, amount_2__gt=0).aggregate(Sum('amount_2'))['amount_2__sum']
             sum_3 = 0 if queryset.filter(category_2=category, amount_2__isnull=True).exclude(category=category).aggregate(Sum('amount'))['amount__sum'] is None else queryset.filter(category_2=category, amount_2__isnull=True).exclude(category=category).aggregate(Sum('amount'))['amount__sum']
 
-            threshold_dict[category] = (category.category, round(100 * (sum_1 + sum_2 + sum_3)/category.threshold, 1), category.threshold, category.threshold_rolling_days, color_to_use)
+            threshold_dict[category] = (category.category, round(100 * (sum_1 + sum_2 + sum_3)/category.threshold, 1), category.threshold, category.threshold_rolling_days, color_to_use, '' if queryset.first() is None else '| ' + str(queryset.first().date))
 
         context['purchase_category_dict'] = threshold_dict
 
@@ -710,6 +714,11 @@ class PurchaseListView(generic.ListView):
                                                                      if x is not None]
 
         context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list(user_object)
+
+        net_worth_chart_options = '<option value="All">All Accounts</option>'
+        for account in Account.objects.filter(user=user_object, active=True):
+            net_worth_chart_options+='<option value="{0}">{1}</option>'.format(account.id, account.account)
+        context['net_worth_chart_options'] = net_worth_chart_options
 
         return context
 

@@ -79,6 +79,8 @@
                 <div style="margin:0; text-align:center;">
                     <h4>Value of Accounts</h4>
                     <canvas id="net_worth_chart" width="375" height="250"></canvas>
+                    <br>
+                    <select class="form-control form-control-sm" id="net_worth_chart_select" style="width:80%; margin:auto;">{{net_worth_chart_options | safe}}</select>
                 </div>
             </div>
 
@@ -196,7 +198,7 @@
         direction: 1, // 1: clockwise, -1: counterclockwise
         color: '#282730', // CSS color or array of colors
         fadeColor: 'transparent', // CSS color or array of colors
-        top: '57%', // Top position relative to parent
+        top: '49%', // Top position relative to parent
         left: '50%', // Left position relative to parent
         shadow: '0 0 1px transparent', // Box-shadow for the lines
         zIndex: 970, // The z-index (defaults to 2e9)
@@ -487,6 +489,8 @@
 
             $.ajax({
                 type: 'GET',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                       'account': $('#net_worth_chart_select').val() },
                 url: 'net_worth_chart/',
                 success: function(response) {
                     console.log('Received net worth chart data!');
@@ -544,6 +548,12 @@
         }
 
         net_worth_chart();
+
+
+        // Refresh with the specified Account's data
+        $('#net_worth_chart_select').on('change', function() {
+            net_worth_chart();
+        });
 
 
         function purchase_category_chart(search_string='') {
