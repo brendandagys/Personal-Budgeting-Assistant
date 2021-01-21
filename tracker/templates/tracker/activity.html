@@ -55,7 +55,10 @@
                 </form>
             </div>
 
-            <div style="margin-top:15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-sm btn-success">Reset Credit Card</button></div>
+            {% if display_reset_credit_card %}
+                <div style="margin-top:15px; text-align:center;"><button id="reset_credit_card" style="position:relative; margin:auto;" type="button" class="btn btn-sm btn-success">Reset Credit Card</button></div>
+            {% endif %}
+
             <br />
             <span style="text-align:center;"><h1 id="accounts_sum"></h1></span>
 
@@ -140,6 +143,7 @@
             <div style="padding:0 4px;" class="col-sm-12">
 
                 <h2 id="purchase_list_header" class="purchase_header">Purchases</h2>
+                <div style="text-align:center;"><small id="savings_rate"></small></div>
 
                 <div class="wrapper" style="position:sticky; top:3.25rem;">
                     <div id="past_period_1" class="box a" style="justify-content:left; padding-left:7px;"></div>
@@ -212,7 +216,7 @@
     }
 
     $(document).ready(function() {
-      
+
         var initial_page_load
 
         // Set the date filters
@@ -317,7 +321,7 @@
         });
 
 
-        $('#account_table').find('input').on('keyup', function() {
+        $(document).on('keyup', '#account_table input', function() {
             if ($(this).val().includes('.') && $(this).val().split('.')[1].length === 2) {
                 $(this).blur();
             }
@@ -339,6 +343,9 @@
                 success: function(response) {
                     console.log('Retrieved accounts sum!');
                     console.log(response);
+
+                    $('#account_table').html(response['accounts_form'])
+
                     $('#accounts_sum').html(response['accounts_sum']);
                     $('#CAD_USD_rate').html(response['exchange_rates']['CAD_USD']);
                     $('#CAD_EUR_rate').html(response['exchange_rates']['CAD_EUR']);
@@ -408,6 +415,8 @@
                             });
                         }
                     });
+
+                    $('#savings_rate').html(response['savings_rate']['rate']);
 
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent
@@ -673,7 +682,7 @@
         });
 
 
-        $('#account_form').find(':input').on('change', function(e) {
+        $(document).on('change', '#account_form input', function(e) {
             if ($(this).val().trim() !== '' && parseFloat($(this).val()) !== parseFloat($(this).attr('placeholder').substring(1).trim().replace(',', ''))) { // When the value is cleared or the placeholder value is typed, this function shouldn't run
                 $.ajax({
                     type: 'POST',
@@ -686,9 +695,9 @@
                     context: this, // To allow access in the callback functions
                     success: function (response) {
                         console.log($(this).attr('id') + ' updated to: ' + $(this).val());
-                        $.each(response, function(id, account_placeholder) {
-                            $('#' + $.escapeSelector(id)).attr('placeholder', account_placeholder);
-                        });
+                        // $.each(response, function(id, account_placeholder) {
+                        //     $('#' + $.escapeSelector(id)).attr('placeholder', account_placeholder);
+                        // });
                         get_accounts_sum();
                         net_worth_chart();
                     },

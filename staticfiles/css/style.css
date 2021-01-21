@@ -202,7 +202,7 @@ select[id^="id_"] {
     /* display: inline; */
     /* margin-top: 2rem; */
     text-align: center;
-    margin-bottom: 23px;
+    margin-bottom: 8px;
 }
 
 .date_span {
@@ -332,22 +332,22 @@ select[id^="id_"] {
   .a {
     grid-column: 1;
     grid-row: 1;
-    font-size:0.7rem;
+    font-size:0.65rem;
   }
   .b {
     grid-column: 1;
     grid-row: 2;
-    font-size:0.7rem;
+    font-size:0.65rem;
   }
   .c {
     grid-column: 1;
     grid-row: 3;
-    font-size:0.7rem;
+    font-size:0.65rem;
   }
   .d {
     grid-column: 1;
     grid-row: 4;
-    font-size:0.7rem;
+    font-size:0.65rem;
   }
   .e {
     grid-column: 2;

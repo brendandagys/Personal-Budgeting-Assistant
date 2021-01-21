@@ -80,7 +80,7 @@ def account_update(request):
     if request.method == 'POST':
         user_object = request.user
 
-        dict = { request.POST['id']: '${:20,.2f}'.format(Decimal(request.POST['value'])) }
+        # dict = { request.POST['id']: '${:20,.2f}'.format(Decimal(request.POST['value'])) }
 
         if request.POST['id'][3:] == user_object.profile.credit_account.account: # If the Account updated was my credit card, check if the balance was paid off rather than added to
             credit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.credit_account).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
@@ -91,7 +91,7 @@ def account_update(request):
 
         AccountUpdate.objects.create(account=Account.objects.get(user=user_object, account=request.POST['id'][3:]), value=request.POST['value'], exchange_rate=get_exchange_rate(Account.objects.get(user=user_object, account=request.POST['id'][3:]).currency, 'CAD')) # id is prefixed with 'id_'
 
-        return JsonResponse(dict)
+        return JsonResponse({})
 
 
 @login_required
@@ -138,7 +138,10 @@ def get_accounts_sum(request):
     USD_CAD_rate = '$' + str(round(get_exchange_rate('USD', 'CAD'), 3))
     EUR_CAD_rate = '$' + str(round(get_exchange_rate('EUR', 'CAD'), 3))
 
-    return JsonResponse({ 'accounts_sum': '${:20,.2f}'.format(accounts_sum), 'exchange_rates': { 'CAD_USD': CAD_USD_rate, 'CAD_EUR': CAD_EUR_rate, 'USD_CAD': USD_CAD_rate, 'EUR_CAD': EUR_CAD_rate } }, safe=False)
+    return JsonResponse({'accounts_sum': '${:20,.2f}'.format(accounts_sum),
+                         'exchange_rates': { 'CAD_USD': CAD_USD_rate, 'CAD_EUR': CAD_EUR_rate, 'USD_CAD': USD_CAD_rate, 'EUR_CAD': EUR_CAD_rate },
+                         'accounts_form': str(AccountForm(user_object)),
+    }, safe=False)
 
 
 @login_required
@@ -233,15 +236,33 @@ def get_json_queryset(request):
 
 
     # Savings rate
+    start_accounts_value = 0
+    end_accounts_value = 0
 
 
-    # Purchase Categories
+    queryset = AccountUpdate.objects.select_related('account').filter(account__user=user_object, account__active=True) # Ordered by -timestamp
+
+    accounts_list = [Account.objects.get(id=x) for x in set(queryset.values_list('account', flat=True))] # List of distinct Account objects that have ever had an update...
+    for account in accounts_list:
+        if account.credit:
+            start_accounts_value-=AccountUpdate.objects.filter(account=account, timestamp__gte=start_date_filter).order_by('timestamp').first().value
+            end_accounts_value-=AccountUpdate.objects.filter(account=account, timestamp__lte=end_date_filter).order_by('-timestamp').first().value
+        else:
+            start_accounts_value+=AccountUpdate.objects.filter(account=account, timestamp__gte=start_date_filter).order_by('timestamp').first().value
+            end_accounts_value+=AccountUpdate.objects.filter(account=account, timestamp__lte=end_date_filter).order_by('-timestamp').first().value
+
+    savings_rate = 'Savings rate: ' + str(round((end_accounts_value - start_accounts_value - purchases_sum)/(end_accounts_value - start_accounts_value), 1)) + '%'
+
+    # print(start_accounts_value)
+    # print(end_accounts_value)
+    # print(savings_rate)
 
     return JsonResponse({'data': purchases_list,
                          'purchases_sum': '${:20,.2f}'.format(purchases_sum),
                          'past_periods': {'labels': periods, 'values': sums},
                          'categories_count': len(purchase_categories_list),
                          'purchase_category_tuples': get_purchase_categories_tuples_list(user_object, start_date_filter, end_date_filter),
+                         'savings_rate': {'start': start_accounts_value, 'end': end_accounts_value, 'rate': savings_rate},
     }, safe=False)
 
 
@@ -738,6 +759,8 @@ class PurchaseListView(generic.ListView):
         for account in Account.objects.filter(user=user_object, active=True):
             net_worth_chart_options+='<option value="{0}">{1}</option>'.format(account.id, account.account)
         context['net_worth_chart_options'] = net_worth_chart_options
+
+        context['display_reset_credit_card'] = False if user_object.profile.credit_account is None or user_object.profile.debit_account is None else True
 
         return context
 

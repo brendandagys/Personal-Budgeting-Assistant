@@ -202,7 +202,7 @@ select[id^="id_"] {
     /* display: inline; */
     /* margin-top: 2rem; */
     text-align: center;
-    margin-bottom: 23px;
+    margin-bottom: 8px;
 }
 
 .date_span {
