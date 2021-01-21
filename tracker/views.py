@@ -254,11 +254,11 @@ def get_json_queryset(request):
         except Exception:
             pass
 
-    savings_rate = 'Savings rate: ' + str(round((end_accounts_value - start_accounts_value - purchases_sum)/(end_accounts_value - start_accounts_value), 1)) + '%'
+    savings_rate = 'Savings rate: ' + str(round((100 * (end_accounts_value - start_accounts_value - purchases_sum))/(end_accounts_value - start_accounts_value), 2)) + '%'
 
-    # print(start_accounts_value)
-    # print(end_accounts_value)
-    # print(savings_rate)
+    print(start_accounts_value)
+    print(end_accounts_value)
+    print(savings_rate)
 
     return JsonResponse({'data': purchases_list,
                          'purchases_sum': '${:20,.2f}'.format(purchases_sum),
