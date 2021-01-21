@@ -60,15 +60,15 @@
             </div>
         </div>
 
-        <table style="width:100%;">
+        <table id="filter_table" style="width:100%;">
             <br>
-            <tr>
+            <tr id="filter_table_all_row">
                 <td colspan="2" style="width:100%; text-align:center; padding-bottom:10px;">
                     <a id="All Categories" class="no_filter filter_identifier" href="">ALL CATEGORIES</a>
                 </td>
             </tr>
 
-            {% for filter_tuple in purchase_categories_tuples_list %}
+            <!-- {% for filter_tuple in purchase_categories_tuples_list %}
                 <tr class="category_sizing">
                     <td style="width:50%; text-align:right; padding-right:10px;">
                         <a id="{{filter_tuple.0}}" class="filter_identifier" href="">{{filter_tuple.0}}</a>
@@ -77,8 +77,7 @@
                         <a id="{{filter_tuple.1}}"  class="filter_identifier" href="">{{filter_tuple.1}}</a>
                     </td>
                 </tr>
-            {% endfor %}
-
+            {% endfor %} -->
         </table>
 
         <br />
@@ -181,20 +180,6 @@
         $('#id_receipt').attr('accept', 'image/*');
 
         $(document).ready(function() {
-            // Initial indication of the applied filters
-            $.ajax({
-                type: 'GET',
-                url: 'filters/',
-                data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                        'page': 'Homepage',                     },
-                success: function(response) {
-                    $.each(response, function(index, category_filter) {
-                          $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
-                          // console.log(category_filter);
-                    });
-                }
-            });
-
 
             $('#purchase_form').on('submit', function(e) {
                 if ($('#id_category').val() === $('#id_category_2').val()) {
@@ -552,7 +537,7 @@
             });
 
 
-            $('a.filter_identifier').on('click', function(e) {
+            $(document).on('click', 'a.filter_identifier', function(e) {
                 e.preventDefault()
 
                 enable_filters(false);
@@ -743,6 +728,39 @@
                         spinner_2.stop();
                         spinner_3.stop();
                         spinner_4.stop();
+
+
+                        // Update the relevant Purchase Categories
+                        $(document).find('#filter_table tr').not('#filter_table_all_row').remove();
+
+                        $.each(response['purchase_category_tuples'], function(key, tuple) {
+                            let a = tuple[0]
+                            let b = tuple[1] === undefined ? '' : tuple[1]
+
+                            $('#filter_table').append(`
+                                <tr class="category_sizing">
+                                    <td style="width:50%; text-align:right; padding-right:10px;">
+                                        <a id="${a}" class="filter_identifier" href="">${a}</a>
+                                    </td>
+                                    <td style="width:50%; text-align:left; padding-left:10px;">
+                                        <a id="${b}"  class="filter_identifier" href="">${b}</a>
+                                    </td>
+                                </tr>
+                            `)
+                        });
+
+                        $.ajax({
+                            type: 'GET',
+                            url: 'filters/',
+                            data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                                    'page': 'Homepage',                     },
+                            success: function(response) {
+                                $.each(response, function(index, category_filter) {
+                                      $(document).find('#' + $.escapeSelector(category_filter)).addClass('green_filters');
+                                });
+                            }
+                        });
+
 
                         var ctx = document.getElementById('spending_chart').getContext('2d');
                         var myChart = new Chart(ctx, {

@@ -97,14 +97,13 @@
             <hr>
 
             <table id="filter_table" style="width:100%;">
-
-                <tr>
+                <tr id="filter_table_all_row">
                     <td colspan="2" style="width:100%; text-align:center; padding-bottom:10px;">
                         <a id="All Categories" class="no_filter filter_identifier" href="">ALL CATEGORIES</a>
                     </td>
                 </tr>
 
-                {% for filter_tuple in purchase_categories_tuples_list %}
+                <!-- {% for filter_tuple in purchase_categories_tuples_list %}
                     <tr class="category_sizing">
                         <td style="width:50%; text-align:right; padding-right:10px;">
                             <a id="{{filter_tuple.0}}" class="filter_identifier" href="">{{filter_tuple.0}}</a>
@@ -113,8 +112,7 @@
                             <a id="{{filter_tuple.1}}"  class="filter_identifier" href="">{{filter_tuple.1}}</a>
                         </td>
                     </tr>
-                {% endfor %}
-
+                {% endfor %} -->
             </table>
 
             <br />
@@ -214,20 +212,8 @@
     }
 
     $(document).ready(function() {
+      
         var initial_page_load
-
-        // Initial indication of the applied filters
-        $.ajax({
-            type: 'GET',
-            url: 'filters/',
-            data: { csrfmiddlewaretoken: '{{ csrf_token }}',
-                    'page': 'Activity',                     },
-            success: function(response) {
-                $.each(response, function(index, category_filter) {
-                      $('#' + $.escapeSelector(category_filter)).addClass('green_filters');
-                });
-            }
-        });
 
         // Set the date filters
         $('#datepicker').val('{{start_date}}');
@@ -391,6 +377,38 @@
                 success: function(response) {
                     console.log('Retrieved purchases!');
                     console.log(response); // object
+
+                    // Update the relevant Purchase Categories
+                    $(document).find('#filter_table tr').not('#filter_table_all_row').remove();
+
+                    $.each(response['purchase_category_tuples'], function(key, tuple) {
+                        let a = tuple[0]
+                        let b = tuple[1] === undefined ? '' : tuple[1]
+
+                        $('#filter_table').append(`
+                            <tr class="category_sizing">
+                                <td style="width:50%; text-align:right; padding-right:10px;">
+                                    <a id="${a}" class="filter_identifier" href="">${a}</a>
+                                </td>
+                                <td style="width:50%; text-align:left; padding-left:10px;">
+                                    <a id="${b}"  class="filter_identifier" href="">${b}</a>
+                                </td>
+                            </tr>
+                        `)
+                    });
+
+                    $.ajax({
+                        type: 'GET',
+                        url: 'filters/',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}',
+                                'page': 'Activity',                     },
+                        success: function(response) {
+                            $.each(response, function(index, category_filter) {
+                                  $(document).find('#' + $.escapeSelector(category_filter)).addClass('green_filters');
+                            });
+                        }
+                    });
+
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent
                     $('#past_period_1').html(response['past_periods']['labels'][0] + ': $' + response['past_periods']['values'][0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
@@ -701,7 +719,7 @@
         });
 
 
-        $('a.filter_identifier').on('click', function(e) {
+        $(document).on('click', 'a.filter_identifier', function(e) {
             e.preventDefault()
 
             enable_filters(false);

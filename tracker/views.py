@@ -40,12 +40,12 @@ def current_date():
 # weekday = date.weekday()
 
 
-def get_purchase_categories_tuples_list(user_object):
+def get_purchase_categories_tuples_list(user_object, start_date, end_date):
     # To generate the filter buttons on Purchase Category and provide context for the green_filters class
     purchase_categories_list = []
     # Only include the ones that have actually been used thus far by the user
-    category_values_used = list(Purchase.objects.filter(user=user_object, category__isnull=False).values_list('category__category', flat=True).distinct())
-    category_2_values_used = list(Purchase.objects.filter(user=user_object, category__isnull=False).values_list('category_2__category', flat=True).distinct())
+    category_values_used = list(Purchase.objects.filter(user=user_object, date__gte=start_date, date__lte=end_date, category__isnull=False).values_list('category__category', flat=True).distinct())
+    category_2_values_used = list(Purchase.objects.filter(user=user_object, date__gte=start_date, date__lte=end_date, category_2__isnull=False).values_list('category_2__category', flat=True).distinct())
     category_2_values_used = [x for x in category_2_values_used if x] # Remove None
     purchase_categories_list = sorted(list(set(category_values_used + category_2_values_used)))
 
@@ -231,7 +231,18 @@ def get_json_queryset(request):
             elif purchase[0] not in purchase_categories_list: # If no 'amount_2', and first category DIDN'T match (we don't want to double-count), add 'amount' (in this case first three of tuple are populated)
                 purchases_sum+=purchase[2]
 
-    return JsonResponse({'data': purchases_list, 'purchases_sum': '${:20,.2f}'.format(purchases_sum), 'past_periods': {'labels': periods, 'values': sums}, 'categories_count': len(purchase_categories_list)}, safe=False)
+
+    # Savings rate
+
+
+    # Purchase Categories
+
+    return JsonResponse({'data': purchases_list,
+                         'purchases_sum': '${:20,.2f}'.format(purchases_sum),
+                         'past_periods': {'labels': periods, 'values': sums},
+                         'categories_count': len(purchase_categories_list),
+                         'purchase_category_tuples': get_purchase_categories_tuples_list(user_object, start_date_filter, end_date_filter),
+    }, safe=False)
 
 
 @login_required # Don't think this is necessary
@@ -412,8 +423,16 @@ def get_purchases_chart_data(request):
         labels_monthly = [x[5:10] + ' - ' + x[-5:] if ' - ' in x else x[5:] for x in labels_monthly] # Removing the year component, as the label is too long
 
 
-        return JsonResponse({'labels_daily': labels_daily, 'values_daily': values_daily, 'labels_weekly': labels_weekly, 'values_weekly': values_weekly,
-                             'labels_biweekly': labels_biweekly, 'values_biweekly': values_biweekly, 'labels_monthly': labels_monthly, 'values_monthly': values_monthly})
+        return JsonResponse({'labels_daily': labels_daily,
+                             'values_daily': values_daily,
+                             'labels_weekly': labels_weekly,
+                             'values_weekly': values_weekly,
+                             'labels_biweekly': labels_biweekly,
+                             'values_biweekly': values_biweekly,
+                             'labels_monthly': labels_monthly,
+                             'values_monthly': values_monthly,
+                             'purchase_category_tuples': get_purchase_categories_tuples_list(user_object, start_date_filter, end_date_filter),
+        })
 
 
 @login_required
@@ -666,7 +685,7 @@ def homepage(request):
     purchase_form = PurchaseForm()
 
     context['purchase_form'] = purchase_form
-    context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list(user_object)
+
 
     return render(request, 'tracker/homepage.html', context=context)
 
@@ -713,7 +732,7 @@ class PurchaseListView(generic.ListView):
                                                                      filter_instance.category_filter_21, filter_instance.category_filter_22, filter_instance.category_filter_23, filter_instance.category_filter_24, filter_instance.category_filter_25]
                                                                      if x is not None]
 
-        context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list(user_object)
+        # context['purchase_categories_tuples_list'] = get_purchase_categories_tuples_list(user_object)
 
         net_worth_chart_options = '<option value="All">All Accounts</option>'
         for account in Account.objects.filter(user=user_object, active=True):
