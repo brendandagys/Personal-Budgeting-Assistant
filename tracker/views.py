@@ -44,8 +44,8 @@ def get_purchase_categories_tuples_list(user_object):
     # To generate the filter buttons on Purchase Category and provide context for the green_filters class
     purchase_categories_list = []
     # Only include the ones that have actually been used thus far by the user
-    category_values_used = list(Purchase.objects.filter(user=user_object).values_list('category__category', flat=True).distinct())
-    category_2_values_used = list(Purchase.objects.filter(user=user_object).values_list('category_2__category', flat=True).distinct())
+    category_values_used = list(Purchase.objects.filter(user=user_object, category__isnull=False).values_list('category__category', flat=True).distinct())
+    category_2_values_used = list(Purchase.objects.filter(user=user_object, category__isnull=False).values_list('category_2__category', flat=True).distinct())
     category_2_values_used = [x for x in category_2_values_used if x] # Remove None
     purchase_categories_list = sorted(list(set(category_values_used + category_2_values_used)))
 
@@ -1148,7 +1148,7 @@ def filter_manager(request):
 def check_recurring_payments(request):
     user_object = request.user
 
-    recurrings = Recurring.objects.filter(user=user_object, active=True)
+    recurrings = Recurring.objects.filter(user=user_object, active=True, category__isnull=False) # If a Category was deleted, this mandatory field will be None and fail below when creating the Purchase
 
     for x in recurrings:
         latest_entry = Purchase.objects.filter(user=user_object, item=x.name).order_by('-date').first()
