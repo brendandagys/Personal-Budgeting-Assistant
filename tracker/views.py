@@ -244,12 +244,15 @@ def get_json_queryset(request):
 
     accounts_list = [Account.objects.get(id=x) for x in set(queryset.values_list('account', flat=True))] # List of distinct Account objects that have ever had an update...
     for account in accounts_list:
-        if account.credit:
-            start_accounts_value-=AccountUpdate.objects.filter(account=account, timestamp__gte=start_date_filter).order_by('timestamp').first().value
-            end_accounts_value-=AccountUpdate.objects.filter(account=account, timestamp__lte=end_date_filter).order_by('-timestamp').first().value
-        else:
-            start_accounts_value+=AccountUpdate.objects.filter(account=account, timestamp__gte=start_date_filter).order_by('timestamp').first().value
-            end_accounts_value+=AccountUpdate.objects.filter(account=account, timestamp__lte=end_date_filter).order_by('-timestamp').first().value
+        try:
+            if account.credit:
+                start_accounts_value-=AccountUpdate.objects.filter(account=account, timestamp__gte=start_date_filter).order_by('timestamp').first().value
+                end_accounts_value-=AccountUpdate.objects.filter(account=account, timestamp__lte=end_date_filter).order_by('-timestamp').first().value
+            else:
+                start_accounts_value+=AccountUpdate.objects.filter(account=account, timestamp__gte=start_date_filter).order_by('timestamp').first().value
+                end_accounts_value+=AccountUpdate.objects.filter(account=account, timestamp__lte=end_date_filter).order_by('-timestamp').first().value
+        except Exception:
+            pass
 
     savings_rate = 'Savings rate: ' + str(round((end_accounts_value - start_accounts_value - purchases_sum)/(end_accounts_value - start_accounts_value), 1)) + '%'
 
