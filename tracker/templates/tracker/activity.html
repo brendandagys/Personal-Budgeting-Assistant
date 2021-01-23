@@ -142,10 +142,11 @@
 
             <div style="padding:0 4px;" class="col-sm-12">
 
-                <h2 id="purchase_list_header" class="purchase_header">Purchases</h2>
-                <div style="text-align:center;"><small id="savings_rate"></small></div>
+                <!-- <h2 id="purchase_list_header" class="purchase_header">Purchases</h2>
+                <div style="text-align:center;"><small id="savings_rate"></small></div> -->
 
                 <div class="wrapper" style="position:sticky; top:3.25rem;">
+                    <div id="savings_rate_box" class="box s" style="justify-content:center;"></div>
                     <div id="past_period_1" class="box a" style="justify-content:left; padding-left:7px;"></div>
                     <div id="past_period_2" class="box b" style="justify-content:left; padding-left:7px;"></div>
                     <div id="past_period_3" class="box c" style="justify-content:left; padding-left:7px;"></div>
@@ -416,7 +417,7 @@
                         }
                     });
 
-                    $('#savings_rate').html(response['savings_rate']['rate'] + ' (Start: $' + response['savings_rate']['start'] + ' | End: $' + response['savings_rate']['end'] + ')');
+                    $('#savings_rate_box').html(response['savings_rate']['rate'] + ' (<b>Start</b>: $' + response['savings_rate']['start'] + '&nbsp&nbsp&nbsp<b>End</b>: $' + response['savings_rate']['end'] + ')');
 
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent

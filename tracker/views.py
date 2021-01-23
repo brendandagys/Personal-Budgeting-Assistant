@@ -254,7 +254,7 @@ def get_json_queryset(request):
         except Exception:
             pass
 
-    savings_rate = 'Savings: ' + str(round((100 * (end_accounts_value - start_accounts_value - purchases_sum))/(end_accounts_value - start_accounts_value), 2)) + '%'
+    savings_rate = 'SAVINGS: ' + str(round((100 * (end_accounts_value - start_accounts_value - purchases_sum))/(end_accounts_value - start_accounts_value), 2)) + '%'
 
     print(start_accounts_value)
     print(end_accounts_value)
@@ -265,7 +265,7 @@ def get_json_queryset(request):
                          'past_periods': {'labels': periods, 'values': sums},
                          'categories_count': len(purchase_categories_list),
                          'purchase_category_tuples': get_purchase_categories_tuples_list(user_object, start_date_filter, end_date_filter),
-                         'savings_rate': {'start': start_accounts_value, 'end': end_accounts_value, 'rate': savings_rate},
+                         'savings_rate': {'start': '{:20,.2f}'.format(start_accounts_value), 'end': '{:20,.2f}'.format(end_accounts_value), 'rate': savings_rate},
     }, safe=False)
 
 
