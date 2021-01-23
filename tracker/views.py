@@ -560,7 +560,7 @@ def get_pie_chart_data(request):
             mode = 'counts_percents'
             total = queryset.filter(Q(category__category__in=purchase_categories_list) | Q(category_2__category__in=purchase_categories_list)).count()
             for category in purchase_categories_list:
-                pie_data.append((category, 100 * queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()/total))
+                pie_data.append((category, round(100 * queryset.filter(Q(category__category=category) | Q(category_2__category=category)).count()/total, 2)))
 
         elif filter_instance.pie_chart_mode == 'Sums':
             mode = 'sums'
@@ -568,7 +568,7 @@ def get_pie_chart_data(request):
                 sum_1 = queryset.filter(Q(category__category=category, amount__isnull=False)).aggregate(Sum('amount'))['amount__sum'] if len(queryset.filter(Q(category__category=category, amount__isnull=False))) > 0 else 0
                 sum_2 = queryset.filter(Q(category_2__category=category, amount__isnull=True, amount_2__isnull=False)).aggregate(Sum('amount_2'))['amount_2__sum'] if len(queryset.filter(Q(category_2__category=category, amount__isnull=True, amount_2__isnull=False))) > 0 else 0
                 sum_3 = queryset.filter(Q(category_2__category=category, amount_2__isnull=True)).aggregate(Sum('amount'))['amount__sum'] if len(queryset.filter(Q(category_2__category=category, amount_2__isnull=True))) > 0 else 0
-                pie_data.append((category, (sum_1 + sum_2 + sum_3)))
+                pie_data.append((category, round(sum_1 + sum_2 + sum_3, 2)))
 
         elif filter_instance.pie_chart_mode == 'Sums Percents':
             mode = 'sums_percents'
@@ -580,7 +580,7 @@ def get_pie_chart_data(request):
                 sum_1 = queryset.filter(Q(category__category=category, amount__isnull=False)).aggregate(Sum('amount'))['amount__sum'] if len(queryset.filter(Q(category__category=category, amount__isnull=False))) > 0 else 0
                 sum_2 = queryset.filter(Q(category_2__category=category, amount__isnull=True, amount_2__isnull=False)).aggregate(Sum('amount_2'))['amount_2__sum'] if len(queryset.filter(Q(category_2__category=category, amount__isnull=True, amount_2__isnull=False))) > 0 else 0
                 sum_3 = queryset.filter(Q(category_2__category=category, amount_2__isnull=True)).aggregate(Sum('amount'))['amount__sum'] if len(queryset.filter(Q(category_2__category=category, amount_2__isnull=True))) > 0 else 0
-                pie_data.append((category, 100 * (sum_1 + sum_2 + sum_3)/total))
+                pie_data.append((category, round(100 * (sum_1 + sum_2 + sum_3)/total, 2)))
 
         pie_data.sort(key=lambda x: x[1], reverse=True) # Reverse-sort the list of tuples by the second values: the counts
         pie_data = list(zip(*pie_data[:7])) # Only keep seven, for readability | * is unpacking operator | is a list of two tuples
