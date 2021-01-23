@@ -115,7 +115,7 @@ def get_accounts_sum(request):
     accounts_sum = 0
 
     for account in Account.objects.filter(user=user_object, active=True):
-        account_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
+        account_value = 0 if AccountUpdate.objects.filter(account=account, account__active=True).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account, account__active=True).order_by('-timestamp').first().value
         account_value*=-1 if account.credit else 1 # If a 'credit' account, change sign before summing with the cumulative total
 
         if account.currency != 'CAD':
