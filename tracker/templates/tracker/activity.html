@@ -416,7 +416,7 @@
                         }
                     });
 
-                    $('#savings_rate').html(response['savings_rate']['rate']);
+                    $('#savings_rate').html(response['savings_rate']['rate'] + ' (Start: $' + response['savings_rate']['start'] + ' | End: $' + response['savings_rate']['end'] + ')');
 
 
                     $('#total_spent').html(response['purchases_sum']); // Set the total amount spent

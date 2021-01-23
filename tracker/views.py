@@ -254,7 +254,7 @@ def get_json_queryset(request):
         except Exception:
             pass
 
-    savings_rate = 'Savings rate: ' + str(round((100 * (end_accounts_value - start_accounts_value - purchases_sum))/(end_accounts_value - start_accounts_value), 2)) + '%'
+    savings_rate = 'Savings: ' + str(round((100 * (end_accounts_value - start_accounts_value - purchases_sum))/(end_accounts_value - start_accounts_value), 2)) + '%'
 
     print(start_accounts_value)
     print(end_accounts_value)
@@ -776,10 +776,19 @@ def settings(request):
         if 'type' in request.GET:
             if request.GET['model'] == 'Profile':
                 choices = '<option value>---------</option>'
-                for x in Account.objects.filter(active=True).values('id', 'account'): # Using a generator or list comprehension wasn't working
+                debit_choices = '<option value>---------</option>'
+                credit_choices = '<option value>---------</option>'
+                for x in Account.objects.filter(active=True).values('id', 'account', 'credit'): # Using a generator or list comprehension wasn't working
                     choices+='<option value="{0}">{1}</option>'.format(x['id'], x['account'])
 
+                    if x['credit'] is True:
+                        credit_choices+='<option value="{0}">{1}</option>'.format(x['id'], x['account'])
+                    else:
+                        debit_choices+='<option value="{0}">{1}</option>'.format(x['id'], x['account'])
+
                 return JsonResponse({'choices': choices,
+                                     'debit_choices': debit_choices,
+                                     'credit_choices': credit_choices,
                                      'values': {'account_to_use': '' if user_object.profile.account_to_use is None else user_object.profile.account_to_use.id,
                                                 'second_account_to_use': '' if user_object.profile.second_account_to_use is None else user_object.profile.second_account_to_use.id,
                                                 'third_account_to_use': '' if user_object.profile.third_account_to_use is None else user_object.profile.third_account_to_use.id,
@@ -1277,8 +1286,8 @@ def check_recurring_payments(request):
 
 
         elif x.xth_type != '':
-            print(3)
-            print(x)
+            # print(3)
+            # print(x)
 
             type_to_day_dict = {
                 'Monday': MO,
