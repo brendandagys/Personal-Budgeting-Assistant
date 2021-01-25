@@ -360,7 +360,7 @@ select[id^="id_"] {
     grid-column: 2;
     grid-row: 2 / 4;
     font-size: 2.8rem;
-    padding-bottom:3.5px;
+    padding-bottom:2.5px;
   }
   .f {
     grid-column: 2;
