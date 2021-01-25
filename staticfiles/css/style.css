@@ -245,7 +245,7 @@ select[id^="id_"] {
 }
 
 .green_filters {
-    color: #35b234 !important;
+    color: #028A0F !important;
     font-weight: bold;
 }
 
@@ -410,4 +410,14 @@ select[id^="id_"] {
 .disable_link {
   pointer-events: none;
   cursor: default;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.blink_me {
+  animation: blinker 2.5s linear infinite;
 }

@@ -40,6 +40,10 @@ def current_date():
 # weekday = date.weekday()
 
 
+def information_page(request):
+    return render(request, 'tracker/information_page.html')
+
+
 def get_purchase_categories_tuples_list(user_object, start_date, end_date):
     # To generate the filter buttons on Purchase Category and provide context for the green_filters class
     purchase_categories_list = []
