@@ -93,13 +93,14 @@ class RecurringAdmin(ImportExportModelAdmin):
 class AccountAdmin(ImportExportModelAdmin):
     resource_class = AccountResource
     list_display = ('id', 'user', 'account', 'active', 'credit', 'currency', 'account_created_datetime')
+    list_filter = ['user']
     readonly_fields = ('account_created_datetime',)
 
 @admin.register(AccountUpdate)
 class AccountUpdateAdmin(ImportExportModelAdmin):
     resource_class = AccountUpdateResource
     list_display = ('account', 'value', 'exchange_rate', 'timestamp')
-    list_filter = ['account']
+    list_filter = ['account__user', 'account']
     readonly_fields = ('timestamp',)
 
 @admin.register(Alert)

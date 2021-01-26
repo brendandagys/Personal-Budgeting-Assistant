@@ -84,14 +84,15 @@ def account_update(request):
     if request.method == 'POST':
         user_object = request.user
 
-        # dict = { request.POST['id']: '${:20,.2f}'.format(Decimal(request.POST['value'])) }
-
-        if request.POST['id'][3:] == user_object.profile.credit_account.account: # If the Account updated was my credit card, check if the balance was paid off rather than added to
-            credit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.credit_account).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
-            if Decimal(request.POST['value']) < credit_account_balance: # If the balance was paid off, the chequing account should be decremented
-                debit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.debit_account).order_by('-timestamp').first().value
-                AccountUpdate.objects.create(account=user_object.profile.debit_account, value=debit_account_balance-(credit_account_balance - Decimal(request.POST['value'])), exchange_rate=get_exchange_rate(user_object.profile.debit_account.currency, 'CAD'))
-                dict.update({'id_' + user_object.profile.debit_account.account: '${:20,.2f}'.format(Decimal(debit_account_balance-(credit_account_balance - Decimal(request.POST['value']))))})
+        try: # Will fail if either credit or debit account isn't set, or if no AccountUpdates have yet been created
+            if request.POST['id'][3:] == user_object.profile.credit_account.account: # If the Account updated was my credit card, check if the balance was paid off rather than added to
+                credit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.credit_account).order_by('-timestamp').first().value # Order should be preserved from models.py Meta options, but being safe
+                if Decimal(request.POST['value']) < credit_account_balance: # If the balance was paid off, the chequing account should be decremented
+                    debit_account_balance = AccountUpdate.objects.filter(account=user_object.profile.debit_account).order_by('-timestamp').first().value
+                    AccountUpdate.objects.create(account=user_object.profile.debit_account, value=debit_account_balance-(credit_account_balance - Decimal(request.POST['value'])), exchange_rate=get_exchange_rate(user_object.profile.debit_account.currency, 'CAD'))
+                    dict.update({'id_' + user_object.profile.debit_account.account: '${:20,.2f}'.format(Decimal(debit_account_balance-(credit_account_balance - Decimal(request.POST['value']))))})
+        except Exception:
+            pass
 
         AccountUpdate.objects.create(account=Account.objects.get(user=user_object, account=request.POST['id'][3:]), value=request.POST['value'], exchange_rate=get_exchange_rate(Account.objects.get(user=user_object, account=request.POST['id'][3:]).currency, 'CAD')) # id is prefixed with 'id_'
 
@@ -505,7 +506,7 @@ def get_net_worth_chart_data(request):
                 last_account_value_on_date = latest_value_dict[account_object.account]
             else:
                 last_account_value_on_date = last_account_update_on_date.value
-                if account.credit:
+                if account_object.credit:
                     last_account_value_on_date*=-1 # If a 'credit' account, change sign before summing with the cumulative total
 
                 if account_object.currency != 'CAD':
