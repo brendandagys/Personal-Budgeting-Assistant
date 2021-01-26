@@ -464,6 +464,12 @@
             });
 
 
+            // If the user has no accounts, or none set, the form height will be off
+            if ('{{account_to_use}}' === 'None' && '{{second_account_to_use}}' === 'None' && '{{third_account_to_use}}' === 'None') {
+                increase_form_height(37);
+            }
+
+
             // Determine which account + currency to use, if any
             $('#custom_anchor_link_2').on('click', function(e) {
                 let account = '';

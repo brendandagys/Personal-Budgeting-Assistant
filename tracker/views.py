@@ -258,7 +258,10 @@ def get_json_queryset(request):
         except Exception:
             pass
 
-    savings_rate = 'SAVINGS: ' + str(round((100 * (end_accounts_value - start_accounts_value - purchases_sum))/(end_accounts_value - start_accounts_value), 2)) + '%'
+    try: # Divide by zero error on new account creation
+        savings_rate = 'SAVINGS: ' + str(round((100 * (end_accounts_value - start_accounts_value - purchases_sum))/(end_accounts_value - start_accounts_value), 2)) + '%'
+    except Exception:
+        savings_rate = 'SAVINGS: N/A'
 
     print(start_accounts_value)
     print(end_accounts_value)
@@ -481,8 +484,11 @@ def get_net_worth_chart_data(request):
     for account in distinct_accounts_list:
         latest_value_dict[account.account] = 0
 
-    for datetime_index in pd.date_range(queryset.last().timestamp.date(), queryset.first().timestamp.date(), freq='D'): # freq='D' is default; returns a DateTime index
-        labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
+    try: # None object has no attribute timestamp
+        for datetime_index in pd.date_range(queryset.last().timestamp.date(), queryset.first().timestamp.date(), freq='D'): # freq='D' is default; returns a DateTime index
+            labels.append(str(datetime_index.date()) + '  (' + calendar.day_name[datetime_index.weekday()][:2] + ')')
+    except Exception:
+        pass
 
     for date in labels:
         start_date = date[:-6] # Remove the suffix we just added so we can filter with the date
@@ -782,7 +788,7 @@ def settings(request):
                 choices = '<option value>---------</option>'
                 debit_choices = '<option value>---------</option>'
                 credit_choices = '<option value>---------</option>'
-                for x in Account.objects.filter(active=True).values('id', 'account', 'credit'): # Using a generator or list comprehension wasn't working
+                for x in Account.objects.filter(user=user_object, active=True).values('id', 'account', 'credit'): # Using a generator or list comprehension wasn't working
                     choices+='<option value="{0}">{1}</option>'.format(x['id'], x['account'])
 
                     if x['credit'] is True:
@@ -877,9 +883,9 @@ def settings(request):
                                                            'currency': Select(attrs={'class': 'form-control form-control-sm', 'style': 'width:67px; margin:auto;'}),
                                                            'active': CheckboxInput(attrs={'class': 'form-control form-control-sm', 'style': 'width:15px; margin:auto;'})})
 
-            context['threshold_formset'] = ThresholdFormSet()
+            context['threshold_formset'] = ThresholdFormSet(queryset=PurchaseCategory.objects.filter(user=user_object))
 
-            context['account_formset'] = AccountFormSet()
+            context['account_formset'] = AccountFormSet(queryset=Account.objects.filter(user=user_object))
 
             context['recurring_list'] = Recurring.objects.select_related('account', 'category').filter(user=user_object).values('name', 'type', 'account__account', 'category__category', 'active', 'amount')
             context['recurring_form'] = RecurringForm()
