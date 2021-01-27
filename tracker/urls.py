@@ -17,5 +17,5 @@ urlpatterns = [
     path('settings/', views.settings, name='settings'),
     path('charts/', views.get_purchases_chart_data),
     path('get_quick_entries/', views.get_quick_entries),
-    path('information_page', views.information_page, name='information page'),
+    path('information', views.information_page, name='information page'),
 ]

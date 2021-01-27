@@ -41,7 +41,7 @@ def current_date():
 
 
 def information_page(request):
-    return render(request, 'tracker/information_page.html')
+    return render(request, 'tracker/information.html')
 
 
 def get_purchase_categories_tuples_list(user_object, start_date, end_date):
