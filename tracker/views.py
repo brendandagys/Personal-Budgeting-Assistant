@@ -671,46 +671,73 @@ def homepage(request):
 
     elif request.method == 'POST':
 
-        purchase_form = PurchaseForm(request.POST, request.FILES)
-        # print(purchase_form.errors)
-        # print(request.FILES)
+        def clean_time(time): # Will be a string of 0 - 4 numbers, no colon
+            time_string = time #self.cleaned_data['time']
+            time_string = time_string.replace(':', '')
+
+            if len(time_string) == 4:
+                if time_string[0:2] in ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
+                                        '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']:
+                    if int(time_string[2]) in range(6) and int(time_string[3]) in range(10): # Normal time
+                        return time_string[0:2] + ':' + time_string[2:4]
+                    else:
+                        return time_string[0:2] + ':00' # If last two digits don't make sense, just save on the hour
+
+            elif len(time_string) == 1: # Number is enforced in the front-end
+                return '0' + time_string + ':00'
+
+            elif len(time_string) == 2:
+                if time_string in ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
+                                   '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']:
+                    return time_string[0:2] + ':' + time_string[2:4]
+
+            elif len(time_string) == 3:
+                if int(time_string[1:]) in range(60):
+                    return '0' + time_string[0] + ':' + time_string[1:]
+                else:
+                    return '0' + time_string[0] + ':00'
+
+            return '00:00'
+
+        # purchase_form = PurchaseForm(request.POST, request.FILES)
+
         purchase_instance = Purchase()
 
-        if purchase_form.is_valid():
-            purchase_instance.user = user_object
-            purchase_instance.date = purchase_form.cleaned_data['date']
-            purchase_instance.time = purchase_form.cleaned_data['time'] # Cleaning done in forms.py
-            purchase_instance.item = purchase_form.cleaned_data['item'].strip()
-            purchase_instance.category = purchase_form.cleaned_data['category'] # Pretty sure that passing an integer (which is coming from the front-end) representing the id means you don't have to retrieve an actual object
-            purchase_instance.amount = purchase_form.cleaned_data['amount']
-            purchase_instance.category_2 = purchase_form.cleaned_data['category_2']
-            purchase_instance.amount_2 = purchase_form.cleaned_data['amount_2']
-            purchase_instance.description = purchase_form.cleaned_data['description'].strip() if len(purchase_form.cleaned_data['description'].strip()) == 0 or purchase_form.cleaned_data['description'].strip()[-1] in ['.', '!', '?'] else purchase_form.cleaned_data['description'].strip() + '.' # Add a period if not present
-            purchase_instance.currency = purchase_form.cleaned_data['currency']
-            purchase_instance.exchange_rate = get_exchange_rate(purchase_form.cleaned_data['currency'], 'CAD')
-            purchase_instance.receipt = request.FILES['receipt'] if len(request.FILES) > 0 and request.FILES['receipt'].size < 50000001 else None # Make sure file was uploaded, and check size (also done in front-end)
+        # if purchase_form.is_valid():
+        purchase_instance.user = user_object
+        purchase_instance.date = request.POST['date']
+        purchase_instance.time = clean_time(request.POST['time']) # Cleaning done in forms.py
+        purchase_instance.item = request.POST['item'].strip()
+        purchase_instance.category = PurchaseCategory.objects.get(id=request.POST['category']) # Pretty sure that passing an integer (which is coming from the front-end) representing the id means you don't have to retrieve an actual object
+        purchase_instance.amount = request.POST['amount']
+        purchase_instance.category_2 = None if request.POST['category_2'] == '' else PurchaseCategory.objects.get(id=request.POST['category_2'])
+        purchase_instance.amount_2 = None if request.POST['amount_2'] == '' else request.POST['amount_2']
+        purchase_instance.description = request.POST['description'].strip() if len(request.POST['description'].strip()) == 0 or request.POST['description'].strip()[-1] in ['.', '!', '?'] else request.POST['description'].strip() + '.' # Add a period if not present
+        purchase_instance.currency = request.POST['currency']
+        purchase_instance.exchange_rate = get_exchange_rate(request.POST['currency'], 'CAD')
+        purchase_instance.receipt = request.FILES['receipt'] if len(request.FILES) > 0 and request.FILES['receipt'].size < 50000001 else None # Make sure file was uploaded, and check size (also done in front-end)
 
-            # If an account to charge was available, and chosen in front-end, create the appropriate AccountUpdate object...
-            account_object_to_charge = Account.objects.get(user=user_object, account=purchase_form.cleaned_data['account_to_use']) if purchase_form.cleaned_data['account_to_use'] != '' else None
-            purchase_instance.account = account_object_to_charge
+        # If an account to charge was available, and chosen in front-end, create the appropriate AccountUpdate object...
+        account_object_to_charge = Account.objects.get(user=user_object, account=request.POST['account_to_use']) if request.POST['account_to_use'] != '' else None
+        purchase_instance.account = account_object_to_charge
 
-            purchase_instance.save()
+        purchase_instance.save()
 
 
-            if account_object_to_charge:
-                account_balance = AccountUpdate.objects.filter(account=account_object_to_charge).order_by('-timestamp').first().value
+        if account_object_to_charge:
+            account_balance = AccountUpdate.objects.filter(account=account_object_to_charge).order_by('-timestamp').first().value
 
-                # Deal with the 2nd amount, which may be None
-                amount_2 = 0
-                if purchase_instance.amount_2 is not None:
-                    amount_2 = purchase_instance.amount_2
+            # Deal with the 2nd amount, which may be None
+            amount_2 = 0
+            if purchase_instance.amount_2 is not None:
+                amount_2 = purchase_instance.amount_2
 
-                amount_to_charge = purchase_instance.amount + amount_2
+            amount_to_charge = Decimal(purchase_instance.amount) + Decimal(amount_2)
 
-                if account_object_to_charge.credit: # True if a credit account
-                    amount_to_charge*=-1
+            if account_object_to_charge.credit: # True if a credit account
+                amount_to_charge*=-1
 
-                AccountUpdate.objects.create(account=account_object_to_charge, purchase=purchase_instance, value=account_balance-amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
+            AccountUpdate.objects.create(account=account_object_to_charge, purchase=purchase_instance, value=account_balance-amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
 
 
             return redirect('homepage')
