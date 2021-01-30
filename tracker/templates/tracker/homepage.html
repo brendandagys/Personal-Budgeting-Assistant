@@ -631,7 +631,12 @@
                 // Make sure the start date is not later than the end date
                 if($('#datepicker').val() !== '' && $('#datepicker_2').val() !== '' & $('#datepicker').val() > $('#datepicker_2').val()){
                     alert('The start date cannot be later than the end date.');
-                    $(this).val('');
+                    if ($(this).attr('id') == 'datepicker') {
+                        $('#datepicker_2').val('');
+                    }
+                    else {
+                        $('#datepicker').val('');
+                    }
                 }
                 else if ($('#datepicker').val().length != 0 && $('#datepicker').val().length != 10 || $('#datepicker_2').val().length != 0 && $('#datepicker_2').val().length != 10) {
                     alert('\nPlease enter a valid date.');

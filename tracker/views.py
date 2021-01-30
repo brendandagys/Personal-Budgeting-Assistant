@@ -291,14 +291,14 @@ def get_purchases_chart_data(request):
         print('Start date filter: ' + str(start_date_filter))
         print('End date filter: ' + str(end_date_filter))
 
-        if start_date_filter is None or start_date_filter < Purchase.objects.filter(user=user_object).order_by('date').first().date:
+        if start_date_filter is None or Purchase.objects.filter(user=user_object).count() > 0 and start_date_filter < Purchase.objects.filter(user=user_object).order_by('date').first().date:
             if Purchase.objects.filter(user=user_object).order_by('date').first() is not None: # Date of first purchase recorded
                 start_date_filter = Purchase.objects.filter(user=user_object).order_by('date').first().date # Date of first purchase recorded
             else:
                 start_date_filter = current_date()
 
 
-        if end_date_filter is None or end_date_filter > Purchase.objects.filter(user=user_object).order_by('date').last().date:
+        if end_date_filter is None or Purchase.objects.filter(user=user_object).count() > 0 and end_date_filter > Purchase.objects.filter(user=user_object).order_by('date').last().date:
             if Purchase.objects.filter(user=user_object).order_by('date').last() is not None: # Date of first purchase recorded
                 end_date_filter = Purchase.objects.filter(user=user_object).order_by('date').last().date # Date of first purchase recorded
             else:
@@ -364,7 +364,7 @@ def get_purchases_chart_data(request):
 
         # WEEKLY CHART
         dates_list = pd.date_range(start=start_date_filter, end=end_date_filter, freq='7D').strftime('%Y-%m-%d').tolist() # This will be a DateTimeIndex. Last two methods format the dates into strings and turn into a list
-        if dates_list[-1] != str(end_date_filter):
+        if len(dates_list) > 0 and dates_list[-1] != str(end_date_filter):
             dates_list.append(str(end_date_filter)) # Ensure we get all data up to the end_date_filter, even if the interval leaves a remainder
 
         labels_weekly = []
@@ -393,7 +393,7 @@ def get_purchases_chart_data(request):
 
         # BI-WEEKLY CHART
         dates_list = pd.date_range(start=start_date_filter, end=end_date_filter, freq='14D').strftime('%Y-%m-%d').tolist() # This will be a DateTimeIndex. Last two methods format the dates into strings and turn into a list
-        if dates_list[-1] != str(end_date_filter):
+        if len(dates_list) > 0 and dates_list[-1] != str(end_date_filter):
             dates_list.append(str(end_date_filter)) # Ensure we get all data up to the end_date_filter, even if the interval leaves a remainder
 
         labels_biweekly = []
@@ -629,9 +629,9 @@ def delete_purchase(request):
 def homepage(request):
     user_object = request.user
 
-    if request.method == 'GET':
-        context = {}
+    context = {}
 
+    if request.method == 'GET':
         threshold_dict = {}
 
         colors = ['bg-success', 'bg-primary', 'bg-info']
@@ -717,7 +717,7 @@ def homepage(request):
 
 
     # This returns a blank form, (to clear for the next submission if request.method == 'POST')
-    purchase_form = PurchaseForm()
+    purchase_form = PurchaseForm(user_object.username)
 
     context['purchase_form'] = purchase_form
 
@@ -1252,13 +1252,14 @@ def check_recurring_payments(request):
                     )
                     print('Created Purchase for: ' + x.name + ', on date: ' + str(date)[0:10])
 
-                    AccountUpdate.objects.create(
-                        account=x.account,
-                        value=(latest_account_value + x.amount) if x.account.credit else (latest_account_value - x.amount),
-                        exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
-                        purchase=purchase_object,
-                    )
-                    print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
+                    if x.account:
+                        AccountUpdate.objects.create(
+                            account=x.account,
+                            value=(latest_account_value + x.amount) if x.account.credit else (latest_account_value - x.amount),
+                            exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
+                            purchase=purchase_object,
+                        )
+                        print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
 
 
         elif x.interval_type != '':
@@ -1279,13 +1280,14 @@ def check_recurring_payments(request):
                     )
                     print('Created Purchase for: ' + x.name + ', on date: ' + str(date_to_iterate_from)[0:10])
 
-                    AccountUpdate.objects.create(
-                        account=x.account,
-                        value=(latest_account_value + x.amount) if x.account.credit else (latest_account_value - x.amount),
-                        exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
-                        purchase=purchase_object,
-                    )
-                    print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
+                    if x.account:
+                        AccountUpdate.objects.create(
+                            account=x.account,
+                            value=(latest_account_value + x.amount) if x.account.credit else (latest_account_value - x.amount),
+                            exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
+                            purchase=purchase_object,
+                        )
+                        print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
 
                 # Increment for the next date to check
                 if x.interval_type == 'Days':
@@ -1329,13 +1331,14 @@ def check_recurring_payments(request):
                     )
                     print('Created Purchase for: ' + x.name + ', on date: ' + str(date_to_iterate_from)[0:10])
 
-                    AccountUpdate.objects.create(
-                        account=x.account,
-                        value=(latest_account_value + x.amount) if x.account.credit else (latest_account_value - x.amount),
-                        exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
-                        purchase=purchase_object,
-                    )
-                    print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
+                    if x.account:
+                        AccountUpdate.objects.create(
+                            account=x.account,
+                            value=(latest_account_value + x.amount) if x.account.credit else (latest_account_value - x.amount),
+                            exchange_rate=get_exchange_rate(x.account.currency, 'CAD'),
+                            purchase=purchase_object,
+                        )
+                        print('Created AccountUpdate for: ' + x.name + ', in Account: ' + x.account.account)
 
                 if x.xth_type not in ['Weekday', 'Weekend']:
                     date_to_iterate_from+=relativedelta(months=+months, day=int(x.xth_from_specific_date), weekday=type_to_day_dict[x.xth_type](x.number))

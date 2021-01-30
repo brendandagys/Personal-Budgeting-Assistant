@@ -7,11 +7,11 @@ from django.utils import timezone
 def current_date():
     return datetime.date.today()
 
-from .models import Purchase, Account, AccountUpdate, Recurring, QuickEntry, Profile
+from .models import Purchase, Account, AccountUpdate, Recurring, QuickEntry, Profile, PurchaseCategory
 
 
 class PurchaseForm(ModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, username=None, *args, **kwargs):
         super(PurchaseForm, self).__init__(*args, **kwargs)
 
         self.fields['account_to_use'] = CharField(required=False) # To indicate to not increment the credit card balance
@@ -28,13 +28,19 @@ class PurchaseForm(ModelForm):
         self.fields['description'].widget.attrs.update({'rows': 3, 'placeholder': 'Specifics...'})
         self.fields['currency'].widget.attrs.update({'placeholder': 'Currency...'})
 
+        user_categories = []
+
+        for category in PurchaseCategory.objects.filter(user__username=username):
+            user_categories.append(category.category)
+
         # The choices that display in the form field match models.py __str__ ... I want __str__ for Admin, but only the category text in the form field
         category_choices = []
         for choice in self.fields['category'].choices:
             if choice[0] == '': # First value is ('', '---------')
                 category_choices.append((choice[0], choice[1]))
-            else:
-                category_choices.append((choice[0], choice[1].split(',')[1].strip())) # (1, 'brendan, Coffee, None, 30 days')
+            elif choice[1].split(',')[0] == username and choice[1].split(', ')[1] in user_categories: # Filter to only that user's categories
+                category_choices.append((choice[0], choice[1].split(', ')[1])) # (1, 'brendan, Coffee, None, 30 days')
+
         self.fields['category'].choices = category_choices
         self.fields['category_2'].choices = category_choices
 
