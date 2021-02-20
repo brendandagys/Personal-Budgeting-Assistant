@@ -162,8 +162,8 @@ class AccountUpdate(models.Model):
     account = models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, verbose_name='Account', related_name='account_updates_1')
     value = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Value')
     exchange_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Exchange Rate to CAD') # Default 1 unnecessary as we always run get_exchange_rate()
-    purchase = models.ForeignKey(Purchase, null=True, on_delete=models.SET_NULL, verbose_name='Purchase', related_name='account_updates_2')
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Account Timestamp')
+    purchase = models.ForeignKey(Purchase, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Purchase', related_name='account_updates_2')
+    timestamp = models.DateTimeField(default=current_datetime, verbose_name='Account Timestamp')
 
     class Meta:
         verbose_name_plural = 'Account Updates'
