@@ -101,7 +101,7 @@ class AccountUpdateAdmin(ImportExportModelAdmin):
     resource_class = AccountUpdateResource
     list_display = ('account', 'value', 'exchange_rate', 'timestamp')
     list_filter = ['account__user', 'account']
-    readonly_fields = ('timestamp',)
+    # readonly_fields = ('timestamp',)
 
 @admin.register(Alert)
 class AlertAdmin(ImportExportModelAdmin):
