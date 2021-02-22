@@ -740,7 +740,7 @@ def homepage(request):
             AccountUpdate.objects.create(account=account_object_to_charge, purchase=purchase_instance, value=account_balance-amount_to_charge, exchange_rate=purchase_instance.exchange_rate)
 
 
-            return redirect('homepage')
+        return redirect('homepage')
 
 
     # This returns a blank form, (to clear for the next submission if request.method == 'POST')
