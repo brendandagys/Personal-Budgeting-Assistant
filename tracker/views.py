@@ -1244,7 +1244,9 @@ def check_recurring_payments(request):
 
     for x in recurrings:
         latest_entry = Purchase.objects.filter(user=user_object, item=x.name).order_by('-date').first()
-        date_to_iterate_from = latest_entry.date if latest_entry is not None else x.start_date
+
+        # Iterate from the last recorded instance of the bill, unless it's the first time or the start date is later than the last instance (if the was a gap where there was no bill)
+        date_to_iterate_from = latest_entry.date if latest_entry is not None and latest_entry.date > x.start_date else x.start_date
 
         if x.dates != '' or x.weekdays != '':
             # Get all of the permissible dates/weekdays to add bills
