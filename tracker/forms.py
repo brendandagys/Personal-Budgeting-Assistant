@@ -126,7 +126,7 @@ class AccountForm(ModelForm):
 
         self.fields = {} # Otherwise a field will appear for each field in the model, but we want a specific field to show for each Account
 
-        for account in Account.objects.filter(user=user_object).order_by('account__account'):
+        for account in Account.objects.filter(user=user_object).order_by('account'):
             if account.active:
                 # Get the last value for the account. If it's None, make placeholder value 0
                 last_value = 0 if AccountUpdate.objects.filter(account=account).order_by('-timestamp').first() is None else AccountUpdate.objects.filter(account=account).order_by('-timestamp').first().value
