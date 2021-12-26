@@ -1,0 +1,29 @@
+#FROM python:3.9
+FROM public.ecr.aws/bitnami/python:3.9
+
+# Set directory where CMD will execute 
+WORKDIR /usr/src/app
+
+RUN pip install --upgrade pip
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+
+ARG DJANGO_SECRET_KEY
+ENV SECRET_KEY=${DJANGO_SECRET_KEY}
+ENV PORT=5000
+
+RUN echo '\nDjango secret key: ' ${DJANGO_SECRET_KEY} '\n'
+RUN echo '\nPort: ' ${PORT} '\n'
+RUN ls
+RUN ls ./staticfiles
+
+RUN python manage.py collectstatic --noinput
+
+EXPOSE ${PORT}
+
+
+# Default command to execute    
+CMD gunicorn spending_app.wsgi:application --bind 0.0.0.0:${PORT} --workers 3

@@ -1,0 +1,59 @@
+version: '3.8'
+
+x-aws-vpc: ${AWS_VPC}
+x-aws-cluster: ${AWS_ECS_CLUSTER}
+x-aws-loadbalancer: ${AWS_ELB}
+
+services:
+  nginx:
+    image: ${DOCKER_IMAGE}
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    expose:
+      - 80
+    ports:
+      - 80:80
+
+  web:
+    image: ${DOCKER_IMAGE_2}
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    expose:
+      - 5000
+    command: gunicorn spending_app.wsgi:application --bind 0.0.0.0:5000 --workers 3
+
+x-aws-cloudformation:
+  Resources:
+    NginxTCP80TargetGroup:
+      # Type: AWS::ElasticLoadBalancingV2::TargetGroup
+      Properties:
+        Name: spending-tracker-django
+        # Protocol: HTTP
+        # Port: 80
+        # TargetType: ip
+        # VpcId: ${AWS_VPC}
+        # HealthCheckPath: /
+        Matcher:
+          HttpCode: 302
+    # NginxTCP80Listener:
+    ListenerHTTPSRuleSpendingTrackerDjango:
+      Type: AWS::ElasticLoadBalancingV2::ListenerRule
+      Properties:
+        Priority: 3
+        ListenerArn: ${LISTENER_HTTPS}
+        Conditions:
+          - Field: host-header
+            HostHeaderConfig:
+              Values:
+                - ${HOST_HEADER_CONFIG}
+        Actions:
+          - Type: forward
+            TargetGroupArn:
+              Ref: NginxTCP80TargetGroup
+            ForwardConfig:
+              TargetGroups:
+                - TargetGroupArn:
+                    Ref: NginxTCP80TargetGroup
+                  Weight: 1
