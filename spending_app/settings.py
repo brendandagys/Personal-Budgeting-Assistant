@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-import django_heroku
+# import django_heroku
 import dj_database_url
 from decouple import config
 
@@ -36,7 +36,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['brendanspending.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = '*'
 
 
 # Application definition
@@ -131,14 +131,14 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-if config('USE_S3', default=True):
+if config('USE_S3', default=False):
     # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     DEFAULT_FILE_STORAGE = 'spending_app.storage_backends.MediaStorage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = 'brendanspending'
-    AWS_S3_OBJECT_PARAMETERS = { 'CacheControl': 'max-age=86400', }
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400', }
     AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
     AWS_LOCATION = 'static'
     STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
@@ -146,7 +146,7 @@ if config('USE_S3', default=True):
     # AWS_QUERYSTRING_AUTH = False # Default is True. False removes query parameter authentication from generated URLs (useful if your S3 buckets are public)
     # AWS_S3_FILE_OVERWRITE = False # Set in storage_backends.py
 
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles'),]
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles'), ]
 
 else:
     STATIC_URL = '/static/'
@@ -156,4 +156,4 @@ else:
 MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 
 
-django_heroku.settings(locals(), staticfiles=False) # second argument was necessary to make staticfiltes copy over to S3
+# django_heroku.settings(locals(), staticfiles=False) # second argument was necessary to make staticfiltes copy over to S3
