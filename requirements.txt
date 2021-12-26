@@ -7,7 +7,7 @@ defusedxml==0.6.0
 diff-match-patch==20200713
 dj-database-url==0.5.0
 Django==3.1.5
-django-heroku==0.3.1
+# django-heroku==0.3.1
 django-import-export==2.5.0
 django-storages==1.11.1
 et-xmlfile==1.0.1
@@ -21,7 +21,7 @@ numpy==1.19.5
 odfpy==1.4.1
 openpyxl==3.0.6
 pandas==1.1.5
-psycopg2==2.8.6
+psycopg2==2.9.1
 python-dateutil==2.8.1
 python-decouple==3.4
 pytz==2020.5
