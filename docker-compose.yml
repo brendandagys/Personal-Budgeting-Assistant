@@ -6,7 +6,7 @@ x-aws-loadbalancer: ${AWS_ELB}
 
 services:
   nginx:
-    image: ${DOCKER_IMAGE}
+    image: ${DOCKER_IMAGE_2}
     build:
       context: .
       dockerfile: Dockerfile.nginx
@@ -16,7 +16,7 @@ services:
       - 80:80
 
   web:
-    image: ${DOCKER_IMAGE_2}
+    image: ${DOCKER_IMAGE}
     build:
       context: .
       dockerfile: Dockerfile.web
