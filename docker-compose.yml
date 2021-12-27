@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile.web
     expose:
       - 5000
-    command: pip list
+    command: python pip list
     # command: gunicorn spending_app.wsgi:application --bind 0.0.0.0:5000 --workers 3
 
 x-aws-cloudformation:
