@@ -41,7 +41,7 @@ x-aws-cloudformation:
     ListenerHTTPSRuleSpendingTrackerDjango:
       Type: AWS::ElasticLoadBalancingV2::ListenerRule
       Properties:
-        Priority: 3
+        Priority: 7
         ListenerArn: ${LISTENER_HTTPS}
         Conditions:
           - Field: host-header
