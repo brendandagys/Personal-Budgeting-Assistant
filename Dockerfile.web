@@ -24,8 +24,5 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE ${PORT}
 
-RUN cat requirements.txt
-RUN pip list
 # Default command to execute
-CMD pip list
-# CMD gunicorn spending_app.wsgi:application --bind 0.0.0.0:${PORT} --workers 3
+CMD gunicorn spending_app.wsgi:application --bind 0.0.0.0:${PORT} --workers 3
