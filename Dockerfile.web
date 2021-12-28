@@ -15,7 +15,7 @@ ARG DJANGO_SECRET_KEY
 ENV SECRET_KEY=${DJANGO_SECRET_KEY:-development}
 ENV PORT=5000
 
-RUN echo '\nDjango secret key:' ${SECRET_KEY} '\n'
+# RUN echo '\nDjango secret key:' ${SECRET_KEY} '\n'
 RUN echo '\nPort:' ${PORT} '\n'
 RUN ls
 RUN ls ./staticfiles
