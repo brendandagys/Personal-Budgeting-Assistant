@@ -58,3 +58,13 @@ x-aws-cloudformation:
                 - TargetGroupArn:
                     Ref: NginxTCP80TargetGroup
                   Weight: 1
+
+    DNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneId: Z1048063LC3J2IKH5GGI
+        Name: spending.brendandagys.com
+        Type: A
+        AliasTarget:
+          HostedZoneId: ${FARGATE_ALB_HZ_ID}
+          DNSName: ${FARGATE_ALB_DNS_NAME}
