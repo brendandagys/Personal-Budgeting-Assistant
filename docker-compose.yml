@@ -62,7 +62,7 @@ x-aws-cloudformation:
     DNSRecord:
       Type: AWS::Route53::RecordSet
       Properties:
-        HostedZoneId: Z1048063LC3J2IKH5GGI
+        HostedZoneId: ${HOSTED_ZONE_ID}
         Name: spending.brendandagys.com
         Type: A
         AliasTarget:
